@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://entities/player.tscn" type="PackedScene" id=1]
+[ext_resource path="res://tilesets/winter.tres" type="TileSet" id=2]
+
+[node name="TestLevel" type="Node"]
+
+[node name="Player" parent="." instance=ExtResource( 1 )]
+position = Vector2( 408.711, 223.468 )
+
+[node name="TileMap" type="TileMap" parent="."]
+tile_set = ExtResource( 2 )
+format = 1
+tile_data = PoolIntArray( 65536, 0, 2, 131072, 0, 5, 131081, 0, 131072, 131082, 0, 65543, 131083, 0, 131073, 196608, 0, 5, 262144, 0, 5, 327680, 0, 5, 327683, 0, 327684, 327684, 0, 327685, 327685, 0, 327686, 327686, 0, 327687, 327687, 0, 1, 327688, 0, 1, 327689, 0, 1, 327690, 0, 1, 327691, 0, 196614, 327693, 0, 262146, 327694, 0, 262148, 393216, 0, 4, 393217, 0, 1, 393218, 0, 1, 393219, 0, 1, 393220, 0, 1, 393221, 0, 1, 393222, 0, 1, 393223, 0, 1, 393224, 0, 1, 393225, 0, 1, 393226, 0, 1, 393227, 0, 1, 393228, 0, 1, 393229, 0, 262145, 393230, 0, 4, 458752, 0, 65538, 458753, 0, 65538, 458754, 0, 65538, 458755, 0, 65538, 458756, 0, 65538, 458757, 0, 65538, 458758, 0, 65538, 458759, 0, 65538, 458760, 0, 65538, 458761, 0, 65538, 458762, 0, 65538, 458763, 0, 65538, 458764, 0, 65538, 458765, 0, 65538, 458766, 0, 65538 )
+
+[node name="Blocks" type="StaticBody2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 0, 64, 64, 64, 64, 384, 192, 384, 448, 320, 704, 320, 768, 384, 832, 384, 960, 320, 960, 512, 0, 512 )
+
+[node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 576, 128, 768, 128, 768, 192, 576, 192 )
