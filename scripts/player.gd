@@ -114,7 +114,7 @@ func _position_process(delta : float, n : int = 4) -> void:
 		# Determine with what kind of object the player collided.
 		# TODO: If the player collides with a wall but they were on a floor,
 		# then we must somehow ensure that they have not left the floor.
-		var surface_angle := collision.normal.angle_to(Vector2.UP)
+		var surface_angle := abs(collision.normal.angle_to(Vector2.UP))
 		if surface_angle <= FLOOR_ANGLE:
 			self.physics_state = PhysicsState.FLOOR
 		elif surface_angle <= SLOPE_ANGLE:
@@ -141,7 +141,7 @@ func _position_process(delta : float, n : int = 4) -> void:
 				# slope is acceptably close to the slope of the previous slope
 				# that the player was on.
 				var surface_slope := sign(self.velocity.x) * test_collision.normal.x / test_collision.normal.y
-				var surface_angle := test_collision.normal.angle_to(Vector2.UP)
+				var surface_angle := abs(test_collision.normal.angle_to(Vector2.UP))
 				if surface_angle <= WALL_ANGLE && surface_slope >= min_slope:
 					self.position += test_collision.travel
 					var velocity_tangent := self.velocity.slide(test_collision.normal)
@@ -155,7 +155,23 @@ func _position_process(delta : float, n : int = 4) -> void:
 					self.surface_normal = test_collision.normal
 					self.velocity = velocity_tangent.normalized() * self.velocity.length()
 
+var prev_physics_state = PhysicsState.AIR
 func _physics_process(delta):
+	# Print the state for debugging purposes.
+	var physics_state_str = ""
+	match physics_state:
+		PhysicsState.AIR:
+			physics_state_str = "Air"
+		PhysicsState.FLOOR:
+			physics_state_str = "Floor"
+		PhysicsState.WALL:
+			physics_state_str = "Wall"
+		PhysicsState.SLOPE:
+			physics_state_str = "Slope"
+	if prev_physics_state != physics_state:
+		print(physics_state_str)
+	prev_physics_state = physics_state
+	
 	var input_move_dir := Vector2()
 	var input_jump := false
 	var input_dash := false

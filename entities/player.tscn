@@ -3,7 +3,7 @@
 [ext_resource path="res://scripts/player.gd" type="Script" id=1]
 [ext_resource path="res://sprites/player.png" type="Texture" id=2]
 
-[sub_resource type="Animation" id=2]
+[sub_resource type="Animation" id=1]
 resource_name = "WalkLeft"
 loop = true
 tracks/0/type = "value"
@@ -19,7 +19,7 @@ tracks/0/keys = {
 "values": [ 0, 1 ]
 }
 
-[sub_resource type="Animation" id=3]
+[sub_resource type="Animation" id=2]
 resource_name = "WalkRight"
 loop = true
 tracks/0/type = "value"
@@ -35,7 +35,7 @@ tracks/0/keys = {
 "values": [ 2, 3 ]
 }
 
-[sub_resource type="CircleShape2D" id=1]
+[sub_resource type="CircleShape2D" id=3]
 radius = 32.0
 
 [node name="Player" type="KinematicBody2D"]
@@ -51,8 +51,8 @@ frame = 1
 region_rect = Rect2( 0, 0, 64, 64 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Sprite"]
-anims/WalkLeft = SubResource( 2 )
-anims/WalkRight = SubResource( 3 )
+anims/WalkLeft = SubResource( 1 )
+anims/WalkRight = SubResource( 2 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource( 1 )
+shape = SubResource( 3 )
