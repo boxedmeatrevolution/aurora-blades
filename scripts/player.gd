@@ -26,12 +26,15 @@ enum PhysicsState {
 
 var physics_state : int = PhysicsState.AIR
 
-const FLOOR_ANGLE := 45.0 * PI / 180.0
+const FLOOR_ANGLE := 40.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
 const WALL_ANGLE := 95.0 * PI / 180.0
 
 const GRAVITY := 300.0
-const WALK_ACCELERATION := 400.0
+const WALK_ACCELERATION := 450.0
+const AIR_ACCELERATION := 200.0
+const WALK_MAX_CONTROL_SPEED = 100.0
+const AIR_MAX_CONTROL_SPEED = 100.0
 const JUMP_SPEED := 200.0
 
 # The normal to whatever surface the player is on.
@@ -40,8 +43,8 @@ var velocity := Vector2()
 
 func _on_surface(physics_state : int) -> bool:
 	return physics_state == PhysicsState.FLOOR \
-		|| physics_state == PhysicsState.SLOPE \
-		|| physics_state == PhysicsState.WALL
+			|| physics_state == PhysicsState.SLOPE \
+			|| physics_state == PhysicsState.WALL
 
 # The maximum angle over which the player's velocity will be redirected without
 # loss when undergoing a velocity change.
@@ -52,41 +55,45 @@ func _max_surface_redirect_angle(state : int) -> float:
 # surface.
 func _max_surface_stick_slope(state : int) -> float:
 	# This should depend on the player state, and potentially the velocity.
-	return 0.5
+	return 1.25
 
 # The maximum velocity which the player can move across the floor with.
 func _max_speed(state : int) -> float:
-	if state == State.STAND:
-		return 100.0
-	elif state == State.WALK:
-		return 100.0
-	elif state == State.SLIDE:
-		return 300.0
-	elif state == State.WALL_SLIDE:
-		return 300.0
-	elif state == State.SKATE:
-		return 800.0
-	else:
-		return 1200.0
+	match state:
+		State.STAND:
+			return 150.0
+		State.WALK:
+			return 150.0
+		State.SLIDE:
+			return 300.0
+		State.WALL_SLIDE:
+			return 300.0
+		State.SKATE:
+			return 800.0
+		_:
+			return 1200.0
 
 # The minimum speed at which the player cannot walk and starts sliding instead.
 func _min_slide_speed(state : int) -> float:
-	return 150.0
+	return 200.0
 
 # The friction (from air or ground) experienced by the player.
 func _friction(state : int) -> float:
-	if state == State.STAND:
-		return 400.0
-	elif state == State.SLIDE:
-		return 200.0
-	elif state == State.WALL_SLIDE:
-		return 200.0
-	elif state == State.SKATE:
-		return 100.0
-	elif state == State.JUMP || state == State.FALL:
-		return 30.0
-	else:
-		return 0.0
+	match state:
+		State.STAND:
+			return 400.0
+		State.SLIDE:
+			return 200.0
+		State.WALL_SLIDE:
+			return 200.0
+		State.SKATE:
+			return 100.0
+		State.JUMP:
+			return 30.0
+		State.FALL:
+			return 30.0
+		_:
+			return 0.0
 
 func _ready() -> void:
 	pass
@@ -155,9 +162,11 @@ func _position_process(delta : float, n : int = 4) -> void:
 					self.surface_normal = test_collision.normal
 					self.velocity = velocity_tangent.normalized() * self.velocity.length()
 
+var prev_state = State.FALL
 var prev_physics_state = PhysicsState.AIR
 func _physics_process(delta):
 	# Print the state for debugging purposes.
+	var state_str = ""
 	var physics_state_str = ""
 	match physics_state:
 		PhysicsState.AIR:
@@ -168,9 +177,27 @@ func _physics_process(delta):
 			physics_state_str = "Wall"
 		PhysicsState.SLOPE:
 			physics_state_str = "Slope"
-	if prev_physics_state != physics_state:
-		print(physics_state_str)
+	match state:
+		State.STAND:
+			state_str = "Stand"
+		State.WALK:
+			state_str = "Walk"
+		State.SLIDE:
+			state_str = "Slide"
+		State.WALL_SLIDE:
+			state_str = "WallSlide"
+		State.SKATE:
+			state_str = "Skate"
+		State.JUMP:
+			state_str = "Jump"
+		State.FALL:
+			state_str = "Fall"
+		State.DASH:
+			state_str = "Dash"
+	if prev_state != state || prev_physics_state != physics_state:
+		print(physics_state_str, ", ", state_str)
 	prev_physics_state = physics_state
+	prev_state = state
 	
 	var input_move_dir := Vector2()
 	var input_jump := false
@@ -254,8 +281,10 @@ func _physics_process(delta):
 				self.state = State.WALL_SLIDE
 			elif input_move_dir.x == 0:
 				self.state = State.STAND
-			var acceleration = input_move_dir.x * WALK_ACCELERATION * Vector2(-self.surface_normal.y, self.surface_normal.x)
-			self.velocity += acceleration * delta
+			else:
+				var acceleration = input_move_dir.x * WALK_ACCELERATION * Vector2(-self.surface_normal.y, self.surface_normal.x)
+				if self.velocity.dot(acceleration) <= WALK_MAX_CONTROL_SPEED * acceleration.length():
+					self.velocity += acceleration * delta
 		elif self.state == State.SLIDE:
 			if self.physics_state == PhysicsState.FLOOR:
 				if input_move_dir.x != 0 && self.velocity.length() <= _max_speed(State.WALK):
@@ -277,7 +306,15 @@ func _physics_process(delta):
 	else:
 		# If the player was in a surface state, then they probably walked off
 		# an edge, so put them into the fall state.
-		if self.state == State.STAND || self.state == State.WALK || self.state == State.SLIDE || self.state == State.SKATE:
+		if self.state == State.STAND || self.state == State.WALK || self.state == State.SLIDE || self.state == State.WALL_SLIDE || self.state == State.SKATE:
 			self.state = State.FALL
 		# Now, update the player based on the air state that they are in.
+		if self.state == State.FALL:
+			var acceleration = Vector2.RIGHT * input_move_dir.x * AIR_ACCELERATION
+			if self.velocity.dot(acceleration) <= AIR_MAX_CONTROL_SPEED * acceleration.length():
+				self.velocity += acceleration * delta
+		elif self.state == State.JUMP:
+			var acceleration = Vector2.RIGHT * input_move_dir.x * AIR_ACCELERATION
+			if self.velocity.dot(acceleration) <= AIR_MAX_CONTROL_SPEED * acceleration.length():
+				self.velocity += acceleration * delta
 		pass
