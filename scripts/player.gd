@@ -28,7 +28,7 @@ var physics_state : int = PhysicsState.AIR
 
 const FLOOR_ANGLE := 40.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
-const WALL_ANGLE := 95.0 * PI / 180.0
+const WALL_ANGLE := 100.0 * PI / 180.0
 
 const GRAVITY := 800.0
 const WALK_ACCELERATION := 700.0
@@ -36,6 +36,7 @@ const AIR_ACCELERATION := 700.0
 const WALK_MAX_CONTROL_SPEED = 100.0
 const AIR_MAX_CONTROL_SPEED = 100.0
 const JUMP_SPEED := 300.0
+const SURFACE_PADDING := 1.0
 
 # The normal to whatever surface the player is on.
 var surface_normal := Vector2()
@@ -64,9 +65,9 @@ func _max_speed(state : int) -> float:
 		State.WALK:
 			return 150.0
 		State.SLIDE:
-			return 300.0
+			return 200.0
 		State.WALL_SLIDE:
-			return 300.0
+			return 200.0
 		State.SKATE:
 			return 800.0
 		_:
@@ -74,7 +75,7 @@ func _max_speed(state : int) -> float:
 
 # The minimum speed at which the player cannot walk and starts sliding instead.
 func _min_slide_speed(state : int) -> float:
-	return 200.0
+	return 175.0
 
 func _has_gravity(state : int) -> bool:
 	match state:
@@ -96,9 +97,9 @@ func _friction(state : int, speed : float) -> float:
 			else:
 				return 800.0
 		State.SLIDE:
-			return 600.0
+			return 400.0
 		State.WALL_SLIDE:
-			return 600.0
+			return 400.0
 		State.SKATE:
 			return 200.0
 		State.JUMP:
@@ -115,8 +116,12 @@ func _position_process(delta : float, n : int = 4) -> void:
 	# Exit if the maximum number of iterations has been reached.
 	if n <= 0 || delta <= 0 || self.velocity.length_squared() == 0:
 		return
+	var delta_remainder := 0.0
+	var found_new_surface := false
+	var new_surface_normal := Vector2()
 	# Handles a single update of the velocity by an amount `delta`.
 	var collision := move_and_collide(self.velocity * delta)
+	
 	# There are four possibilities that need to be handled:
 	# * Player was in air and did not hit anything.
 	#   * Don't do anything.
@@ -127,27 +132,11 @@ func _position_process(delta : float, n : int = 4) -> void:
 	# * Player was on surface and did not hit anything.
 	#   * Evaluate whether we should stick to the surface that we just left.
 	if collision != null:
-		var delta_remainder := collision.remainder.length() / velocity.length()
-		var velocity_tangent := self.velocity.slide(collision.normal)
-		var velocity_normal := self.velocity.dot(collision.normal) * collision.normal
-		var surface_velocity_normal := collision.collider_velocity.dot(collision.normal)
-		# Determine with what kind of object the player collided.
-		# TODO: If the player collides with a wall but they were on a floor,
-		# then we must somehow ensure that they have not left the floor.
-		var surface_angle := abs(collision.normal.angle_to(Vector2.UP))
-		if surface_angle <= FLOOR_ANGLE:
-			self.physics_state = PhysicsState.FLOOR
-		elif surface_angle <= SLOPE_ANGLE:
-			self.physics_state = PhysicsState.SLOPE
-		elif surface_angle <= WALL_ANGLE:
-			self.physics_state = PhysicsState.WALL
-		else:
-			self.physics_state = PhysicsState.AIR
-		self.surface_normal = collision.normal
-		self.velocity = velocity_tangent
-		_position_process(delta_remainder, n - 1)
+		delta_remainder = collision.remainder.length() / velocity.length()
+		found_new_surface = true
+		new_surface_normal = collision.normal
 	elif _on_surface(self.physics_state) && collision == null:
-		self.physics_state = PhysicsState.AIR
+		delta_remainder = 0.0
 		# If the player used to be on a surface, then we should try to stick
 		# to whatever surface may still be below them.
 		if self.velocity.x != 0:
@@ -156,30 +145,58 @@ func _position_process(delta : float, n : int = 4) -> void:
 			var max_slope_change := 0.5 * GRAVITY / self.velocity.x * surface_stick_time
 			var extreme_slope := velocity_slope + max_slope_change
 			var test_displacement := Vector2.DOWN * velocity.x * delta * max_slope_change
-			var test_collision := move_and_collide(test_displacement, true, true, false)
+			var test_collision := move_and_collide(test_displacement, true, true, true)
 			if test_collision != null && test_collision.normal.y < 0:
 				# If a surface below the player was found, then check that the
 				# slope is acceptably close to the slope of the previous slope
 				# that the player was on.
 				var surface_slope := test_collision.normal.x / abs(test_collision.normal.y)
-				var surface_angle := abs(test_collision.normal.angle_to(Vector2.UP))
+				var surface_angle := test_collision.normal.angle_to(Vector2.UP)
 				var slope_condition := false
 				if self.velocity.x < 0:
 					slope_condition = surface_slope >= extreme_slope
 				else:
 					slope_condition = surface_slope <= extreme_slope
-				if surface_angle <= WALL_ANGLE && slope_condition:
+				if abs(surface_angle) <= WALL_ANGLE && slope_condition:
 					self.position += test_collision.travel
+					found_new_surface = true
+					new_surface_normal = test_collision.normal
 					var velocity_tangent := self.velocity.slide(test_collision.normal)
 					var velocity_normal := self.velocity.dot(test_collision.normal) * test_collision.normal
-					if surface_angle <= FLOOR_ANGLE:
-						self.physics_state = PhysicsState.FLOOR
-					elif surface_angle <= SLOPE_ANGLE:
-						self.physics_state = PhysicsState.SLOPE
-					else:
-						self.physics_state = PhysicsState.WALL
-					self.surface_normal = test_collision.normal
 					self.velocity = velocity_tangent.normalized() * self.velocity.length()
+	# If the player landed on a new surface, we need to adjust the state.
+	if found_new_surface:
+		# First, modify the velocity as the player moves onto the surface.
+		var velocity_tangent := self.velocity.slide(new_surface_normal)
+		var velocity_normal := self.velocity.dot(new_surface_normal) * new_surface_normal
+		self.velocity = velocity_tangent
+	# Before committing to the new surface, make sure that there isn't a
+	# better choice of surface to be on by looking in the direction of the
+	# last surface the player was on.
+	if _on_surface(self.physics_state):
+		var test_collision := move_and_collide(-self.surface_normal, true, true, true)
+		if test_collision != null:
+			var test_normal := test_collision.normal
+			# Whichever surface is the more horizontal is the better choice.
+			if !found_new_surface || test_normal.dot(Vector2.UP) > new_surface_normal.dot(Vector2.UP):
+				self.position += test_collision.travel
+				self.velocity = self.velocity.slide(test_collision.normal)
+				found_new_surface = true
+				new_surface_normal = test_normal
+	if found_new_surface:
+		var new_surface_angle := new_surface_normal.angle_to(Vector2.UP)
+		self.surface_normal = new_surface_normal
+		if abs(new_surface_angle) <= FLOOR_ANGLE:
+			self.physics_state = PhysicsState.FLOOR
+		elif abs(new_surface_angle) <= SLOPE_ANGLE:
+			self.physics_state = PhysicsState.SLOPE
+		elif abs(new_surface_angle) <= WALL_ANGLE:
+			self.physics_state = PhysicsState.WALL
+		else:
+			self.physics_state = PhysicsState.AIR
+	else:
+		self.physics_state = PhysicsState.AIR
+	_position_process(delta_remainder, n - 1)
 
 var prev_state = State.FALL
 var prev_physics_state = PhysicsState.AIR

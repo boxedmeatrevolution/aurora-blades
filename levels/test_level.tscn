@@ -18,7 +18,7 @@ collision_mask = 0
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Blocks"]
 position = Vector2( 0, -29.6507 )
-polygon = PoolVector2Array( 0, 64, 17.6866, 62.8129, 37.1449, 538.15, 296.588, 552.049, 544.913, 464.95, 650.543, 389.897, 768, 384, 832, 384, 960, 320, 960, 576, 0, 576 )
+polygon = PoolVector2Array( 0, 64, 17.6866, 62.8129, 37.1449, 538.15, 296.588, 552.049, 544.913, 464.95, 650.543, 389.897, 741.348, 388.97, 824.741, 340.788, 892, 300, 892, 31.309, 960.022, 34.0888, 960, 576, 0, 576 )
 
 [node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="Blocks"]
 polygon = PoolVector2Array( 186.325, 429.74, 628.305, 301.871, 548.619, 366.732, 203.003, 470.51 )
