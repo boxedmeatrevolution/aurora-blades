@@ -30,12 +30,12 @@ const FLOOR_ANGLE := 40.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
 const WALL_ANGLE := 95.0 * PI / 180.0
 
-const GRAVITY := 300.0
-const WALK_ACCELERATION := 450.0
-const AIR_ACCELERATION := 200.0
+const GRAVITY := 800.0
+const WALK_ACCELERATION := 700.0
+const AIR_ACCELERATION := 700.0
 const WALK_MAX_CONTROL_SPEED = 100.0
 const AIR_MAX_CONTROL_SPEED = 100.0
-const JUMP_SPEED := 200.0
+const JUMP_SPEED := 300.0
 
 # The normal to whatever surface the player is on.
 var surface_normal := Vector2()
@@ -51,11 +51,10 @@ func _on_surface(physics_state : int) -> bool:
 func _max_surface_redirect_angle(state : int) -> float:
 	return 45.0 * PI / 180.0
 
-# The maximum change in slope over which the player will "stick" to the
-# surface.
-func _max_surface_stick_slope(state : int) -> float:
-	# This should depend on the player state, and potentially the velocity.
-	return 1.25
+# The time for the player to re-land on the ground after a change in slope that
+# is considered to small to be allowed by the physics engine.
+func _max_surface_stick_time(state : int) -> float:
+	return 0.2
 
 # The maximum velocity which the player can move across the floor with.
 func _max_speed(state : int) -> float:
@@ -77,21 +76,35 @@ func _max_speed(state : int) -> float:
 func _min_slide_speed(state : int) -> float:
 	return 200.0
 
-# The friction (from air or ground) experienced by the player.
-func _friction(state : int) -> float:
+func _has_gravity(state : int) -> bool:
 	match state:
 		State.STAND:
-			return 400.0
+			return false
+		State.WALK:
+			return false
+		_:
+			return true
+
+# The friction (from air or ground) experienced by the player.
+func _friction(state : int, speed : float) -> float:
+	match state:
+		State.STAND:
+			return 800.0
+		State.WALK:
+			if speed <= self.WALK_MAX_CONTROL_SPEED:
+				return 0.0
+			else:
+				return 800.0
 		State.SLIDE:
-			return 200.0
+			return 600.0
 		State.WALL_SLIDE:
-			return 200.0
+			return 600.0
 		State.SKATE:
-			return 100.0
+			return 200.0
 		State.JUMP:
-			return 30.0
+			return 50.0
 		State.FALL:
-			return 30.0
+			return 50.0
 		_:
 			return 0.0
 
@@ -138,18 +151,24 @@ func _position_process(delta : float, n : int = 4) -> void:
 		# If the player used to be on a surface, then we should try to stick
 		# to whatever surface may still be below them.
 		if self.velocity.x != 0:
-			var velocity_slope := self.velocity.y / abs(self.velocity.x)
-			var max_slope_change := _max_surface_stick_slope(self.state)
-			var min_slope := velocity_slope - max_slope_change
-			var test_displacement := Vector2.DOWN * abs(velocity.x) * delta * max_slope_change
+			var surface_stick_time := _max_surface_stick_time(self.state)
+			var velocity_slope := self.velocity.y / self.velocity.x
+			var max_slope_change := 0.5 * GRAVITY / self.velocity.x * surface_stick_time
+			var extreme_slope := velocity_slope + max_slope_change
+			var test_displacement := Vector2.DOWN * velocity.x * delta * max_slope_change
 			var test_collision := move_and_collide(test_displacement, true, true, false)
 			if test_collision != null && test_collision.normal.y < 0:
 				# If a surface below the player was found, then check that the
 				# slope is acceptably close to the slope of the previous slope
 				# that the player was on.
-				var surface_slope := sign(self.velocity.x) * test_collision.normal.x / test_collision.normal.y
+				var surface_slope := test_collision.normal.x / abs(test_collision.normal.y)
 				var surface_angle := abs(test_collision.normal.angle_to(Vector2.UP))
-				if surface_angle <= WALL_ANGLE && surface_slope >= min_slope:
+				var slope_condition := false
+				if self.velocity.x < 0:
+					slope_condition = surface_slope >= extreme_slope
+				else:
+					slope_condition = surface_slope <= extreme_slope
+				if surface_angle <= WALL_ANGLE && slope_condition:
 					self.position += test_collision.travel
 					var velocity_tangent := self.velocity.slide(test_collision.normal)
 					var velocity_normal := self.velocity.dot(test_collision.normal) * test_collision.normal
@@ -168,7 +187,7 @@ func _physics_process(delta):
 	# Print the state for debugging purposes.
 	var state_str = ""
 	var physics_state_str = ""
-	match physics_state:
+	match self.physics_state:
 		PhysicsState.AIR:
 			physics_state_str = "Air"
 		PhysicsState.FLOOR:
@@ -177,7 +196,7 @@ func _physics_process(delta):
 			physics_state_str = "Wall"
 		PhysicsState.SLOPE:
 			physics_state_str = "Slope"
-	match state:
+	match self.state:
 		State.STAND:
 			state_str = "Stand"
 		State.WALK:
@@ -194,10 +213,10 @@ func _physics_process(delta):
 			state_str = "Fall"
 		State.DASH:
 			state_str = "Dash"
-	if prev_state != state || prev_physics_state != physics_state:
+	if prev_state != self.state || prev_physics_state != self.physics_state:
 		print(physics_state_str, ", ", state_str)
-	prev_physics_state = physics_state
-	prev_state = state
+	prev_physics_state = self.physics_state
+	prev_state = self.state
 	
 	var input_move_dir := Vector2()
 	var input_jump := false
@@ -219,10 +238,11 @@ func _physics_process(delta):
 		input_skate = true
 	
 	# Apply gravity.
-	self.velocity += Vector2.DOWN * GRAVITY * delta
+	if _has_gravity(self.state):
+		self.velocity += Vector2.DOWN * GRAVITY * delta
 	# Apply friction.
 	if self.velocity.length_squared() != 0:
-		var friction_delta = _friction(self.state) * self.velocity.normalized() * delta
+		var friction_delta = _friction(self.state, self.velocity.length()) * self.velocity.normalized() * delta
 		if friction_delta.length_squared() > self.velocity.length_squared():
 			self.velocity = Vector2()
 		else:
@@ -232,6 +252,8 @@ func _physics_process(delta):
 	
 	# Step the position forward by the timestep.
 	_position_process(delta)
+	# Do transitions between the states.
+	#_state_transition_process()
 	
 	# Update the player state from the current physics state.
 	if _on_surface(self.physics_state):
