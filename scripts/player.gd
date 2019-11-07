@@ -30,89 +30,112 @@ const FLOOR_ANGLE := 40.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
 const WALL_ANGLE := 100.0 * PI / 180.0
 
+# If the player would land on the ground in this amount of time after leaving
+# the ground, then don't bother letting the player leave the ground at all.
+const SURFACE_DROP_TIME := 0.2
+# If the player is registered as leaving a surface, but the surface remains
+# within this distance of the player, then don't let the player leave the
+# surface.
+const SURFACE_PADDING := 1.0
+
+const MAX_SPEED := 1000.0
 const GRAVITY := 800.0
 const WALK_ACCELERATION := 700.0
-const AIR_ACCELERATION := 700.0
-const WALK_MAX_CONTROL_SPEED = 100.0
-const AIR_MAX_CONTROL_SPEED = 100.0
+const WALK_SPEED := 100.0
+const WALK_MAX_SPEED = 125.0
+const SLIDE_ACCELERATION := 700.0
+const SLIDE_SPEED := 150.0
+const WALL_SLIDE_ACCELERATION := 700.0
+const WALL_SLIDE_SPEED := 175.0
 const JUMP_SPEED := 300.0
-const SURFACE_PADDING := 1.0
+const AIR_ACCELERATION := 700.0
+const AIR_FRICTION := 100.0
+const AIR_CONTROL_SPEED := 100.0
 
 # The normal to whatever surface the player is on.
 var surface_normal := Vector2()
 var velocity := Vector2()
 
-func _on_surface(physics_state : int) -> bool:
-	return physics_state == PhysicsState.FLOOR \
-			|| physics_state == PhysicsState.SLOPE \
-			|| physics_state == PhysicsState.WALL
+func _on_surface() -> bool:
+	return self.physics_state == PhysicsState.FLOOR \
+			|| self.physics_state == PhysicsState.SLOPE \
+			|| self.physics_state == PhysicsState.WALL
 
 # The maximum angle over which the player's velocity will be redirected without
 # loss when undergoing a velocity change.
-func _max_surface_redirect_angle(state : int) -> float:
+func _max_surface_redirect_angle() -> float:
 	return 45.0 * PI / 180.0
-
-# The time for the player to re-land on the ground after a change in slope that
-# is considered to small to be allowed by the physics engine.
-func _max_surface_stick_time(state : int) -> float:
-	return 0.2
-
-# The maximum velocity which the player can move across the floor with.
-func _max_speed(state : int) -> float:
-	match state:
-		State.STAND:
-			return 150.0
-		State.WALK:
-			return 150.0
-		State.SLIDE:
-			return 200.0
-		State.WALL_SLIDE:
-			return 200.0
-		State.SKATE:
-			return 800.0
-		_:
-			return 1200.0
-
-# The minimum speed at which the player cannot walk and starts sliding instead.
-func _min_slide_speed(state : int) -> float:
-	return 175.0
-
-func _has_gravity(state : int) -> bool:
-	match state:
-		State.STAND:
-			return false
-		State.WALK:
-			return false
-		_:
-			return true
-
-# The friction (from air or ground) experienced by the player.
-func _friction(state : int, speed : float) -> float:
-	match state:
-		State.STAND:
-			return 800.0
-		State.WALK:
-			if speed <= self.WALK_MAX_CONTROL_SPEED:
-				return 0.0
-			else:
-				return 800.0
-		State.SLIDE:
-			return 400.0
-		State.WALL_SLIDE:
-			return 400.0
-		State.SKATE:
-			return 200.0
-		State.JUMP:
-			return 50.0
-		State.FALL:
-			return 50.0
-		_:
-			return 0.0
 
 func _ready() -> void:
 	pass
 
-func _position_process(delta : float, n : int = 4) -> void:
+# Updates the velocities based on the current state.
+func _velocity_step(delta : float, input_move_dir : Vector2) -> void:
+	# Any acceleration parallel to the surface which the player is on.
+	var surface_acceleration := 0.0
+	# Any acceleration against the direction of the velocity of the player.
+	var drag := 0.0
+	
+	if self.state == State.JUMP || self.state == State.FALL:
+		# Apply gravity.
+		self.velocity += Vector2.DOWN * GRAVITY * delta
+		# Apply air friction.
+		drag = AIR_FRICTION
+		# Apply air movement.
+		if sign(input_move_dir.x) * self.velocity.x < AIR_CONTROL_SPEED:
+			self.velocity.x += input_move_dir.x * AIR_ACCELERATION * delta
+	elif self.state == State.STAND:
+		# When the player is standing, they should slow down to a stop. We use
+		# the walk acceleration here so that it blends nicely with ceasing to
+		# walk.
+		drag = WALK_ACCELERATION
+	elif self.state == State.WALK:
+		# When the player is walking, we must accelerate them up to speed in
+		# the direction they have chosen to move.
+		if self.velocity.length() > WALK_SPEED:
+			drag = WALK_ACCELERATION
+		else:
+			surface_acceleration = input_move_dir.x * WALK_ACCELERATION
+	elif self.state == State.SLIDE:
+		# When the player is sliding, they will speed up to reach the sliding
+		# speed, and then maintain that speed. If they slide onto a floor
+		# region, they will slow down to a stop.
+		if self.physics_state == PhysicsState.FLOOR:
+			drag = SLIDE_ACCELERATION
+		elif self.physics_state == PhysicsState.SLOPE || self.physics_state == PhysicsState.WALL:
+			if self.velocity.length() > SLIDE_SPEED:
+				drag = SLIDE_ACCELERATION
+			else:
+				surface_acceleration = sign(self.surface_normal.x) * SLIDE_ACCELERATION
+	elif self.state == State.WALL_SLIDE:
+		# Similar to regular sliding.
+		if self.physics_state == PhysicsState.FLOOR || self.physics_state == PhysicsState.SLOPE:
+			drag = WALL_SLIDE_ACCELERATION
+		elif self.physics_state == PhysicsState.WALL:
+			if self.velocity.length() > SLIDE_SPEED:
+				drag = WALL_SLIDE_ACCELERATION
+			else:
+				surface_acceleration = sign(self.surface_normal.x) * SLIDE_ACCELERATION
+	
+	# Apply drag, making sure that if the drag would bring the velocity to zero
+	# we don't overshoot.
+	if self.velocity.length_squared() > 0.0:
+		var drag_delta := -drag * self.velocity.normalized() * delta
+		if drag >= 0 && drag_delta.length() >= self.velocity.length():
+			self.velocity = Vector2()
+		else:
+			self.velocity += drag_delta
+	
+	# Apply surface acceleration.
+	var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
+	var surface_acceleration_delta := surface_acceleration * surface_tangent * delta
+	self.velocity += surface_acceleration_delta
+	
+	# Clamp the velocity by the max speed.
+	self.velocity = self.velocity.clamped(MAX_SPEED)
+
+# Steps the position forward by a small amount based on the current velocity.
+func _position_step(delta : float, n : int = 4) -> void:
 	# Exit if the maximum number of iterations has been reached.
 	if n <= 0 || delta <= 0 || self.velocity.length_squared() == 0:
 		return
@@ -135,14 +158,13 @@ func _position_process(delta : float, n : int = 4) -> void:
 		delta_remainder = collision.remainder.length() / velocity.length()
 		found_new_surface = true
 		new_surface_normal = collision.normal
-	elif _on_surface(self.physics_state) && collision == null:
+	elif _on_surface() && collision == null:
 		delta_remainder = 0.0
 		# If the player used to be on a surface, then we should try to stick
 		# to whatever surface may still be below them.
 		if self.velocity.x != 0:
-			var surface_stick_time := _max_surface_stick_time(self.state)
 			var velocity_slope := self.velocity.y / self.velocity.x
-			var max_slope_change := 0.5 * GRAVITY / self.velocity.x * surface_stick_time
+			var max_slope_change := 0.5 * GRAVITY / self.velocity.x * SURFACE_DROP_TIME
 			var extreme_slope := velocity_slope + max_slope_change
 			var test_displacement := Vector2.DOWN * velocity.x * delta * max_slope_change
 			var test_collision := move_and_collide(test_displacement, true, true, true)
@@ -173,7 +195,7 @@ func _position_process(delta : float, n : int = 4) -> void:
 	# Before committing to the new surface, make sure that there isn't a
 	# better choice of surface to be on by looking in the direction of the
 	# last surface the player was on.
-	if _on_surface(self.physics_state):
+	if _on_surface():
 		var test_collision := move_and_collide(-self.surface_normal, true, true, true)
 		if test_collision != null:
 			var test_normal := test_collision.normal
@@ -196,7 +218,7 @@ func _position_process(delta : float, n : int = 4) -> void:
 			self.physics_state = PhysicsState.AIR
 	else:
 		self.physics_state = PhysicsState.AIR
-	_position_process(delta_remainder, n - 1)
+	_position_step(delta_remainder, n - 1)
 
 var prev_state = State.FALL
 var prev_physics_state = PhysicsState.AIR
@@ -254,26 +276,15 @@ func _physics_process(delta):
 	if Input.is_action_just_pressed("skate"):
 		input_skate = true
 	
-	# Apply gravity.
-	if _has_gravity(self.state):
-		self.velocity += Vector2.DOWN * GRAVITY * delta
-	# Apply friction.
-	if self.velocity.length_squared() != 0:
-		var friction_delta = _friction(self.state, self.velocity.length()) * self.velocity.normalized() * delta
-		if friction_delta.length_squared() > self.velocity.length_squared():
-			self.velocity = Vector2()
-		else:
-			self.velocity -= friction_delta
-	# Clamp the velocity by the max speed.
-	self.velocity = self.velocity.clamped(_max_speed(self.state))
-	
+	# Update the velocities based on the current state.
+	_velocity_step(delta, input_move_dir)
 	# Step the position forward by the timestep.
-	_position_process(delta)
-	# Do transitions between the states.
+	_position_step(delta)
+	# Transition between states.
 	#_state_transition_process()
 	
 	# Update the player state from the current physics state.
-	if _on_surface(self.physics_state):
+	if _on_surface():
 		# If the player was in an air state, then make a transition into a
 		# surface state.
 		if self.state == State.FALL || self.state == State.JUMP:
@@ -284,7 +295,7 @@ func _physics_process(delta):
 			elif self.physics_state == PhysicsState.FLOOR:
 				# If the player landed on the floor, enter either the standing,
 				# walking, or sliding state (depending on velocity and input).
-				if self.velocity.length() >= _min_slide_speed(self.state):
+				if self.velocity.length() > WALK_MAX_SPEED:
 					self.state = State.SLIDE
 				elif input_move_dir.x != 0:
 					self.state = State.WALK
@@ -300,7 +311,7 @@ func _physics_process(delta):
 			if input_jump:
 				self.state = State.JUMP
 				self.velocity += Vector2.UP * JUMP_SPEED
-			elif self.velocity.length() >= _min_slide_speed(self.state):
+			elif self.velocity.length() > WALK_MAX_SPEED:
 				self.state = State.SLIDE
 			elif self.physics_state == PhysicsState.SLOPE:
 				self.state = State.SLIDE
@@ -312,7 +323,7 @@ func _physics_process(delta):
 			if input_jump:
 				self.state = State.JUMP
 				self.velocity += Vector2.UP * JUMP_SPEED
-			elif self.velocity.length() >= _min_slide_speed(self.state):
+			elif self.velocity.length() > WALK_MAX_SPEED:
 				self.state = State.SLIDE
 			elif self.physics_state == PhysicsState.SLOPE:
 				self.state = State.SLIDE
@@ -320,24 +331,22 @@ func _physics_process(delta):
 				self.state = State.WALL_SLIDE
 			elif input_move_dir.x == 0:
 				self.state = State.STAND
-			else:
-				var acceleration = input_move_dir.x * WALK_ACCELERATION * Vector2(-self.surface_normal.y, self.surface_normal.x)
-				if self.velocity.dot(acceleration) <= WALK_MAX_CONTROL_SPEED * acceleration.length():
-					self.velocity += acceleration * delta
 		elif self.state == State.SLIDE:
 			if self.physics_state == PhysicsState.FLOOR:
-				if input_move_dir.x != 0 && self.velocity.length() <= _max_speed(State.WALK):
-					self.state = State.WALK
-				elif self.velocity.length() <= _max_speed(State.STAND):
-					self.state = State.STAND
+				if self.velocity.length() <= WALK_SPEED:
+					if input_move_dir.x != 0:
+						self.state = State.WALK
+					else:
+						self.state = State.STAND
 			elif self.physics_state == PhysicsState.WALL:
 				self.state = State.WALL_SLIDE
 		elif self.state == State.WALL_SLIDE:
 			if self.physics_state == PhysicsState.FLOOR:
-				if input_move_dir.x != 0 && self.velocity.length() <= _max_speed(State.WALK):
-					self.state = State.WALK
-				elif self.velocity.length() <= _max_speed(State.STAND):
-					self.state = State.STAND
+				if self.velocity.length() <= WALK_SPEED:
+					if input_move_dir.x != 0:
+						self.state = State.WALK
+					else:
+						self.state = State.STAND
 				else:
 					self.state = State.SLIDE
 			elif self.physics_state == PhysicsState.SLOPE:
@@ -347,13 +356,3 @@ func _physics_process(delta):
 		# an edge, so put them into the fall state.
 		if self.state == State.STAND || self.state == State.WALK || self.state == State.SLIDE || self.state == State.WALL_SLIDE || self.state == State.SKATE:
 			self.state = State.FALL
-		# Now, update the player based on the air state that they are in.
-		if self.state == State.FALL:
-			var acceleration = Vector2.RIGHT * input_move_dir.x * AIR_ACCELERATION
-			if self.velocity.dot(acceleration) <= AIR_MAX_CONTROL_SPEED * acceleration.length():
-				self.velocity += acceleration * delta
-		elif self.state == State.JUMP:
-			var acceleration = Vector2.RIGHT * input_move_dir.x * AIR_ACCELERATION
-			if self.velocity.dot(acceleration) <= AIR_MAX_CONTROL_SPEED * acceleration.length():
-				self.velocity += acceleration * delta
-		pass
