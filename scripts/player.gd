@@ -11,8 +11,16 @@ enum State {
 	FALL,
 	DASH
 }
-
-var state : int = State.FALL
+const STATE_NAME := {
+	State.STAND: "Stand",
+	State.WALK: "Walk",
+	State.SLIDE: "Slide",
+	State.WALL_SLIDE: "WallSlide",
+	State.SKATE: "Skate",
+	State.JUMP: "Jump",
+	State.FALL: "Fall",
+	State.DASH: "Dash"
+}
 
 # The allowed physics states. The physics states are semi-independent of the
 # player states. They just refer to whether the player is in the air or moving
@@ -23,8 +31,12 @@ enum PhysicsState {
 	SLOPE,
 	WALL
 }
-
-var physics_state : int = PhysicsState.AIR
+const PHYSICS_STATE_NAME := {
+	PhysicsState.AIR: "Air",
+	PhysicsState.FLOOR: "Floor",
+	PhysicsState.SLOPE: "Slope",
+	PhysicsState.WALL: "Wall"
+}
 
 const FLOOR_ANGLE := 40.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
@@ -52,7 +64,10 @@ const AIR_ACCELERATION := 700.0
 const AIR_FRICTION := 100.0
 const AIR_CONTROL_SPEED := 100.0
 
-# The normal to whatever surface the player is on.
+var state : int = State.FALL
+var physics_state : int = PhysicsState.AIR
+# The normal to the surface the player is on (only valid if `_on_surface`
+# returns true).
 var surface_normal := Vector2()
 var velocity := Vector2()
 
@@ -68,6 +83,42 @@ func _max_surface_redirect_angle() -> float:
 
 func _ready() -> void:
 	pass
+
+var prev_state : int = State.FALL
+var prev_physics_state : int = PhysicsState.AIR
+func _physics_process(delta):
+	# Print the state for debugging purposes.
+	if prev_state != self.state || prev_physics_state != self.physics_state:
+		print(PHYSICS_STATE_NAME[self.physics_state], ", ", STATE_NAME[self.state])
+	prev_physics_state = self.physics_state
+	prev_state = self.state
+	
+	# Get input from the user.
+	var input_move_dir := Vector2()
+	var input_jump := false
+	var input_dash := false
+	var input_skate := false
+	if Input.is_action_pressed("move_left"):
+		input_move_dir.x -= 1
+	if Input.is_action_pressed("move_right"):
+		input_move_dir.x += 1
+	if Input.is_action_pressed("move_up"):
+		input_move_dir.y -= 1
+	if Input.is_action_pressed("move_down"):
+		input_move_dir.y += 1
+	if Input.is_action_just_released("jump"):
+		input_jump = true
+	if Input.is_action_just_pressed("dash"):
+		input_dash = true
+	if Input.is_action_just_pressed("skate"):
+		input_skate = true
+	
+	# Update the velocities based on the current state.
+	_velocity_step(delta, input_move_dir)
+	# Step the position forward by the timestep.
+	_position_step(delta)
+	# Transition between states.
+	_state_transition(input_move_dir, input_jump)
 
 # Updates the velocities based on the current state.
 func _velocity_step(delta : float, input_move_dir : Vector2) -> void:
@@ -220,70 +271,7 @@ func _position_step(delta : float, n : int = 4) -> void:
 		self.physics_state = PhysicsState.AIR
 	_position_step(delta_remainder, n - 1)
 
-var prev_state = State.FALL
-var prev_physics_state = PhysicsState.AIR
-func _physics_process(delta):
-	# Print the state for debugging purposes.
-	var state_str = ""
-	var physics_state_str = ""
-	match self.physics_state:
-		PhysicsState.AIR:
-			physics_state_str = "Air"
-		PhysicsState.FLOOR:
-			physics_state_str = "Floor"
-		PhysicsState.WALL:
-			physics_state_str = "Wall"
-		PhysicsState.SLOPE:
-			physics_state_str = "Slope"
-	match self.state:
-		State.STAND:
-			state_str = "Stand"
-		State.WALK:
-			state_str = "Walk"
-		State.SLIDE:
-			state_str = "Slide"
-		State.WALL_SLIDE:
-			state_str = "WallSlide"
-		State.SKATE:
-			state_str = "Skate"
-		State.JUMP:
-			state_str = "Jump"
-		State.FALL:
-			state_str = "Fall"
-		State.DASH:
-			state_str = "Dash"
-	if prev_state != self.state || prev_physics_state != self.physics_state:
-		print(physics_state_str, ", ", state_str)
-	prev_physics_state = self.physics_state
-	prev_state = self.state
-	
-	var input_move_dir := Vector2()
-	var input_jump := false
-	var input_dash := false
-	var input_skate := false
-	if Input.is_action_pressed("move_left"):
-		input_move_dir.x -= 1
-	if Input.is_action_pressed("move_right"):
-		input_move_dir.x += 1
-	if Input.is_action_pressed("move_up"):
-		input_move_dir.y -= 1
-	if Input.is_action_pressed("move_down"):
-		input_move_dir.y += 1
-	if Input.is_action_just_released("jump"):
-		input_jump = true
-	if Input.is_action_just_pressed("dash"):
-		input_dash = true
-	if Input.is_action_just_pressed("skate"):
-		input_skate = true
-	
-	# Update the velocities based on the current state.
-	_velocity_step(delta, input_move_dir)
-	# Step the position forward by the timestep.
-	_position_step(delta)
-	# Transition between states.
-	#_state_transition_process()
-	
-	# Update the player state from the current physics state.
+func _state_transition(input_move_dir : Vector2, input_jump : bool) -> void:
 	if _on_surface():
 		# If the player was in an air state, then make a transition into a
 		# surface state.
