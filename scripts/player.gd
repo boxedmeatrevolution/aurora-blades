@@ -42,7 +42,7 @@ const PHYSICS_STATE_NAME := {
 
 # Represents what the player wants to do.
 class Intent:
-	var move_dir := Vector2()
+	var move_direction := Vector2()
 	var jump := false
 	var dash := false
 
@@ -78,6 +78,8 @@ var physics_state : int = PhysicsState.AIR
 # returns true).
 var surface_normal := Vector2()
 var velocity := Vector2()
+var facing_direction := -1
+onready var animation_player := $Sprite/AnimationPlayer
 
 # Is the player on a surface, meaning on a floor, slope, or wall?
 func _on_surface() -> bool:
@@ -122,18 +124,20 @@ func _physics_process(delta):
 	_position_step(delta)
 	# Transition between states.
 	_state_transition(intent)
+	# Update the animation based on the state.
+	_animation_transition(intent)
 
 func _read_intent() -> Intent:
 	var intent := Intent.new()
 	# Get input from the user.
 	if Input.is_action_pressed("move_left"):
-		intent.move_dir.x -= 1
+		intent.move_direction.x -= 1
 	if Input.is_action_pressed("move_right"):
-		intent.move_dir.x += 1
+		intent.move_direction.x += 1
 	if Input.is_action_pressed("move_up"):
-		intent.move_dir.y -= 1
+		intent.move_direction.y -= 1
 	if Input.is_action_pressed("move_down"):
-		intent.move_dir.y += 1
+		intent.move_direction.y += 1
 	if Input.is_action_just_released("jump"):
 		intent.jump = true
 	if Input.is_action_just_pressed("dash"):
@@ -160,7 +164,7 @@ func _velocity_step(delta : float, intent : Intent) -> void:
 		if self.velocity.length() > WALK_SPEED:
 			drag = WALK_ACCELERATION
 		else:
-			surface_acceleration = intent.move_dir.x * WALK_ACCELERATION
+			surface_acceleration = intent.move_direction.x * WALK_ACCELERATION
 	elif self.state == State.SLIDE:
 		# When the player is sliding, they will speed up to reach the sliding
 		# speed, and then maintain that speed. If they slide onto a floor
@@ -190,8 +194,8 @@ func _velocity_step(delta : float, intent : Intent) -> void:
 		# Apply air friction.
 		drag = AIR_FRICTION
 		# Apply air movement.
-		if sign(intent.move_dir.x) * self.velocity.x < AIR_CONTROL_SPEED:
-			self.velocity.x += intent.move_dir.x * AIR_ACCELERATION * delta
+		if sign(intent.move_direction.x) * self.velocity.x < AIR_CONTROL_SPEED:
+			self.velocity.x += intent.move_direction.x * AIR_ACCELERATION * delta
 	
 	# Apply drag, making sure that if the drag would bring the velocity to zero
 	# we don't overshoot.
@@ -316,7 +320,7 @@ func _state_transition(intent : Intent) -> void:
 				# walking, or sliding state (depending on velocity and input).
 				if self.velocity.length() > WALK_MAX_SPEED:
 					self.state = State.SLIDE
-				elif intent.move_dir.x != 0:
+				elif intent.move_direction.x != 0:
 					self.state = State.WALK
 				else:
 					self.state = State.STAND
@@ -335,7 +339,7 @@ func _state_transition(intent : Intent) -> void:
 				self.state = State.SLIDE
 			elif self.physics_state == PhysicsState.WALL:
 				self.state = State.WALL_SLIDE
-			elif intent.move_dir.x != 0:
+			elif intent.move_direction.x != 0:
 				self.state = State.WALK
 		elif self.state == State.WALK:
 			if intent.jump:
@@ -346,12 +350,12 @@ func _state_transition(intent : Intent) -> void:
 				self.state = State.SLIDE
 			elif self.physics_state == PhysicsState.WALL:
 				self.state = State.WALL_SLIDE
-			elif intent.move_dir.x == 0:
+			elif intent.move_direction.x == 0:
 				self.state = State.STAND
 		elif self.state == State.SLIDE:
 			if self.physics_state == PhysicsState.FLOOR:
 				if self.velocity.length() <= WALK_SPEED:
-					if intent.move_dir.x != 0:
+					if intent.move_direction.x != 0:
 						self.state = State.WALK
 					else:
 						self.state = State.STAND
@@ -360,7 +364,7 @@ func _state_transition(intent : Intent) -> void:
 		elif self.state == State.WALL_SLIDE:
 			if self.physics_state == PhysicsState.FLOOR:
 				if self.velocity.length() <= WALK_SPEED:
-					if intent.move_dir.x != 0:
+					if intent.move_direction.x != 0:
 						self.state = State.WALK
 					else:
 						self.state = State.STAND
@@ -374,3 +378,40 @@ func _state_transition(intent : Intent) -> void:
 		# state.
 		if _is_surface_state(self.state):
 			self.state = State.FALL
+
+func _animation_transition(intent : Intent) -> void:
+	if intent.move_direction.x != 0:
+		self.facing_direction = intent.move_direction.x
+	var next_animation := ""
+	if self.state == State.STAND:
+		if self.facing_direction == -1:
+			next_animation = "StandLeft"
+		else:
+			next_animation = "StandRight"
+	elif self.state == State.WALK:
+		if self.facing_direction == -1:
+			next_animation = "WalkLeft"
+		else:
+			next_animation = "WalkRight"
+	elif self.state == State.SLIDE:
+		if self.surface_normal.x < 0:
+			next_animation = "SlideLeft"
+		else:
+			next_animation = "SlideRight"
+	elif self.state == State.WALL_SLIDE:
+		if self.surface_normal.x < 0:
+			next_animation = "WallSlideLeft"
+		else:
+			next_animation = "WallSlideRight"
+	elif self.state == State.JUMP_START || self.state == State.JUMP:
+		if self.facing_direction == -1:
+			next_animation = "JumpLeft"
+		else:
+			next_animation = "JumpRight"
+	elif self.state == State.FALL:
+		if self.facing_direction == -1:
+			next_animation = "FallLeft"
+		else:
+			next_animation = "FallRight"
+	if self.animation_player.current_animation != next_animation:
+		self.animation_player.play(next_animation)
