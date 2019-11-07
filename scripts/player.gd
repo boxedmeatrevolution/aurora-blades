@@ -7,6 +7,7 @@ enum State {
 	SLIDE,
 	WALL_SLIDE,
 	SKATE,
+	JUMP_START,
 	JUMP,
 	FALL,
 	DASH
@@ -17,6 +18,7 @@ const STATE_NAME := {
 	State.SLIDE: "Slide",
 	State.WALL_SLIDE: "WallSlide",
 	State.SKATE: "Skate",
+	State.JUMP_START: "JumpStart",
 	State.JUMP: "Jump",
 	State.FALL: "Fall",
 	State.DASH: "Dash"
@@ -37,6 +39,12 @@ const PHYSICS_STATE_NAME := {
 	PhysicsState.SLOPE: "Slope",
 	PhysicsState.WALL: "Wall"
 }
+
+# Represents what the player wants to do.
+class Intent:
+	var move_dir := Vector2()
+	var jump := false
+	var dash := false
 
 const FLOOR_ANGLE := 40.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
@@ -71,13 +79,27 @@ var physics_state : int = PhysicsState.AIR
 var surface_normal := Vector2()
 var velocity := Vector2()
 
+# Is the player on a surface, meaning on a floor, slope, or wall?
 func _on_surface() -> bool:
 	return self.physics_state == PhysicsState.FLOOR \
 			|| self.physics_state == PhysicsState.SLOPE \
 			|| self.physics_state == PhysicsState.WALL
 
+# "Surface states" are those player states which are meant to be compatible
+# with the player moving on a surface. If the player is in one of these states,
+# then a call to `_on_surface` must return true (but the converse is not
+# necessarily true).
+func _is_surface_state(state : int) -> bool:
+	return state == State.STAND \
+			|| state == State.WALK \
+			|| state == State.SLIDE \
+			|| state == State.WALL_SLIDE \
+			|| state == State.SKATE \
+			|| state == State.JUMP_START
+
 # The maximum angle over which the player's velocity will be redirected without
 # loss when undergoing a velocity change.
+# TODO: Actually use this physics concept.
 func _max_surface_redirect_angle() -> float:
 	return 45.0 * PI / 180.0
 
@@ -93,49 +115,41 @@ func _physics_process(delta):
 	prev_physics_state = self.physics_state
 	prev_state = self.state
 	
-	# Get input from the user.
-	var input_move_dir := Vector2()
-	var input_jump := false
-	var input_dash := false
-	var input_skate := false
-	if Input.is_action_pressed("move_left"):
-		input_move_dir.x -= 1
-	if Input.is_action_pressed("move_right"):
-		input_move_dir.x += 1
-	if Input.is_action_pressed("move_up"):
-		input_move_dir.y -= 1
-	if Input.is_action_pressed("move_down"):
-		input_move_dir.y += 1
-	if Input.is_action_just_released("jump"):
-		input_jump = true
-	if Input.is_action_just_pressed("dash"):
-		input_dash = true
-	if Input.is_action_just_pressed("skate"):
-		input_skate = true
-	
+	var intent := _read_intent()
 	# Update the velocities based on the current state.
-	_velocity_step(delta, input_move_dir)
+	_velocity_step(delta, intent)
 	# Step the position forward by the timestep.
 	_position_step(delta)
 	# Transition between states.
-	_state_transition(input_move_dir, input_jump)
+	_state_transition(intent)
+
+func _read_intent() -> Intent:
+	var intent := Intent.new()
+	# Get input from the user.
+	if Input.is_action_pressed("move_left"):
+		intent.move_dir.x -= 1
+	if Input.is_action_pressed("move_right"):
+		intent.move_dir.x += 1
+	if Input.is_action_pressed("move_up"):
+		intent.move_dir.y -= 1
+	if Input.is_action_pressed("move_down"):
+		intent.move_dir.y += 1
+	if Input.is_action_just_released("jump"):
+		intent.jump = true
+	if Input.is_action_just_pressed("dash"):
+		intent.dash = true
+	if Input.is_action_just_pressed("skate"):
+		intent.dash = true
+	return intent
 
 # Updates the velocities based on the current state.
-func _velocity_step(delta : float, input_move_dir : Vector2) -> void:
+func _velocity_step(delta : float, intent : Intent) -> void:
 	# Any acceleration parallel to the surface which the player is on.
 	var surface_acceleration := 0.0
 	# Any acceleration against the direction of the velocity of the player.
 	var drag := 0.0
 	
-	if self.state == State.JUMP || self.state == State.FALL:
-		# Apply gravity.
-		self.velocity += Vector2.DOWN * GRAVITY * delta
-		# Apply air friction.
-		drag = AIR_FRICTION
-		# Apply air movement.
-		if sign(input_move_dir.x) * self.velocity.x < AIR_CONTROL_SPEED:
-			self.velocity.x += input_move_dir.x * AIR_ACCELERATION * delta
-	elif self.state == State.STAND:
+	if self.state == State.STAND:
 		# When the player is standing, they should slow down to a stop. We use
 		# the walk acceleration here so that it blends nicely with ceasing to
 		# walk.
@@ -146,7 +160,7 @@ func _velocity_step(delta : float, input_move_dir : Vector2) -> void:
 		if self.velocity.length() > WALK_SPEED:
 			drag = WALK_ACCELERATION
 		else:
-			surface_acceleration = input_move_dir.x * WALK_ACCELERATION
+			surface_acceleration = intent.move_dir.x * WALK_ACCELERATION
 	elif self.state == State.SLIDE:
 		# When the player is sliding, they will speed up to reach the sliding
 		# speed, and then maintain that speed. If they slide onto a floor
@@ -167,6 +181,17 @@ func _velocity_step(delta : float, input_move_dir : Vector2) -> void:
 				drag = WALL_SLIDE_ACCELERATION
 			else:
 				surface_acceleration = sign(self.surface_normal.x) * SLIDE_ACCELERATION
+	elif self.state == State.JUMP_START:
+		# Launch the player into the air.
+		self.velocity.y = min(self.velocity.y, -JUMP_SPEED)
+	elif self.state == State.JUMP || self.state == State.FALL:
+		# Apply gravity.
+		self.velocity += Vector2.DOWN * GRAVITY * delta
+		# Apply air friction.
+		drag = AIR_FRICTION
+		# Apply air movement.
+		if sign(intent.move_dir.x) * self.velocity.x < AIR_CONTROL_SPEED:
+			self.velocity.x += intent.move_dir.x * AIR_ACCELERATION * delta
 	
 	# Apply drag, making sure that if the drag would bring the velocity to zero
 	# we don't overshoot.
@@ -271,11 +296,12 @@ func _position_step(delta : float, n : int = 4) -> void:
 		self.physics_state = PhysicsState.AIR
 	_position_step(delta_remainder, n - 1)
 
-func _state_transition(input_move_dir : Vector2, input_jump : bool) -> void:
+func _state_transition(intent : Intent) -> void:
 	if _on_surface():
-		# If the player was in an air state, then make a transition into a
-		# surface state.
-		if self.state == State.FALL || self.state == State.JUMP:
+		# If `_on_surface` is true, then the player must be in a surface state.
+		# In case the player is not, make a transition into one of the surface
+		# states.
+		if !_is_surface_state(self.state):
 			if false:
 				# If the skate button is held down and velocity conditions are met,
 				# then enter the skate state directly.
@@ -285,7 +311,7 @@ func _state_transition(input_move_dir : Vector2, input_jump : bool) -> void:
 				# walking, or sliding state (depending on velocity and input).
 				if self.velocity.length() > WALK_MAX_SPEED:
 					self.state = State.SLIDE
-				elif input_move_dir.x != 0:
+				elif intent.move_dir.x != 0:
 					self.state = State.WALK
 				else:
 					self.state = State.STAND
@@ -294,35 +320,33 @@ func _state_transition(input_move_dir : Vector2, input_jump : bool) -> void:
 				self.state = State.SLIDE
 			elif self.physics_state == PhysicsState.WALL:
 				self.state = State.WALL_SLIDE
-		# Now, update the player based on the surface state that they are in.
+		# Now, update the player's state based on their surface state.
 		if self.state == State.STAND:
-			if input_jump:
-				self.state = State.JUMP
-				self.velocity += Vector2.UP * JUMP_SPEED
+			if intent.jump:
+				self.state = State.JUMP_START
 			elif self.velocity.length() > WALK_MAX_SPEED:
 				self.state = State.SLIDE
 			elif self.physics_state == PhysicsState.SLOPE:
 				self.state = State.SLIDE
 			elif self.physics_state == PhysicsState.WALL:
 				self.state = State.WALL_SLIDE
-			elif input_move_dir.x != 0:
+			elif intent.move_dir.x != 0:
 				self.state = State.WALK
 		elif self.state == State.WALK:
-			if input_jump:
-				self.state = State.JUMP
-				self.velocity += Vector2.UP * JUMP_SPEED
+			if intent.jump:
+				self.state = State.JUMP_START
 			elif self.velocity.length() > WALK_MAX_SPEED:
 				self.state = State.SLIDE
 			elif self.physics_state == PhysicsState.SLOPE:
 				self.state = State.SLIDE
 			elif self.physics_state == PhysicsState.WALL:
 				self.state = State.WALL_SLIDE
-			elif input_move_dir.x == 0:
+			elif intent.move_dir.x == 0:
 				self.state = State.STAND
 		elif self.state == State.SLIDE:
 			if self.physics_state == PhysicsState.FLOOR:
 				if self.velocity.length() <= WALK_SPEED:
-					if input_move_dir.x != 0:
+					if intent.move_dir.x != 0:
 						self.state = State.WALK
 					else:
 						self.state = State.STAND
@@ -331,7 +355,7 @@ func _state_transition(input_move_dir : Vector2, input_jump : bool) -> void:
 		elif self.state == State.WALL_SLIDE:
 			if self.physics_state == PhysicsState.FLOOR:
 				if self.velocity.length() <= WALK_SPEED:
-					if input_move_dir.x != 0:
+					if intent.move_dir.x != 0:
 						self.state = State.WALK
 					else:
 						self.state = State.STAND
@@ -340,7 +364,10 @@ func _state_transition(input_move_dir : Vector2, input_jump : bool) -> void:
 			elif self.physics_state == PhysicsState.SLOPE:
 				self.state = State.SLIDE
 	else:
-		# If the player was in a surface state, then they probably walked off
-		# an edge, so put them into the fall state.
-		if self.state == State.STAND || self.state == State.WALK || self.state == State.SLIDE || self.state == State.WALL_SLIDE || self.state == State.SKATE:
+		# If the player is in a surface state while not being on a surface,
+		# then they must have walked off an edge, so put them into the fall
+		# state (only exception being a pre-jump of course).
+		if self.state == State.JUMP_START:
+			self.state = State.JUMP
+		elif _is_surface_state(self.state):
 			self.state = State.FALL
