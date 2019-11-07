@@ -114,7 +114,6 @@ func _physics_process(delta):
 		print(PHYSICS_STATE_NAME[self.physics_state], ", ", STATE_NAME[self.state])
 	prev_physics_state = self.physics_state
 	prev_state = self.state
-	print(self.velocity.length())
 	
 	var intent := _read_intent()
 	# Update the velocities based on the current state.
@@ -260,9 +259,6 @@ func _position_step(delta : float, n : int = 4) -> void:
 					self.position += test_collision.travel
 					found_new_surface = true
 					new_surface_normal = test_collision.normal
-					var velocity_tangent := self.velocity.slide(test_collision.normal)
-					var velocity_normal := self.velocity.dot(test_collision.normal) * test_collision.normal
-					self.velocity = velocity_tangent.normalized() * self.velocity.length()
 	# If the player landed on a new surface, we need to adjust the state.
 	if found_new_surface:
 		# First, modify the velocity as the player moves onto the surface.
@@ -276,12 +272,16 @@ func _position_step(delta : float, n : int = 4) -> void:
 		var test_collision := move_and_collide(-self.surface_normal, true, true, true)
 		if test_collision != null:
 			var test_normal := test_collision.normal
-			# Whichever surface is the more horizontal is the better choice.
-			if !found_new_surface || test_normal.dot(Vector2.UP) > new_surface_normal.dot(Vector2.UP):
-				self.position += test_collision.travel
-				self.velocity = self.velocity.slide(test_collision.normal)
-				found_new_surface = true
-				new_surface_normal = test_normal
+			# The test normal should be the same (to within tolerance) as the
+			# normal of the last surface the player was on.
+			if test_normal.dot(self.surface_normal) >= 1.0 - 0.01:
+				# Choose the more horizontal surface.
+				if !found_new_surface || test_normal.dot(Vector2.UP) > new_surface_normal.dot(Vector2.UP):
+					self.position += test_collision.travel
+					var velocity_tangent := self.velocity.slide(test_collision.normal)
+					self.velocity = velocity_tangent
+					found_new_surface = true
+					new_surface_normal = test_normal
 	if found_new_surface:
 		var new_surface_angle := new_surface_normal.angle_to(Vector2.UP)
 		self.surface_normal = new_surface_normal
