@@ -273,8 +273,9 @@ func _position_step(delta : float, n : int = 4) -> void:
 		if test_collision != null:
 			var test_normal := test_collision.normal
 			# The test normal should be the same (to within tolerance) as the
-			# normal of the last surface the player was on.
-			if test_normal.dot(self.surface_normal) >= 1.0 - 0.01:
+			# normal of the last surface the player was on. Also, ensure that
+			# it is not a ceiling.
+			if test_normal.dot(self.surface_normal) >= 1.0 - 0.01 && abs(test_normal.angle_to(Vector2.UP)) <= WALL_ANGLE:
 				# Choose the more horizontal surface.
 				if !found_new_surface || test_normal.dot(Vector2.UP) > new_surface_normal.dot(Vector2.UP):
 					self.position += test_collision.travel
