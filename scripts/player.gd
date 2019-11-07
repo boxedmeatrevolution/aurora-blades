@@ -63,10 +63,10 @@ const GRAVITY := 800.0
 const WALK_ACCELERATION := 700.0
 const WALK_SPEED := 100.0
 const WALK_MAX_SPEED = 125.0
-const SLIDE_ACCELERATION := 700.0
+const SLIDE_ACCELERATION := 600.0
 const SLIDE_SPEED := 150.0
-const WALL_SLIDE_ACCELERATION := 700.0
-const WALL_SLIDE_SPEED := 175.0
+const WALL_SLIDE_ACCELERATION := 600.0
+const WALL_SLIDE_SPEED := 100.0
 const JUMP_SPEED := 300.0
 const AIR_ACCELERATION := 700.0
 const AIR_FRICTION := 100.0
@@ -114,6 +114,7 @@ func _physics_process(delta):
 		print(PHYSICS_STATE_NAME[self.physics_state], ", ", STATE_NAME[self.state])
 	prev_physics_state = self.physics_state
 	prev_state = self.state
+	print(self.velocity.length())
 	
 	var intent := _read_intent()
 	# Update the velocities based on the current state.
@@ -177,10 +178,10 @@ func _velocity_step(delta : float, intent : Intent) -> void:
 		if self.physics_state == PhysicsState.FLOOR || self.physics_state == PhysicsState.SLOPE:
 			drag = WALL_SLIDE_ACCELERATION
 		elif self.physics_state == PhysicsState.WALL:
-			if self.velocity.length() > SLIDE_SPEED:
+			if self.velocity.length() > WALL_SLIDE_SPEED:
 				drag = WALL_SLIDE_ACCELERATION
 			else:
-				surface_acceleration = sign(self.surface_normal.x) * SLIDE_ACCELERATION
+				surface_acceleration = sign(self.surface_normal.x) * WALL_SLIDE_ACCELERATION
 	elif self.state == State.JUMP_START:
 		# Launch the player into the air.
 		self.velocity.y = min(self.velocity.y, -JUMP_SPEED)
@@ -297,6 +298,9 @@ func _position_step(delta : float, n : int = 4) -> void:
 	_position_step(delta_remainder, n - 1)
 
 func _state_transition(intent : Intent) -> void:
+	# Always transition from pre-jump to jump before anything else.
+	if self.state == State.JUMP_START:
+		self.state = State.JUMP
 	if _on_surface():
 		# If `_on_surface` is true, then the player must be in a surface state.
 		# In case the player is not, make a transition into one of the surface
@@ -366,8 +370,6 @@ func _state_transition(intent : Intent) -> void:
 	else:
 		# If the player is in a surface state while not being on a surface,
 		# then they must have walked off an edge, so put them into the fall
-		# state (only exception being a pre-jump of course).
-		if self.state == State.JUMP_START:
-			self.state = State.JUMP
-		elif _is_surface_state(self.state):
+		# state.
+		if _is_surface_state(self.state):
 			self.state = State.FALL
