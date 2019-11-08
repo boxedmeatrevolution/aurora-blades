@@ -6,7 +6,11 @@ extends KinematicBody2D
 #   * Jumping goes higher if you hold button.
 #   * Jumping pushes you partly in the direction of the normal, and partly
 #     upwards.
-#   * Well-timed jumps can leave you in ballistic state.
+#   * Three kinds of jumps: Walking jumps go straight up, "moving" jumps put
+#     the player into the ballistic state and are affected by normals, and wall
+#     jumps which are basically a special type of walking jump.
+#   * Well-timed jumps just after hitting the ground can keep the player in
+#     ballistic state.
 # * Collisions when skating with wall result in wipeout. This should work by
 #   checking that if the velocity change from colliding with a surface takes
 #   you below the min skating velocity, the player wipes out.
@@ -31,6 +35,7 @@ enum State {
 	WALK,
 	SLIDE,
 	WALL_SLIDE,
+	WALL_RELEASE,
 	SKATE_START,
 	SKATE,
 	SKATE_BOOST,
@@ -45,6 +50,7 @@ const STATE_NAME := {
 	State.WALK: "Walk",
 	State.SLIDE: "Slide",
 	State.WALL_SLIDE: "WallSlide",
+	State.WALL_RELEASE: "WallRelease",
 	State.SKATE_START: "SkateStart",
 	State.SKATE: "Skate",
 	State.SKATE_BOOST: "SkateBoost",
@@ -125,8 +131,10 @@ const WIPEOUT_TIME := 0.8
 
 const WALL_SLIDE_ACCELERATION := 600.0
 const WALL_SLIDE_SPEED := 100.0
+const WALL_RELEASE_LAUNCH_SPEED := 50.0
 
-const JUMP_LAUNCH_SPEED := 300.0
+const JUMP_LAUNCH_SPEED_NORMAL := 100.0
+const JUMP_LAUNCH_SPEED_VERTICAL := 200.0
 const AIR_ACCELERATION := 700.0
 const AIR_FRICTION := 100.0
 const AIR_CONTROL_SPEED := 100.0
@@ -159,6 +167,7 @@ func _is_surface_state(state : int) -> bool:
 			|| state == State.WALK \
 			|| state == State.SLIDE \
 			|| state == State.WALL_SLIDE \
+			|| state == State.WALL_RELEASE \
 			|| state == State.SKATE_START \
 			|| state == State.SKATE \
 			|| state == State.SKATE_BOOST \
@@ -190,7 +199,7 @@ var prev_physics_state : int = PhysicsState.AIR
 func _physics_process(delta):
 	# Print the state for debugging purposes.
 	if prev_state != self.state || prev_physics_state != self.physics_state:
-		print(PHYSICS_STATE_NAME[self.physics_state], ", ", STATE_NAME[self.state])
+		print(PHYSICS_STATE_NAME[self.physics_state], "; ", STATE_NAME[self.state])
 	prev_physics_state = self.physics_state
 	prev_state = self.state
 	
@@ -290,7 +299,11 @@ func _state_process(delta : float, intent : Intent) -> void:
 				drag = WALL_SLIDE_ACCELERATION
 			else:
 				surface_acceleration = sign(self.surface_normal.x) * WALL_SLIDE_ACCELERATION
+	elif self.state == State.WALL_RELEASE:
+		# Similar to a small jump off of the wall.
+		self.velocity += self.surface_normal * WALL_RELEASE_LAUNCH_SPEED
 	elif self.state == State.SKATE_START:
+		# TODO: Come back here.
 		var skate_direction := intent.move_direction.x
 		if skate_direction == 0:
 			skate_direction = self.facing_direction
@@ -317,7 +330,8 @@ func _state_process(delta : float, intent : Intent) -> void:
 		drag = WIPEOUT_FRICTION
 	elif self.state == State.JUMP_START:
 		# Launch the player into the air.
-		self.velocity.y = min(self.velocity.y, -JUMP_LAUNCH_SPEED)
+		var jump_velocity := JUMP_LAUNCH_SPEED_NORMAL * self.surface_normal + JUMP_LAUNCH_SPEED_VERTICAL * Vector2.UP
+		self.velocity += jump_velocity
 	elif self.state == State.JUMP || self.state == State.FALL:
 		# Apply gravity.
 		self.velocity.y += GRAVITY * delta
@@ -406,13 +420,18 @@ func _position_process(delta : float, n : int = 4) -> void:
 	# better choice of surface to be on by looking in the direction of the
 	# last surface the player was on.
 	if _on_surface():
-		var test_collision := move_and_collide(-self.surface_normal, true, true, true)
+		var test_collision := move_and_collide(-self.surface_normal * SURFACE_PADDING, true, true, true)
 		if test_collision != null:
 			var test_normal := test_collision.normal
 			# The test normal should be the same (to within tolerance) as the
-			# normal of the last surface the player was on. Also, ensure that
-			# it is not a ceiling.
-			if test_normal.dot(self.surface_normal) >= 1.0 - 0.01 && abs(test_normal.angle_to(Vector2.UP)) <= WALL_ANGLE:
+			# normal of the last surface the player was on.
+			var normal_condition := test_normal.dot(self.surface_normal) >= 1.0 - 0.01
+			# The surface must not be a ceiling.
+			var ceiling_condition := abs(test_normal.angle_to(Vector2.UP)) <= WALL_ANGLE
+			# The velocity vector must not be such that the player will move
+			# more than the padding distance away in the next step.
+			var velocity_condition := test_normal.dot(self.velocity * delta) <= SURFACE_PADDING
+			if normal_condition && ceiling_condition && velocity_condition:
 				# Choose the more horizontal surface.
 				if !found_new_surface || test_normal.dot(Vector2.UP) > new_surface_normal.dot(Vector2.UP):
 					self.position += test_collision.travel
@@ -453,7 +472,9 @@ func _state_transition(delta : float, intent : Intent) -> void:
 		# If the player is in the air but not in an air-compatible state, then
 		# transition into the correct air state.
 		if !_is_air_state(self.state):
-			if self.state == State.JUMP_START:
+			if self.state == State.WALL_RELEASE:
+				self.state = State.FALL
+			elif self.state == State.JUMP_START:
 				self.state = State.JUMP
 			else:
 				self.state = _get_default_state(intent)
@@ -495,8 +516,18 @@ func _state_transition(delta : float, intent : Intent) -> void:
 		elif self.physics_state != PhysicsState.SLOPE:
 			self.state = _get_default_state(intent, true)
 	elif self.state == State.WALL_SLIDE:
-		if self.physics_state != PhysicsState.WALL:
+		if intent.jump:
+			self.state = State.JUMP_START
+		elif intent.skate_start:
+			self.state = State.SKATE_START
+		elif self.physics_state != PhysicsState.WALL:
 			self.state = _get_default_state(intent, true)
+		elif sign(intent.move_direction.x) == sign(self.surface_normal.x):
+			self.state = State.WALL_RELEASE
+	elif self.state == State.WALL_RELEASE:
+		# This shouldn't happen normally, so just re-enter a default state.
+		printerr("Failed to release wall.")
+		self.state = _get_default_state(intent)
 	elif self.state == State.SKATE_START:
 		if intent.jump:
 			self.state = State.JUMP_START
@@ -524,11 +555,8 @@ func _state_transition(delta : float, intent : Intent) -> void:
 			if self.wipeout_timer > WIPEOUT_TIME:
 				self.state = _get_default_state(intent)
 	elif self.state == State.JUMP_START:
-		# We only would have gotten here if the jump was unsuccessful in
-		# lifting the player off of the surface. In this case, we should just
-		# re-enter a surface state.
-		# TODO: Ending up in this situation is very bad, so make sure it is as
-		# rare as possible.
+		# This shouldn't happen normally, so just re-enter a default state.
+		printerr("Failed to jump.")
 		self.state = _get_default_state(intent)
 	
 	# Handle transitions into and away from different states.
@@ -562,7 +590,7 @@ func _get_default_state(intent : Intent, prefer_slide : bool = false) -> int:
 	elif self.physics_state == PhysicsState.WALL:
 		return State.WALL_SLIDE
 	else:
-		print_debug("Unrecognized Physics state")
+		printerr("Couldn't get default state for physics state ", PHYSICS_STATE_NAME[self.physics_state])
 		return State.STAND
 
 func _animation_transition() -> void:
@@ -584,7 +612,7 @@ func _animation_transition() -> void:
 			next_animation = "SlideLeft"
 		else:
 			next_animation = "SlideRight"
-	elif self.state == State.WALL_SLIDE:
+	elif self.state == State.WALL_SLIDE || self.state == State.WALL_RELEASE:
 		if self.facing_direction == -1:
 			next_animation = "WallSlideLeft"
 		else:
@@ -615,5 +643,7 @@ func _animation_transition() -> void:
 			next_animation = "FallLeft"
 		else:
 			next_animation = "FallRight"
+	else:
+		printerr("No animation found for state ", STATE_NAME[self.state])
 	if self.animation_player.current_animation != next_animation:
 		self.animation_player.play(next_animation)
