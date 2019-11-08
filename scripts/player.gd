@@ -28,6 +28,10 @@ extends KinematicBody2D
 #     wall-jumps.
 #   * The ballistic state allows for the skating state to be entered directly
 #     at high speed upon landing.
+#   * If the player misses entering the skating state on landing (from coming
+#     in at too high of an angle), they will instead wipe out.
+#   * The speed requirement is higher in the downward vertical direction than
+#     the others, to account for ordinary jumps.
 
 # The allowed player states.
 enum State {
@@ -84,6 +88,7 @@ class Intent:
 	var dash := false
 	var skate_start := false
 	var skate_boost := false
+	var skate_transition := false
 
 const FLOOR_ANGLE := 40.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
@@ -110,14 +115,16 @@ const SLIDE_SPEED := 150.0
 # Minimum speed before entering a walk.
 const SLIDE_MIN_SPEED := 100.0
 # Minimum time to slide for on a flat surface before entering a walk.
-const SLIDE_MIN_TIME := 0.3
+const SLIDE_MIN_TIME := 0.5
 
+# Speed needed to launch the player into the skating state.
+const SKATE_START_MIN_SPEED := 40.0
 # Initial speed when entering the skate state.
-const SKATE_LAUNCH_SPEED := 160.0
+const SKATE_START_SPEED := 180.0
 # Maximum speed gain when getting a perfect boost.
 const SKATE_BOOST_MAX_SPEED := 80.0
 const SKATE_BOOST_MIN_SPEED := 20.0
-const SKATE_MIN_SPEED := 100.0
+const SKATE_MIN_SPEED := 120.0
 const SKATE_MAX_SPEED := 1000.0
 const SKATE_FRICTION := 40.0
 # Friction when going over the max speed or when slowing down.
@@ -127,14 +134,14 @@ const SKATE_BOOST_MIN_TIME := 0.4
 const SKATE_BOOST_MAX_TIME := 0.8
 
 const WIPEOUT_FRICTION := 600.0
-const WIPEOUT_TIME := 0.8
+const WIPEOUT_TIME := 1.5
 
 const WALL_SLIDE_ACCELERATION := 600.0
 const WALL_SLIDE_SPEED := 100.0
-const WALL_RELEASE_LAUNCH_SPEED := 50.0
+const WALL_RELEASE_START_SPEED := 50.0
 
-const JUMP_LAUNCH_SPEED_NORMAL := 100.0
-const JUMP_LAUNCH_SPEED_VERTICAL := 200.0
+const JUMP_START_SPEED_NORMAL := 100.0
+const JUMP_START_SPEED_VERTICAL := 200.0
 const AIR_ACCELERATION := 700.0
 const AIR_FRICTION := 100.0
 const AIR_CONTROL_SPEED := 100.0
@@ -163,6 +170,7 @@ func _on_surface() -> bool:
 # then a call to `_on_surface` must return true (but the converse is not
 # necessarily true).
 func _is_surface_state(state : int) -> bool:
+	# Jump can be a surface state if we jump next to a wall.
 	return state == State.STAND \
 			|| state == State.WALK \
 			|| state == State.SLIDE \
@@ -172,9 +180,13 @@ func _is_surface_state(state : int) -> bool:
 			|| state == State.SKATE \
 			|| state == State.SKATE_BOOST \
 			|| state == State.JUMP_START \
+			|| state == State.JUMP \
 			|| state == State.WIPEOUT \
 			|| state == State.DASH
 
+# "Air states" are the opposite of surface states. Note that a state can be
+# both an air state and a surface state. That simply means that the player may
+# be on a surface or in the air when they are in that state.
 func _is_air_state(state : int) -> bool:
 	return state == State.JUMP \
 			|| state == State.FALL \
@@ -234,9 +246,10 @@ func _read_intent() -> Intent:
 		intent.dash = true
 	if Input.is_action_just_pressed("skate"):
 		intent.skate_boost = true
-	# TODO: Think about whether this is the correct condition.
-	if (!self._on_surface() && Input.is_action_pressed("skate")) || Input.is_action_just_pressed("skate"):
+	if Input.is_action_just_pressed("skate"):
 		intent.skate_start = true
+	if Input.is_action_pressed("skate"):
+		intent.skate_transition = true
 	return intent
 
 # Updates the facing direction based on the state. Note that the facing
@@ -301,13 +314,11 @@ func _state_process(delta : float, intent : Intent) -> void:
 				surface_acceleration = sign(self.surface_normal.x) * WALL_SLIDE_ACCELERATION
 	elif self.state == State.WALL_RELEASE:
 		# Similar to a small jump off of the wall.
-		self.velocity += self.surface_normal * WALL_RELEASE_LAUNCH_SPEED
+		self.velocity += self.surface_normal * WALL_RELEASE_START_SPEED
 	elif self.state == State.SKATE_START:
-		# TODO: Come back here.
-		var skate_direction := intent.move_direction.x
-		if skate_direction == 0:
-			skate_direction = self.facing_direction
-		self.velocity = skate_direction * surface_tangent * SKATE_LAUNCH_SPEED
+		var skate_direction := sign(self.velocity.dot(surface_tangent))
+		if skate_direction != 0:
+			self.velocity = skate_direction * surface_tangent * SKATE_START_SPEED
 	elif self.state == State.SKATE:
 		# Apply gravity.
 		self.velocity.y += SKATE_GRAVITY * delta
@@ -330,7 +341,7 @@ func _state_process(delta : float, intent : Intent) -> void:
 		drag = WIPEOUT_FRICTION
 	elif self.state == State.JUMP_START:
 		# Launch the player into the air.
-		var jump_velocity := JUMP_LAUNCH_SPEED_NORMAL * self.surface_normal + JUMP_LAUNCH_SPEED_VERTICAL * Vector2.UP
+		var jump_velocity := JUMP_START_SPEED_NORMAL * self.surface_normal + JUMP_START_SPEED_VERTICAL * Vector2.UP
 		self.velocity += jump_velocity
 	elif self.state == State.JUMP || self.state == State.FALL:
 		# Apply gravity.
@@ -463,9 +474,8 @@ func _state_transition(delta : float, intent : Intent) -> void:
 		# In case the player is not, make a transition into one of the surface
 		# states.
 		if !_is_surface_state(self.state):
-			if intent.skate_start && self.velocity.length() >= SKATE_MIN_SPEED:
+			if intent.skate_transition && self.velocity.length() >= SKATE_MIN_SPEED:
 				self.state = State.SKATE
-				self.skate_boost_timer = 0.0
 			else:
 				self.state = _get_default_state(intent)
 	else:
@@ -483,7 +493,7 @@ func _state_transition(delta : float, intent : Intent) -> void:
 	if self.state == State.STAND:
 		if intent.jump:
 			self.state = State.JUMP_START
-		elif intent.skate_start:
+		elif intent.skate_start && self.velocity.length() >= SKATE_START_MIN_SPEED:
 			self.state = State.SKATE_START
 		elif self.physics_state != PhysicsState.FLOOR:
 			self.state = _get_default_state(intent)
@@ -495,7 +505,7 @@ func _state_transition(delta : float, intent : Intent) -> void:
 	elif self.state == State.WALK:
 		if intent.jump:
 			self.state = State.JUMP_START
-		elif intent.skate_start:
+		elif intent.skate_start && self.velocity.length() >= SKATE_START_MIN_SPEED:
 			self.state = State.SKATE_START
 		elif self.physics_state != PhysicsState.FLOOR:
 			self.state = _get_default_state(intent)
@@ -507,7 +517,7 @@ func _state_transition(delta : float, intent : Intent) -> void:
 	elif self.state == State.SLIDE:
 		if intent.jump:
 			self.state = State.JUMP_START
-		elif intent.skate_start:
+		elif intent.skate_start && self.velocity.length() >= SKATE_START_MIN_SPEED:
 			self.state = State.SKATE_START
 		elif self.slide_timer < SLIDE_MIN_TIME:
 			self.slide_timer += delta
@@ -518,21 +528,25 @@ func _state_transition(delta : float, intent : Intent) -> void:
 	elif self.state == State.WALL_SLIDE:
 		if intent.jump:
 			self.state = State.JUMP_START
-		elif intent.skate_start:
+		elif intent.skate_start && self.velocity.length() >= SKATE_START_MIN_SPEED:
 			self.state = State.SKATE_START
 		elif self.physics_state != PhysicsState.WALL:
 			self.state = _get_default_state(intent, true)
 		elif sign(intent.move_direction.x) == sign(self.surface_normal.x):
 			self.state = State.WALL_RELEASE
 	elif self.state == State.WALL_RELEASE:
-		# This shouldn't happen normally, so just re-enter a default state.
+		# Shouldn't happen.
 		printerr("Failed to release wall.")
 		self.state = _get_default_state(intent)
 	elif self.state == State.SKATE_START:
 		if intent.jump:
 			self.state = State.JUMP_START
-		else:
+		elif self.velocity.length() >= SKATE_MIN_SPEED:
 			self.state = State.SKATE
+		else:
+			# Shouldn't happen.
+			printerr("Failed to start skating.")
+			self.state = _get_default_state(intent)
 	elif self.state == State.SKATE:
 		self.skate_boost_timer += delta
 		if intent.jump:
@@ -550,14 +564,17 @@ func _state_transition(delta : float, intent : Intent) -> void:
 		else:
 			self.state = State.SKATE
 	elif self.state == State.WIPEOUT:
-		if self._on_surface() && self.velocity.length() < WALK_MAX_SPEED:
+		if (self.physics_state == PhysicsState.FLOOR || self.physics_state == PhysicsState.SLOPE) && self.velocity.length() < WALK_MAX_SPEED:
 			self.wipeout_timer += delta
 			if self.wipeout_timer > WIPEOUT_TIME:
 				self.state = _get_default_state(intent)
 	elif self.state == State.JUMP_START:
-		# This shouldn't happen normally, so just re-enter a default state.
+		# Shouldn't happen.
 		printerr("Failed to jump.")
 		self.state = _get_default_state(intent)
+	elif self.state == State.JUMP:
+		if self.velocity.y >= 0.0:
+			self.state = _get_default_state(intent)
 	
 	# Handle transitions into and away from different states.
 	if previous_state != self.state:
