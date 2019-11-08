@@ -1,33 +1,23 @@
 [gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://entities/player.tscn" type="PackedScene" id=1]
-[ext_resource path="res://tilesets/winter.tres" type="TileSet" id=2]
-[ext_resource path="res://entities/pixel_camera.tscn" type="PackedScene" id=3]
+[ext_resource path="res://entities/pixel_camera.tscn" type="PackedScene" id=2]
+[ext_resource path="res://tilesets/winter.tres" type="TileSet" id=3]
 
 [node name="TestLevel" type="Node"]
 
 [node name="Player" parent="." instance=ExtResource( 1 )]
 position = Vector2( 527.314, 234.587 )
 
+[node name="Camera" parent="Player" instance=ExtResource( 2 )]
+
 [node name="TileMap" type="TileMap" parent="."]
-tile_set = ExtResource( 2 )
+tile_set = ExtResource( 3 )
 format = 1
 
 [node name="Blocks" type="StaticBody2D" parent="."]
-editor/display_folded = true
 collision_layer = 2
 collision_mask = 0
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Blocks"]
-position = Vector2( 0, -29.6507 )
-polygon = PoolVector2Array( 0, 64, 17.6866, 62.8129, 37.1449, 538.15, 296.588, 552.049, 544.913, 464.95, 650.543, 389.897, 741.348, 388.97, 824.741, 340.788, 892, 300, 892, 31.309, 960.022, 34.0888, 960, 576, 0, 576 )
-
-[node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="Blocks"]
-polygon = PoolVector2Array( 224.315, 461.244, 379.981, 325.963, 628.305, 301.871, 548.619, 366.732, 308.634, 451.051 )
-
-[node name="CollisionPolygon2D3" type="CollisionPolygon2D" parent="Blocks"]
-position = Vector2( -15.7519, -25.0177 )
-polygon = PoolVector2Array( 123.317, 315.77, 96.4462, 237.937, 140.922, 149.912, 226.168, 166.59, 278.057, 232.378, 459.667, 298.165, 228.021, 343.568 )
-
-[node name="Camera" parent="." instance=ExtResource( 3 )]
-position = Vector2( 480, 270 )
+polygon = PoolVector2Array( 32.3756, 152.285, 82.0889, 278.73, 165.305, 370.591, 272.297, 443, 407.387, 498.117, 551.124, 519.732, 692.699, 514.328, 834.274, 500.278, 935.862, 470.018, 1026.64, 415.982, 1005.03, 763.975, 1027.32, 819.092, 1080.28, 860.16, 1167.82, 880.694, 1270.48, 880.694, 1380.72, 852.595, 1515.81, 745.603, 1604.43, 635.369, 1697.37, 508.924, 1794.64, 434.354, 1877.85, 432.646, 1871.37, -140.138, 1904.87, -140.138, 1914.6, 981.654, -8.01324, 997.865, -16.4655, -102.968, 29.7355, -100.915 )

@@ -105,6 +105,8 @@ const SURFACE_PADDING := 0.5
 const MAX_SPEED := 1000.0
 const GRAVITY := 800.0
 
+const EXHAUSTED_TIME := 0.5
+
 const WALK_ACCELERATION := 700.0
 const WALK_SPEED := 100.0
 # Maximum speed before entering a slide.
@@ -126,10 +128,10 @@ const SKATE_BOOST_MAX_SPEED := 80.0
 const SKATE_BOOST_MIN_SPEED := 20.0
 const SKATE_MIN_SPEED := 120.0
 const SKATE_MAX_SPEED := 1000.0
-const SKATE_FRICTION := 40.0
+const SKATE_FRICTION := 50.0
 # Friction when going over the max speed or when slowing down.
-const SKATE_MAX_FRICTION := 200.0
-const SKATE_GRAVITY := 70.0
+const SKATE_MAX_FRICTION := 300.0
+const SKATE_GRAVITY := 100.0
 const SKATE_BOOST_MIN_TIME := 0.4
 const SKATE_BOOST_MAX_TIME := 0.8
 
@@ -153,6 +155,9 @@ var physics_state : int = PhysicsState.AIR
 var surface_normal := Vector2()
 var velocity := Vector2()
 var facing_direction := -1
+# When the player is exhausted, they can no longer skate for a short period.
+var exhausted := false
+var exhausted_timer := 0.0
 var slide_timer := 0.0
 var skate_boost_timer := 0.0
 var wipeout_timer := 0.0
@@ -257,7 +262,7 @@ func _read_intent() -> Intent:
 func _facing_direction_process(intent : Intent) -> void:
 	var next_facing_direction := 0
 	var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
-	if self.state == State.STAND || self.state == State.WALK:
+	if self.state == State.STAND || self.state == State.WALK || self.state == State.FALL:
 		next_facing_direction = int(sign(intent.move_direction.x))
 	elif self.state == State.SLIDE:
 		if self.physics_state == PhysicsState.SLOPE:
@@ -267,7 +272,7 @@ func _facing_direction_process(intent : Intent) -> void:
 	elif self.state == State.WALL_SLIDE:
 		if self.physics_state == PhysicsState.WALL:
 			next_facing_direction = int(sign(self.surface_normal.x))
-	elif self.state == State.SKATE || self.state == State.SKATE_BOOST:
+	elif self.state == State.SKATE_START || self.state == State.SKATE || self.state == State.SKATE_BOOST:
 		next_facing_direction = int(sign(self.velocity.dot(surface_tangent)))
 	if next_facing_direction != 0:
 		self.facing_direction = next_facing_direction
@@ -469,6 +474,13 @@ func _state_transition(delta : float, intent : Intent) -> void:
 	# Store the previous state so we can handle transitions at the end.
 	var previous_state := self.state
 	
+	# Since exhaustion is related to allowed state transitions, handle it here.
+	if self.exhausted:
+		self.exhausted_timer += delta
+		if self.exhausted_timer > EXHAUSTED_TIME:
+			self.exhausted = false
+			self.exhausted_timer = 0.0
+	
 	if _on_surface():
 		# If `_on_surface` is true, then the player must be in a surface state.
 		# In case the player is not, make a transition into one of the surface
@@ -493,7 +505,7 @@ func _state_transition(delta : float, intent : Intent) -> void:
 	if self.state == State.STAND:
 		if intent.jump:
 			self.state = State.JUMP_START
-		elif intent.skate_start && self.velocity.length() >= SKATE_START_MIN_SPEED:
+		elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
 			self.state = State.SKATE_START
 		elif self.physics_state != PhysicsState.FLOOR:
 			self.state = _get_default_state(intent)
@@ -505,7 +517,7 @@ func _state_transition(delta : float, intent : Intent) -> void:
 	elif self.state == State.WALK:
 		if intent.jump:
 			self.state = State.JUMP_START
-		elif intent.skate_start && self.velocity.length() >= SKATE_START_MIN_SPEED:
+		elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
 			self.state = State.SKATE_START
 		elif self.physics_state != PhysicsState.FLOOR:
 			self.state = _get_default_state(intent)
@@ -517,7 +529,7 @@ func _state_transition(delta : float, intent : Intent) -> void:
 	elif self.state == State.SLIDE:
 		if intent.jump:
 			self.state = State.JUMP_START
-		elif intent.skate_start && self.velocity.length() >= SKATE_START_MIN_SPEED:
+		elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
 			self.state = State.SKATE_START
 		elif self.slide_timer < SLIDE_MIN_TIME:
 			self.slide_timer += delta
@@ -528,7 +540,7 @@ func _state_transition(delta : float, intent : Intent) -> void:
 	elif self.state == State.WALL_SLIDE:
 		if intent.jump:
 			self.state = State.JUMP_START
-		elif intent.skate_start && self.velocity.length() >= SKATE_START_MIN_SPEED:
+		elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
 			self.state = State.SKATE_START
 		elif self.physics_state != PhysicsState.WALL:
 			self.state = _get_default_state(intent, true)
@@ -553,6 +565,7 @@ func _state_transition(delta : float, intent : Intent) -> void:
 			self.state = State.JUMP_START
 		elif self.velocity.length() < SKATE_MIN_SPEED:
 			self.state = _get_default_state(intent, true)
+			self.exhausted = true
 		elif intent.skate_boost:
 			if self.skate_boost_timer < SKATE_BOOST_MIN_TIME:
 				self.state = State.WIPEOUT
