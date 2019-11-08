@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=22 format=2]
 
 [ext_resource path="res://scripts/player.gd" type="Script" id=1]
 [ext_resource path="res://sprites/player.png" type="Texture" id=2]
@@ -67,6 +67,38 @@ tracks/0/keys = {
 "values": [ 15 ]
 }
 
+[sub_resource type="Animation" id=16]
+resource_name = "SkateBoostLeft"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ 20, 19, 18 ]
+}
+
+[sub_resource type="Animation" id=17]
+resource_name = "SkateBoostRight"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ 21, 22, 23 ]
+}
+
 [sub_resource type="Animation" id=14]
 resource_name = "SkateLeft"
 loop = true
@@ -80,7 +112,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 1,
-"values": [ 12 ]
+"values": [ 18 ]
 }
 
 [sub_resource type="Animation" id=15]
@@ -96,7 +128,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 1,
-"values": [ 17 ]
+"values": [ 23 ]
 }
 
 [sub_resource type="Animation" id=8]
@@ -229,6 +261,38 @@ tracks/0/keys = {
 "values": [ 6 ]
 }
 
+[sub_resource type="Animation" id=18]
+resource_name = "WipeoutLeft"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 12 ]
+}
+
+[sub_resource type="Animation" id=19]
+resource_name = "WipeoutRight"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 17 ]
+}
+
 [sub_resource type="RectangleShape2D" id=3]
 extents = Vector2( 6, 14 )
 
@@ -240,12 +304,11 @@ __meta__ = {
 }
 
 [node name="Sprite" type="Sprite" parent="."]
-editor/display_folded = true
 position = Vector2( 0, -2 )
 texture = ExtResource( 2 )
-vframes = 3
+vframes = 4
 hframes = 6
-frame = 12
+frame = 20
 region_rect = Rect2( 0, 0, 24, 32 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Sprite"]
@@ -253,6 +316,8 @@ anims/FallLeft = SubResource( 4 )
 anims/FallRight = SubResource( 5 )
 anims/JumpLeft = SubResource( 6 )
 anims/JumpRight = SubResource( 7 )
+anims/SkateBoostLeft = SubResource( 16 )
+anims/SkateBoostRight = SubResource( 17 )
 anims/SkateLeft = SubResource( 14 )
 anims/SkateRight = SubResource( 15 )
 anims/SlideLeft = SubResource( 8 )
@@ -263,6 +328,8 @@ anims/WalkLeft = SubResource( 1 )
 anims/WalkRight = SubResource( 2 )
 anims/WallSlideLeft = SubResource( 12 )
 anims/WallSlideRight = SubResource( 13 )
+anims/WipeoutLeft = SubResource( 18 )
+anims/WipeoutRight = SubResource( 19 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
