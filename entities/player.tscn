@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://scripts/player.gd" type="Script" id=1]
 [ext_resource path="res://sprites/player.png" type="Texture" id=2]
@@ -65,6 +65,38 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1 ),
 "update": 1,
 "values": [ 15 ]
+}
+
+[sub_resource type="Animation" id=14]
+resource_name = "SkateLeft"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 12 ]
+}
+
+[sub_resource type="Animation" id=15]
+resource_name = "SkateRight"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 17 ]
 }
 
 [sub_resource type="Animation" id=8]
@@ -213,7 +245,7 @@ position = Vector2( 0, -2 )
 texture = ExtResource( 2 )
 vframes = 3
 hframes = 6
-frame = 8
+frame = 12
 region_rect = Rect2( 0, 0, 24, 32 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Sprite"]
@@ -221,6 +253,8 @@ anims/FallLeft = SubResource( 4 )
 anims/FallRight = SubResource( 5 )
 anims/JumpLeft = SubResource( 6 )
 anims/JumpRight = SubResource( 7 )
+anims/SkateLeft = SubResource( 14 )
+anims/SkateRight = SubResource( 15 )
 anims/SlideLeft = SubResource( 8 )
 anims/SlideRight = SubResource( 9 )
 anims/StandLeft = SubResource( 10 )

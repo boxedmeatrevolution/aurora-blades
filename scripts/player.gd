@@ -1,11 +1,28 @@
 extends KinematicBody2D
 
+# Things that need to be done:
+# * Allow wall-jumps and moving away from a wall-slide.
+# * Allow jumping with forward momentum from a slope-slide.
+# * Skating.
+# * Some kind of ballistic arial system. Some thoughts on this:
+#   * If the player is moving fast enough, they enter a "ballistic" state
+#     where they can no longer accelerate as usual in the air.
+#   * Instead, pressing arrow keys tangent to their direction of motion will
+#     slightly adjust their angle.
+#   * Pressing arrow keys backwards from the direction of motion will slow down
+#     the player. If slowed down enough, enters normal arial movement.
+#   * The ballistic state can allow for redirection by dashes and well-timed
+#     wall-jumps.
+#   * The ballistic state allows for the skating state to be entered directly
+#     at high speed upon landing.
+
 # The allowed player states.
 enum State {
 	STAND,
 	WALK,
 	SLIDE,
 	WALL_SLIDE,
+	SKATE_START,
 	SKATE,
 	JUMP_START,
 	JUMP,
@@ -17,6 +34,7 @@ const STATE_NAME := {
 	State.WALK: "Walk",
 	State.SLIDE: "Slide",
 	State.WALL_SLIDE: "WallSlide",
+	State.SKATE_START: "SkateStart",
 	State.SKATE: "Skate",
 	State.JUMP_START: "JumpStart",
 	State.JUMP: "Jump",
@@ -45,6 +63,8 @@ class Intent:
 	var move_direction := Vector2()
 	var jump := false
 	var dash := false
+	var skate_start := false
+	var skate_boost := false
 
 const FLOOR_ANGLE := 40.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
@@ -60,14 +80,35 @@ const SURFACE_PADDING := 1.0
 
 const MAX_SPEED := 1000.0
 const GRAVITY := 800.0
+
 const WALK_ACCELERATION := 700.0
 const WALK_SPEED := 100.0
-const WALK_MAX_SPEED = 125.0
+# Maximum speed before entering a slide.
+const WALK_MAX_SPEED := 125.0
+
 const SLIDE_ACCELERATION := 600.0
 const SLIDE_SPEED := 150.0
+# Minimum speed before entering a walk.
+const SLIDE_MIN_SPEED := 100.0
+
+# Initial speed when entering the skate state.
+const SKATE_LAUNCH_SPEED := 150.0
+# Maximum speed gain when getting a perfect boost.
+const SKATE_BOOST_MAX_SPEED := 80.0
+const SKATE_BOOST_MIN_SPEED := 20.0
+const SKATE_MIN_SPEED := 100.0
+const SKATE_MAX_SPEED := 1000.0
+const SKATE_FRICTION := 60.0
+# Friction when going over the max speed.
+const SKATE_MAX_FRICTION := 140.0
+const SKATE_GRAVITY := 100.0
+const SKATE_BOOST_MIN_TIME := 0.25
+const SKATE_BOOST_MAX_TIME := 0.50
+
 const WALL_SLIDE_ACCELERATION := 600.0
 const WALL_SLIDE_SPEED := 100.0
-const JUMP_SPEED := 300.0
+
+const JUMP_LAUNCH_SPEED := 300.0
 const AIR_ACCELERATION := 700.0
 const AIR_FRICTION := 100.0
 const AIR_CONTROL_SPEED := 100.0
@@ -79,6 +120,8 @@ var physics_state : int = PhysicsState.AIR
 var surface_normal := Vector2()
 var velocity := Vector2()
 var facing_direction := -1
+var skate_boost_timer := 0.0
+
 onready var animation_player := $Sprite/AnimationPlayer
 
 # Is the player on a surface, meaning on a floor, slope, or wall?
@@ -96,6 +139,7 @@ func _is_surface_state(state : int) -> bool:
 			|| state == State.WALK \
 			|| state == State.SLIDE \
 			|| state == State.WALL_SLIDE \
+			|| state == State.SKATE_START \
 			|| state == State.SKATE \
 			|| state == State.JUMP_START
 
@@ -118,10 +162,12 @@ func _physics_process(delta):
 	prev_state = self.state
 	
 	var intent := _read_intent()
+	if intent.move_direction.x != 0 && (self.state == State.STAND || self.state == State.WALK):
+		self.facing_direction = intent.move_direction.x
 	# Update the velocities based on the current state.
-	_velocity_step(delta, intent)
+	_state_process(delta, intent)
 	# Step the position forward by the timestep.
-	_position_step(delta)
+	_position_process(delta)
 	# Transition between states.
 	_state_transition(intent)
 	# Update the animation based on the state.
@@ -130,6 +176,9 @@ func _physics_process(delta):
 func _read_intent() -> Intent:
 	var intent := Intent.new()
 	# Get input from the user.
+	# TODO: Perhaps some of these should be conditional depending on the
+	# current state. For example, pressing the skate button means to start
+	# skating when you are on the ground, but to boost when already skating.
 	if Input.is_action_pressed("move_left"):
 		intent.move_direction.x -= 1
 	if Input.is_action_pressed("move_right"):
@@ -138,16 +187,19 @@ func _read_intent() -> Intent:
 		intent.move_direction.y -= 1
 	if Input.is_action_pressed("move_down"):
 		intent.move_direction.y += 1
-	if Input.is_action_just_released("jump"):
+	if Input.is_action_just_pressed("jump"):
 		intent.jump = true
 	if Input.is_action_just_pressed("dash"):
 		intent.dash = true
 	if Input.is_action_just_pressed("skate"):
-		intent.dash = true
+		intent.skate_boost = true
+	if (!self._is_surface_state(self.state) && Input.is_action_pressed("skate")) || Input.is_action_just_pressed("skate"):
+		intent.skate_start = true
 	return intent
 
 # Updates the velocities based on the current state.
-func _velocity_step(delta : float, intent : Intent) -> void:
+func _state_process(delta : float, intent : Intent) -> void:
+	var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
 	# Any acceleration parallel to the surface which the player is on.
 	var surface_acceleration := 0.0
 	# Any acceleration against the direction of the velocity of the player.
@@ -185,12 +237,37 @@ func _velocity_step(delta : float, intent : Intent) -> void:
 				drag = WALL_SLIDE_ACCELERATION
 			else:
 				surface_acceleration = sign(self.surface_normal.x) * WALL_SLIDE_ACCELERATION
+	elif self.state == State.SKATE_START:
+		var skate_direction := intent.move_direction.x
+		if skate_direction == 0:
+			skate_direction = self.facing_direction
+		self.velocity = skate_direction * surface_tangent * SKATE_LAUNCH_SPEED
+		self.skate_boost_timer = 0.0
+	elif self.state == State.SKATE:
+		# Update the boost timer. If you boost too early, you wipe out. If you
+		# boost too late, it doesn't do very much.
+		self.skate_boost_timer += delta
+		if intent.skate_boost:
+			if self.skate_boost_timer < SKATE_BOOST_MIN_TIME:
+				print("Wipeout!")
+			else:
+				var skate_direction := sign(self.velocity.dot(surface_tangent))
+				var boost_fraction := clamp((SKATE_BOOST_MAX_TIME - self.skate_boost_timer) / (SKATE_BOOST_MAX_TIME - SKATE_BOOST_MIN_TIME), 0.0, 1.0)
+				var boost := SKATE_BOOST_MIN_SPEED * boost_fraction + SKATE_BOOST_MAX_SPEED * (1.0 - boost_fraction)
+				self.velocity += skate_direction * surface_tangent * boost
+				self.skate_boost_timer = 0.0
+		# Apply gravity.
+		self.velocity.y += SKATE_GRAVITY * delta
+		if self.velocity.length() > SKATE_MAX_SPEED:
+			drag = SKATE_MAX_FRICTION
+		else:
+			drag = SKATE_FRICTION
 	elif self.state == State.JUMP_START:
 		# Launch the player into the air.
-		self.velocity.y = min(self.velocity.y, -JUMP_SPEED)
+		self.velocity.y = min(self.velocity.y, -JUMP_LAUNCH_SPEED)
 	elif self.state == State.JUMP || self.state == State.FALL:
 		# Apply gravity.
-		self.velocity += Vector2.DOWN * GRAVITY * delta
+		self.velocity.y += GRAVITY * delta
 		# Apply air friction.
 		drag = AIR_FRICTION
 		# Apply air movement.
@@ -207,7 +284,6 @@ func _velocity_step(delta : float, intent : Intent) -> void:
 			self.velocity += drag_delta
 	
 	# Apply surface acceleration.
-	var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
 	var surface_acceleration_delta := surface_acceleration * surface_tangent * delta
 	self.velocity += surface_acceleration_delta
 	
@@ -215,7 +291,7 @@ func _velocity_step(delta : float, intent : Intent) -> void:
 	self.velocity = self.velocity.clamped(MAX_SPEED)
 
 # Steps the position forward by a small amount based on the current velocity.
-func _position_step(delta : float, n : int = 4) -> void:
+func _position_process(delta : float, n : int = 4) -> void:
 	# Exit if the maximum number of iterations has been reached.
 	if n <= 0 || delta <= 0 || self.velocity.length_squared() == 0:
 		return
@@ -300,7 +376,7 @@ func _position_step(delta : float, n : int = 4) -> void:
 			self.physics_state = PhysicsState.AIR
 	else:
 		self.physics_state = PhysicsState.AIR
-	_position_step(delta_remainder, n - 1)
+	_position_process(delta_remainder, n - 1)
 
 func _state_transition(intent : Intent) -> void:
 	# Always transition from pre-jump to jump before anything else.
@@ -311,9 +387,10 @@ func _state_transition(intent : Intent) -> void:
 		# In case the player is not, make a transition into one of the surface
 		# states.
 		if !_is_surface_state(self.state):
-			if false:
-				# If the skate button is held down and velocity conditions are met,
-				# then enter the skate state directly.
+			if intent.skate_start && self.velocity.length() >= SKATE_MIN_SPEED:
+				# If the skate button is held down and velocity conditions are
+				# met, then enter the skate state directly. Don't worry about
+				# pushing off since we have enough velocity.
 				self.state = State.SKATE
 			elif self.physics_state == PhysicsState.FLOOR:
 				# If the player landed on the floor, enter either the standing,
@@ -331,30 +408,34 @@ func _state_transition(intent : Intent) -> void:
 				self.state = State.WALL_SLIDE
 		# Now, update the player's state based on their surface state.
 		if self.state == State.STAND:
-			if intent.jump:
-				self.state = State.JUMP_START
-			elif self.velocity.length() > WALK_MAX_SPEED:
+			if self.velocity.length() > WALK_MAX_SPEED:
 				self.state = State.SLIDE
 			elif self.physics_state == PhysicsState.SLOPE:
 				self.state = State.SLIDE
 			elif self.physics_state == PhysicsState.WALL:
 				self.state = State.WALL_SLIDE
+			elif intent.jump:
+				self.state = State.JUMP_START
+			elif intent.skate_start:
+				self.state = State.SKATE_START
 			elif intent.move_direction.x != 0:
 				self.state = State.WALK
 		elif self.state == State.WALK:
-			if intent.jump:
-				self.state = State.JUMP_START
-			elif self.velocity.length() > WALK_MAX_SPEED:
+			if self.velocity.length() > WALK_MAX_SPEED:
 				self.state = State.SLIDE
 			elif self.physics_state == PhysicsState.SLOPE:
 				self.state = State.SLIDE
 			elif self.physics_state == PhysicsState.WALL:
 				self.state = State.WALL_SLIDE
+			elif intent.jump:
+				self.state = State.JUMP_START
+			elif intent.skate_start:
+				self.state = State.SKATE_START
 			elif intent.move_direction.x == 0:
 				self.state = State.STAND
 		elif self.state == State.SLIDE:
 			if self.physics_state == PhysicsState.FLOOR:
-				if self.velocity.length() <= WALK_SPEED:
+				if self.velocity.length() < SLIDE_MIN_SPEED:
 					if intent.move_direction.x != 0:
 						self.state = State.WALK
 					else:
@@ -363,7 +444,7 @@ func _state_transition(intent : Intent) -> void:
 				self.state = State.WALL_SLIDE
 		elif self.state == State.WALL_SLIDE:
 			if self.physics_state == PhysicsState.FLOOR:
-				if self.velocity.length() <= WALK_SPEED:
+				if self.velocity.length() < SLIDE_MIN_SPEED:
 					if intent.move_direction.x != 0:
 						self.state = State.WALK
 					else:
@@ -372,6 +453,27 @@ func _state_transition(intent : Intent) -> void:
 					self.state = State.SLIDE
 			elif self.physics_state == PhysicsState.SLOPE:
 				self.state = State.SLIDE
+		elif self.state == State.SKATE_START:
+			if intent.jump:
+				self.state = State.JUMP_START
+			else:
+				self.state = State.SKATE
+		elif self.state == State.SKATE:
+			if intent.jump:
+				self.state = State.JUMP_START
+			elif self.velocity.length() < SKATE_MIN_SPEED:
+				if self.physics_state == PhysicsState.FLOOR:
+					if self.velocity.length() <= WALK_MAX_SPEED:
+						if intent.move_direction.x != 0:
+							self.state = State.WALK
+						else:
+							self.state = State.STAND
+					else:
+						self.state = State.SLIDE
+				elif self.physics_state == PhysicsState.SLOPE:
+					self.state = State.SLIDE
+				elif self.physics_state == PhysicsState.WALL:
+					self.state = State.WALL_SLIDE
 	else:
 		# If the player is in a surface state while not being on a surface,
 		# then they must have walked off an edge, so put them into the fall
@@ -380,9 +482,8 @@ func _state_transition(intent : Intent) -> void:
 			self.state = State.FALL
 
 func _animation_transition(intent : Intent) -> void:
-	if intent.move_direction.x != 0:
-		self.facing_direction = intent.move_direction.x
 	var next_animation := ""
+	var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
 	if self.state == State.STAND:
 		if self.facing_direction == -1:
 			next_animation = "StandLeft"
@@ -394,15 +495,25 @@ func _animation_transition(intent : Intent) -> void:
 		else:
 			next_animation = "WalkRight"
 	elif self.state == State.SLIDE:
-		if self.surface_normal.x < 0:
+		if self.surface_normal.x < 0.0:
 			next_animation = "SlideLeft"
 		else:
 			next_animation = "SlideRight"
 	elif self.state == State.WALL_SLIDE:
-		if self.surface_normal.x < 0:
+		if self.surface_normal.x < 0.0:
 			next_animation = "WallSlideLeft"
 		else:
 			next_animation = "WallSlideRight"
+	elif self.state == State.SKATE_START:
+		if self.facing_direction < 0.0:
+			next_animation = "SkateLeft"
+		else:
+			next_animation = "SkateRight"
+	elif self.state == State.SKATE:
+		if self.velocity.dot(surface_tangent) < 0.0:
+			next_animation = "SkateLeft"
+		else:
+			next_animation = "SkateRight"
 	elif self.state == State.JUMP_START || self.state == State.JUMP:
 		if self.facing_direction == -1:
 			next_animation = "JumpLeft"
