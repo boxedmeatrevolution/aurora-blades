@@ -2,9 +2,14 @@ extends KinematicBody2D
 
 # Things that need to be done:
 # * Allow wall-jumps and moving away from a wall-slide.
-# * Allow jumping with forward momentum from a slope-slide.
-# * Incorporate velocity preservation around certain angles.
-# * Collisions when skating with wall result in wipeout.
+# * Jumping rework:
+#   * Jumping goes higher if you hold button.
+#   * Jumping pushes you partly in the direction of the normal, and partly
+#     upwards.
+#   * Well-timed jumps can leave you in ballistic state.
+# * Collisions when skating with wall result in wipeout. This should work by
+#   checking that if the velocity change from colliding with a surface takes
+#   you below the min skating velocity, the player wipes out.
 # * Make sliding off of a slope and onto a floor give a small velocity boost,
 #   to stop awkward situations where the player keeps trying to walk onto a
 #   slope.
@@ -84,7 +89,7 @@ const SURFACE_DROP_TIME := 0.4
 # If the player is registered as leaving a surface, but the surface remains
 # within this distance of the player, then don't let the player leave the
 # surface.
-const SURFACE_PADDING := 1.0
+const SURFACE_PADDING := 0.5
 
 const MAX_SPEED := 1000.0
 const GRAVITY := 800.0
@@ -455,31 +460,35 @@ func _state_transition(delta : float, intent : Intent) -> void:
 	
 	# Update the player based on their state.
 	if self.state == State.STAND:
-		if self.physics_state != PhysicsState.FLOOR:
+		if intent.jump:
+			self.state = State.JUMP_START
+		elif intent.skate_start:
+			self.state = State.SKATE_START
+		elif self.physics_state != PhysicsState.FLOOR:
 			self.state = _get_default_state(intent)
 		elif self.velocity.length() > WALK_MAX_SPEED:
 			self.state = State.SLIDE
 			self.slide_timer = 0.0
-		elif intent.jump:
-			self.state = State.JUMP_START
-		elif intent.skate_start:
-			self.state = State.SKATE_START
 		elif intent.move_direction.x != 0:
 			self.state = State.WALK
 	elif self.state == State.WALK:
-		if self.physics_state != PhysicsState.FLOOR:
+		if intent.jump:
+			self.state = State.JUMP_START
+		elif intent.skate_start:
+			self.state = State.SKATE_START
+		elif self.physics_state != PhysicsState.FLOOR:
 			self.state = _get_default_state(intent)
 		elif self.velocity.length() > WALK_MAX_SPEED:
 			self.state = State.SLIDE
 			self.slide_timer = 0.0
-		elif intent.jump:
-			self.state = State.JUMP_START
-		elif intent.skate_start:
-			self.state = State.SKATE_START
 		elif intent.move_direction.x == 0:
 			self.state = State.STAND
 	elif self.state == State.SLIDE:
-		if self.slide_timer < SLIDE_MIN_TIME:
+		if intent.jump:
+			self.state = State.JUMP_START
+		elif intent.skate_start:
+			self.state = State.SKATE_START
+		elif self.slide_timer < SLIDE_MIN_TIME:
 			self.slide_timer += delta
 			if self.physics_state != PhysicsState.SLOPE && self.physics_state != PhysicsState.FLOOR:
 				self.state = _get_default_state(intent, true)
