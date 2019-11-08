@@ -169,9 +169,13 @@ func _is_air_state(state : int) -> bool:
 
 # The maximum angle over which the player's velocity will be redirected without
 # loss when undergoing a velocity change.
-# TODO: Actually use this physics concept.
 func _max_surface_redirect_angle() -> float:
-	return 45.0 * PI / 180.0
+	if self.state == State.SKATE_START \
+			|| self.state == State.SKATE \
+			|| self.state == State.SKATE_BOOST:
+		return 45.0 * PI / 180.0
+	else:
+		return 0.0
 
 func _ready() -> void:
 	pass
@@ -388,7 +392,11 @@ func _position_process(delta : float, n : int = 4) -> void:
 		# First, modify the velocity as the player moves onto the surface.
 		var velocity_tangent := self.velocity.slide(new_surface_normal)
 		var velocity_normal := self.velocity.dot(new_surface_normal) * new_surface_normal
-		self.velocity = velocity_tangent
+		if self.velocity.length_squared() != 0.0 && velocity_tangent.length_squared() != 0.0 \
+				&& abs(self.velocity.angle_to(velocity_tangent)) <= _max_surface_redirect_angle():
+			self.velocity = velocity_tangent.normalized() * self.velocity.length()
+		else:
+			self.velocity = velocity_tangent
 	# Before committing to the new surface, make sure that there isn't a
 	# better choice of surface to be on by looking in the direction of the
 	# last surface the player was on.
