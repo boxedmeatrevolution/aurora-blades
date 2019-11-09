@@ -1,7 +1,6 @@
 extends KinematicBody2D
 
 # Things that need to be done:
-# * Allow wall-jumps and moving away from a wall-slide.
 # * Jumping rework:
 #   * Jumping goes higher if you hold button.
 #   * Jumping pushes you partly in the direction of the normal, and partly
@@ -32,7 +31,10 @@ extends KinematicBody2D
 #     in at too high of an angle), they will instead wipe out.
 #   * The speed requirement is higher in the downward vertical direction than
 #     the others, to account for ordinary jumps.
-
+#   * In the ballistic state: air resistance and gravity are lessened.
+#   * To enter the ballistic state, do a jump or go flying into the air while
+#     skating. A jump will only enter the player into the ballistic state if
+#     the player is skating above a critical speed threshold.
 # The allowed player states.
 enum State {
 	STAND,
@@ -47,6 +49,7 @@ enum State {
 	JUMP_START,
 	JUMP,
 	FALL,
+	BALLISTIC,
 	DASH
 }
 const STATE_NAME := {
@@ -62,6 +65,7 @@ const STATE_NAME := {
 	State.JUMP_START: "JumpStart",
 	State.JUMP: "Jump",
 	State.FALL: "Fall",
+	State.BALLISTIC: "Ballistic",
 	State.DASH: "Dash"
 }
 
@@ -102,9 +106,10 @@ const SURFACE_DROP_TIME := 0.4
 # surface.
 const SURFACE_PADDING := 0.5
 
-const MAX_SPEED := 1000.0
+# The regular force of gravity. Depending on the state of the player, they may
+# experience a different amount of gravity than this.
 const GRAVITY := 800.0
-
+const MAX_SPEED := 1000.0
 const EXHAUSTED_TIME := 0.5
 
 const WALK_ACCELERATION := 700.0
@@ -113,11 +118,15 @@ const WALK_SPEED := 100.0
 const WALK_MAX_SPEED := 150.0
 
 const SLIDE_ACCELERATION := 500.0
-const SLIDE_SPEED := 150.0
+const SLIDE_SPEED := 140.0
 # Minimum speed before entering a walk.
 const SLIDE_MIN_SPEED := 100.0
 # Minimum time to slide for on a flat surface before entering a walk.
-const SLIDE_MIN_TIME := 0.5
+const SLIDE_MIN_TIME := 0.2
+
+const WALL_SLIDE_ACCELERATION := 600.0
+const WALL_SLIDE_SPEED := 50.0
+const WALL_RELEASE_START_SPEED := 50.0
 
 # Speed needed to launch the player into the skating state.
 const SKATE_START_MIN_SPEED := 40.0
@@ -138,15 +147,12 @@ const SKATE_BOOST_MAX_TIME := 0.8
 const WIPEOUT_FRICTION := 600.0
 const WIPEOUT_TIME := 1.5
 
-const WALL_SLIDE_ACCELERATION := 600.0
-const WALL_SLIDE_SPEED := 100.0
-const WALL_RELEASE_START_SPEED := 50.0
-
 const JUMP_START_SPEED_NORMAL := 100.0
 const JUMP_START_SPEED_VERTICAL := 200.0
-const AIR_ACCELERATION := 700.0
-const AIR_FRICTION := 100.0
-const AIR_CONTROL_SPEED := 100.0
+
+const FALL_ACCELERATION := 700.0
+const FALL_FRICTION := 100.0
+const FALL_CONTROL_SPEED := 100.0
 
 var state : int = State.FALL
 var physics_state : int = PhysicsState.AIR
@@ -195,6 +201,7 @@ func _is_surface_state(state : int) -> bool:
 func _is_air_state(state : int) -> bool:
 	return state == State.JUMP \
 			|| state == State.FALL \
+			|| state == State.BALLISTIC \
 			|| state == State.WIPEOUT \
 			|| state == State.DASH
 
@@ -352,10 +359,10 @@ func _state_process(delta : float, intent : Intent) -> void:
 		# Apply gravity.
 		self.velocity.y += GRAVITY * delta
 		# Apply air friction.
-		drag = AIR_FRICTION
+		drag = FALL_FRICTION
 		# Apply air movement.
-		if sign(intent.move_direction.x) * self.velocity.x < AIR_CONTROL_SPEED:
-			self.velocity.x += intent.move_direction.x * AIR_ACCELERATION * delta
+		if sign(intent.move_direction.x) * self.velocity.x < FALL_CONTROL_SPEED:
+			self.velocity.x += intent.move_direction.x * FALL_ACCELERATION * delta
 	
 	# Apply drag, making sure that if the drag would bring the velocity to zero
 	# we don't overshoot.
@@ -564,7 +571,7 @@ func _state_transition(delta : float, intent : Intent) -> void:
 		if intent.jump:
 			self.state = State.JUMP_START
 		elif self.velocity.length() < SKATE_MIN_SPEED:
-			self.state = _get_default_state(intent, true)
+			self.state = _get_default_state(intent)
 			self.exhausted = true
 		elif intent.skate_boost:
 			if self.skate_boost_timer < SKATE_BOOST_MIN_TIME:
