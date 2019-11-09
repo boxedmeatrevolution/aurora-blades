@@ -143,16 +143,34 @@ const SKATE_MAX_FRICTION := 300.0
 const SKATE_GRAVITY := 100.0
 const SKATE_BOOST_MIN_TIME := 0.4
 const SKATE_BOOST_MAX_TIME := 0.8
+const SKATE_REDIRECT_ANGLE := 45.0 * PI / 180.0
 
+# The "minimum fractional impulse" needed to wipeout, meaning what percentage
+# of the player's speed must be lost in an instant.
+const WIPEOUT_MIN_FRACTIONAL_IMPULSE := 0.6
+# The "minimum impulse" needed to wipeout, meaning what absolute amount of
+# speed must be lost in an instant.
+const WIPEOUT_MIN_IMPULSE := 200.0
 const WIPEOUT_FRICTION := 600.0
 const WIPEOUT_TIME := 1.5
 
 const JUMP_START_SPEED_NORMAL := 100.0
 const JUMP_START_SPEED_VERTICAL := 200.0
 
-const FALL_ACCELERATION := 700.0
+const FALL_ACCELERATION := 800.0
 const FALL_FRICTION := 100.0
-const FALL_CONTROL_SPEED := 100.0
+const FALL_MAX_SPEED_HORIZONTAL := 100.0
+const FALL_MAX_SPEED_VERTICAL := 800.0
+
+const BALLISTIC_GRAVITY := 800.0
+# The angular speed at which the ballistic trajectory can be affected.
+const BALLISTIC_ANGULAR_SPEED := 230.0 * PI / 180.0
+# The acceleration that is applied to the trajectory if the max speed is
+# exceeded. Gravity is also stopped in that case.
+const BALLISTIC_ACCELERATION := 400.0
+const BALLISTIC_MIN_SPEED := 300.0
+const BALLISTIC_MAX_SPEED := 1000.0
+const BALLISTIC_REDIRECT_ANGLE := 45.0 * PI / 180.0
 
 var state : int = State.FALL
 var physics_state : int = PhysicsState.AIR
@@ -167,6 +185,13 @@ var exhausted_timer := 0.0
 var slide_timer := 0.0
 var skate_boost_timer := 0.0
 var wipeout_timer := 0.0
+
+# Store the previous state as well.
+var previous_state := self.state
+var previous_physics_state := self.physics_state
+# TODO: Should this be initialized with `onready`?
+var previous_position := self.position
+var previous_velocity := self.velocity
 
 onready var animation_player := $Sprite/AnimationPlayer
 
@@ -211,22 +236,24 @@ func _max_surface_redirect_angle() -> float:
 	if self.state == State.SKATE_START \
 			|| self.state == State.SKATE \
 			|| self.state == State.SKATE_BOOST:
-		return 45.0 * PI / 180.0
+		return SKATE_REDIRECT_ANGLE
+	elif self.state == State.BALLISTIC:
+		return BALLISTIC_REDIRECT_ANGLE
 	else:
 		return 0.0
+
+func _apply_drag(drag : float, delta : float) -> void:
+	if self.velocity.length_squared() > 0.0:
+		var drag_delta := -drag * self.velocity.normalized() * delta
+		if drag >= 0 && drag_delta.length() >= self.velocity.length():
+			self.velocity = Vector2()
+		else:
+			self.velocity += drag_delta
 
 func _ready() -> void:
 	pass
 
-var prev_state : int = State.FALL
-var prev_physics_state : int = PhysicsState.AIR
 func _physics_process(delta):
-	# Print the state for debugging purposes.
-	if prev_state != self.state || prev_physics_state != self.physics_state:
-		print(PHYSICS_STATE_NAME[self.physics_state], "; ", STATE_NAME[self.state])
-	prev_physics_state = self.physics_state
-	prev_state = self.state
-	
 	var intent := _read_intent()
 	_facing_direction_process(intent)
 	# Update the velocities based on the current state.
@@ -237,6 +264,15 @@ func _physics_process(delta):
 	_state_transition(delta, intent)
 	# Update the animation based on the state.
 	_animation_transition()
+	
+	# Print the state for debugging purposes.
+	if self.previous_state != self.state || self.previous_physics_state != self.physics_state:
+		print(PHYSICS_STATE_NAME[self.physics_state], "; ", STATE_NAME[self.state])
+	
+	self.previous_state = self.state
+	self.previous_physics_state = self.physics_state
+	self.previous_position = self.position
+	self.previous_velocity = self.velocity
 
 func _read_intent() -> Intent:
 	var intent := Intent.new()
@@ -287,43 +323,38 @@ func _facing_direction_process(intent : Intent) -> void:
 # Updates the velocities based on the current state.
 func _state_process(delta : float, intent : Intent) -> void:
 	var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
-	# Any acceleration parallel to the surface which the player is on.
-	var surface_acceleration := 0.0
-	# Any acceleration against the direction of the velocity of the player.
-	var drag := 0.0
-	
 	if self.state == State.STAND:
 		# When the player is standing, they should slow down to a stop. We use
 		# the walk acceleration here so that it blends nicely with ceasing to
 		# walk.
-		drag = WALK_ACCELERATION
+		_apply_drag(WALK_ACCELERATION, delta)
 	elif self.state == State.WALK:
 		# When the player is walking, we must accelerate them up to speed in
 		# the direction they have chosen to move.
 		if self.velocity.length() > WALK_SPEED:
-			drag = WALK_ACCELERATION
+			_apply_drag(WALK_ACCELERATION, delta)
 		else:
-			surface_acceleration = intent.move_direction.x * WALK_ACCELERATION
+			self.velocity += intent.move_direction.x * WALK_ACCELERATION * surface_tangent * delta
 	elif self.state == State.SLIDE:
 		# When the player is sliding, they will speed up to reach the sliding
 		# speed, and then maintain that speed. If they slide onto a floor
 		# region, they will slow down to a stop.
 		if self.physics_state == PhysicsState.FLOOR:
-			drag = SLIDE_ACCELERATION
+			_apply_drag(SLIDE_ACCELERATION, delta)
 		elif self.physics_state == PhysicsState.SLOPE || self.physics_state == PhysicsState.WALL:
 			if self.velocity.length() > SLIDE_SPEED:
-				drag = SLIDE_ACCELERATION
+				_apply_drag(SLIDE_ACCELERATION, delta)
 			else:
-				surface_acceleration = sign(self.surface_normal.x) * SLIDE_ACCELERATION
+				self.velocity += sign(self.surface_normal.x) * SLIDE_ACCELERATION * surface_tangent * delta
 	elif self.state == State.WALL_SLIDE:
 		# Similar to regular sliding.
 		if self.physics_state == PhysicsState.FLOOR || self.physics_state == PhysicsState.SLOPE:
-			drag = WALL_SLIDE_ACCELERATION
+			_apply_drag(WALL_SLIDE_ACCELERATION, delta)
 		elif self.physics_state == PhysicsState.WALL:
 			if self.velocity.length() > WALL_SLIDE_SPEED:
-				drag = WALL_SLIDE_ACCELERATION
+				_apply_drag(WALL_SLIDE_ACCELERATION, delta)
 			else:
-				surface_acceleration = sign(self.surface_normal.x) * WALL_SLIDE_ACCELERATION
+				self.velocity += sign(self.surface_normal.x) * WALL_SLIDE_ACCELERATION * surface_tangent * delta
 	elif self.state == State.WALL_RELEASE:
 		# Similar to a small jump off of the wall.
 		self.velocity += self.surface_normal * WALL_RELEASE_START_SPEED
@@ -338,9 +369,9 @@ func _state_process(delta : float, intent : Intent) -> void:
 		if intent.move_direction.x != 0:
 			braking = sign(intent.move_direction.x) != sign(self.velocity.dot(surface_tangent))
 		if braking || self.velocity.length() > SKATE_MAX_SPEED:
-			drag = SKATE_MAX_FRICTION
+			_apply_drag(SKATE_MAX_FRICTION, delta)
 		else:
-			drag = SKATE_FRICTION
+			_apply_drag(SKATE_FRICTION, delta)
 	elif self.state == State.SKATE_BOOST:
 		# If you boost too early, you wipe out. If you boost too late, it
 		# doesn't do very much.
@@ -350,7 +381,7 @@ func _state_process(delta : float, intent : Intent) -> void:
 		self.velocity += skate_direction * surface_tangent * boost
 	elif self.state == State.WIPEOUT:
 		self.velocity.y += GRAVITY * delta
-		drag = WIPEOUT_FRICTION
+		_apply_drag(WIPEOUT_FRICTION, delta)
 	elif self.state == State.JUMP_START:
 		# Launch the player into the air.
 		var jump_velocity := JUMP_START_SPEED_NORMAL * self.surface_normal + JUMP_START_SPEED_VERTICAL * Vector2.UP
@@ -359,23 +390,22 @@ func _state_process(delta : float, intent : Intent) -> void:
 		# Apply gravity.
 		self.velocity.y += GRAVITY * delta
 		# Apply air friction.
-		drag = FALL_FRICTION
-		# Apply air movement.
-		if sign(intent.move_direction.x) * self.velocity.x < FALL_CONTROL_SPEED:
-			self.velocity.x += intent.move_direction.x * FALL_ACCELERATION * delta
-	
-	# Apply drag, making sure that if the drag would bring the velocity to zero
-	# we don't overshoot.
-	if self.velocity.length_squared() > 0.0:
-		var drag_delta := -drag * self.velocity.normalized() * delta
-		if drag >= 0 && drag_delta.length() >= self.velocity.length():
-			self.velocity = Vector2()
+		_apply_drag(FALL_FRICTION, delta)
+		# Air movement.
+		if abs(self.velocity.x) > FALL_MAX_SPEED_HORIZONTAL:
+			self.velocity.x -= sign(self.velocity.x) * FALL_ACCELERATION * delta
 		else:
-			self.velocity += drag_delta
-	
-	# Apply surface acceleration.
-	var surface_acceleration_delta := surface_acceleration * surface_tangent * delta
-	self.velocity += surface_acceleration_delta
+			self.velocity.x += intent.move_direction.x * FALL_ACCELERATION * delta
+	elif self.state == State.BALLISTIC:
+		if self.velocity.length() > BALLISTIC_MAX_SPEED:
+			_apply_drag(BALLISTIC_ACCELERATION, delta)
+		else:
+			self.velocity.y += BALLISTIC_GRAVITY * delta
+		var angle_change_direction := sign(self.velocity.angle_to(intent.move_direction))
+		if angle_change_direction != 0:
+			# When in the ballistic state, the player's direction can be
+			# changed, but not the magnitude of the velocity.
+			self.velocity = self.velocity.rotated(angle_change_direction * BALLISTIC_ANGULAR_SPEED * delta)
 	
 	# Clamp the velocity by the max speed.
 	self.velocity = self.velocity.clamped(MAX_SPEED)
@@ -479,7 +509,7 @@ func _position_process(delta : float, n : int = 4) -> void:
 
 func _state_transition(delta : float, intent : Intent) -> void:
 	# Store the previous state so we can handle transitions at the end.
-	var previous_state := self.state
+	var old_state := self.state
 	
 	# Since exhaustion is related to allowed state transitions, handle it here.
 	if self.exhausted:
@@ -487,16 +517,29 @@ func _state_transition(delta : float, intent : Intent) -> void:
 		if self.exhausted_timer > EXHAUSTED_TIME:
 			self.exhausted = false
 			self.exhausted_timer = 0.0
+	# Impulse is used in a few state transitions.
+	var impulse := self.velocity.length() - self.previous_velocity.length()
+	var fractional_impulse := 0.0
+	if self.previous_velocity.length_squared() != 0.0:
+		fractional_impulse = impulse / self.previous_velocity.length()
 	
 	if _on_surface():
 		# If `_on_surface` is true, then the player must be in a surface state.
 		# In case the player is not, make a transition into one of the surface
 		# states.
 		if !_is_surface_state(self.state):
-			if intent.skate_transition && self.velocity.length() >= SKATE_MIN_SPEED:
-				self.state = State.SKATE
+			if self.state == State.BALLISTIC:
+				# If the player is ballistic, they will either crash or skate
+				# upon collision with the ground.
+				if intent.skate_transition && (impulse > -WIPEOUT_MIN_IMPULSE || fractional_impulse > -WIPEOUT_MIN_FRACTIONAL_IMPULSE):
+					self.state = State.SKATE
+				else:
+					self.state = State.WIPEOUT
 			else:
-				self.state = _get_default_state(intent)
+				if intent.skate_transition && self.velocity.length() >= SKATE_MIN_SPEED:
+					self.state = State.SKATE
+				else:
+					self.state = _get_default_state(intent)
 	else:
 		# If the player is in the air but not in an air-compatible state, then
 		# transition into the correct air state.
@@ -570,6 +613,8 @@ func _state_transition(delta : float, intent : Intent) -> void:
 		self.skate_boost_timer += delta
 		if intent.jump:
 			self.state = State.JUMP_START
+		elif impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
+			self.state = State.WIPEOUT
 		elif self.velocity.length() < SKATE_MIN_SPEED:
 			self.state = _get_default_state(intent)
 			self.exhausted = true
@@ -595,9 +640,15 @@ func _state_transition(delta : float, intent : Intent) -> void:
 	elif self.state == State.JUMP:
 		if self.velocity.y >= 0.0:
 			self.state = _get_default_state(intent)
+	elif self.state == State.FALL:
+		if self.velocity.y > FALL_MAX_SPEED_VERTICAL:
+			self.state = State.BALLISTIC
+	elif self.state == State.BALLISTIC:
+		if self.velocity.length() < BALLISTIC_MIN_SPEED:
+			self.state = State.FALL
 	
 	# Handle transitions into and away from different states.
-	if previous_state != self.state:
+	if old_state != self.state:
 		# Transition away from previous state.
 		# Transition into new state.
 		if self.state == State.SLIDE:
