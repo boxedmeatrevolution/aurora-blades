@@ -1,6 +1,8 @@
 extends KinematicBody2D
 
 # Things that need to be done:
+# * Fix issue where tapping skate just after landing will wipe you out. Landing
+#   in skate mode shouldn't wipe you out if you try to boost too soon.
 # * Jumping rework:
 #   * Jumping goes higher if you hold button.
 #   * Jumping pushes you partly in the direction of the normal, and partly
@@ -118,14 +120,14 @@ const SKATE_START_MIN_SPEED := 40.0
 # Initial speed when entering the skate state.
 const SKATE_START_SPEED := 180.0
 # Maximum speed gain when getting a perfect boost.
-const SKATE_BOOST_MAX_SPEED := 80.0
-const SKATE_BOOST_MIN_SPEED := 20.0
+const SKATE_BOOST_MAX_SPEED := 120.0
+const SKATE_BOOST_MIN_SPEED := 40.0
 const SKATE_MIN_SPEED := 120.0
 const SKATE_FRICTION := 80.0
 # Friction when the player tries to slow down.
 const SKATE_BRAKE_ACCELERATION := 400.0
 const SKATE_GRAVITY := 140.0
-const SKATE_BOOST_MIN_TIME := 0.4
+const SKATE_BOOST_MIN_TIME := 0.3
 const SKATE_BOOST_MAX_TIME := 0.8
 const SKATE_REDIRECT_ANGLE := 30.0 * PI / 180.0
 
@@ -174,8 +176,11 @@ var facing_direction := -1
 var exhausted := false
 var exhausted_timer := 0.0
 var slide_timer := 0.0
+# This timer keeps track of how long the player has been skating for.
+var is_skating := false
+var is_skating_ballistic := false
+var skate_timer := 0.0
 var skate_boost_timer := 0.0
-var skate_ballistic := false
 var wipeout_timer := 0.0
 
 # Store the previous state as well.
@@ -518,6 +523,10 @@ func _state_transition(delta : float, intent : Intent) -> void:
 		if self.exhausted_timer > EXHAUSTED_TIME:
 			self.exhausted = false
 			self.exhausted_timer = 0.0
+	# Update the skating timers.
+	if self.is_skating:
+		self.skate_timer += delta
+		self.skate_boost_timer += delta
 	# Impulse is used in a few state transitions.
 	var impulse := self.velocity.length() - self.previous_velocity.length()
 	var fractional_impulse := 0.0
@@ -553,7 +562,7 @@ func _state_transition(delta : float, intent : Intent) -> void:
 				self.state = State.JUMP
 			elif self.state == State.JUMP_BALLISTIC_START:
 				self.state = State.BALLISTIC
-			elif (self.state == State.SKATE || self.state == State.SKATE_BOOST) && self.skate_ballistic:
+			elif (self.state == State.SKATE || self.state == State.SKATE_BOOST) && self.is_skating_ballistic:
 				self.state = State.BALLISTIC
 			else:
 				self.state = _get_default_state(intent)
@@ -570,7 +579,6 @@ func _state_transition(delta : float, intent : Intent) -> void:
 				self.state = _get_default_state(intent)
 			elif self.velocity.length() > WALK_MAX_SPEED:
 				self.state = State.SLIDE
-				self.slide_timer = 0.0
 			elif intent.move_direction.x != 0:
 				self.state = State.WALK
 		elif self.state == State.WALK:
@@ -619,15 +627,14 @@ func _state_transition(delta : float, intent : Intent) -> void:
 				printerr("Failed to start skating.")
 				self.state = _get_default_state(intent)
 		elif self.state == State.SKATE:
-			self.skate_boost_timer += delta
-			if self.skate_ballistic:
+			if self.is_skating_ballistic:
 				if self.velocity.length() < SKATE_BALLISTIC_MIN_SPEED:
-					self.skate_ballistic = false
+					self.is_skating_ballistic = false
 			else:
 				if self.velocity.length() > SKATE_MAX_SPEED:
-					self.skate_ballistic = true
+					self.is_skating_ballistic = true
 			if intent.jump:
-				if self.skate_ballistic:
+				if self.is_skating_ballistic:
 					self.state = State.JUMP_BALLISTIC_START
 				elif self.physics_state == PhysicsState.WALL:
 					self.state = State.JUMP_WALL_START
@@ -645,7 +652,7 @@ func _state_transition(delta : float, intent : Intent) -> void:
 					self.state = State.SKATE_BOOST
 		elif self.state == State.SKATE_BOOST:
 			if intent.jump:
-				if self.skate_ballistic:
+				if self.is_skating_ballistic:
 					self.state = State.JUMP_BALLISTIC_START
 				elif self.physics_state == PhysicsState.WALL:
 					self.state = State.JUMP_WALL_START
@@ -687,14 +694,17 @@ func _state_transition(delta : float, intent : Intent) -> void:
 		if self.state == State.SLIDE:
 			self.slide_timer = 0.0
 		elif self.state == State.SKATE:
-			if old_state != State.SKATE_BOOST:
-				if old_state == State.BALLISTIC:
-					self.skate_ballistic = true
-				else:
-					self.skate_ballistic = false
-			self.skate_boost_timer = 0.0
+			self.is_skating = true
+			if old_state == State.SKATE_BOOST || old_state == State.SKATE_START:
+				self.skate_boost_timer = 0.0
 		elif self.state == State.WIPEOUT:
 			self.wipeout_timer = 0.0
+		
+		if self.state != State.SKATE && self.state != State.SKATE_BOOST && self.state != State.JUMP_BALLISTIC_START && self.state != State.BALLISTIC:
+			self.is_skating = false
+			self.is_skating_ballistic = false
+			self.skate_timer = 0.0
+			self.skate_boost_timer = 0.0
 	
 	if self._on_surface() && !_is_surface_state(self.state):
 		printerr("On surface but state ", STATE_NAME[self.state], " is not a surface state.")
@@ -785,7 +795,7 @@ func _visuals_process() -> void:
 		self.animation_player.play(next_animation)
 	
 	# Effects.
-	if self.state == State.BALLISTIC || (self.state == State.SKATE || self.state == State.SKATE_BOOST) && self.skate_ballistic:
+	if self.state == State.BALLISTIC || (self.state == State.SKATE || self.state == State.SKATE_BOOST) && self.is_skating_ballistic:
 		if !self.ballistic_effect_sprite.visible:
 			self.ballistic_effect_sprite.visible = true
 		self.ballistic_effect_sprite.rotation = self.velocity.angle()
