@@ -47,6 +47,8 @@ enum State {
 	SKATE_BOOST,
 	WIPEOUT,
 	JUMP_START,
+	JUMP_WALL_START,
+	JUMP_BALLISTIC_START,
 	JUMP,
 	FALL,
 	BALLISTIC,
@@ -63,6 +65,8 @@ const STATE_NAME := {
 	State.SKATE_BOOST: "SkateBoost",
 	State.WIPEOUT: "Wipeout",
 	State.JUMP_START: "JumpStart",
+	State.JUMP_WALL_START: "JumpWallStart",
+	State.JUMP_BALLISTIC_START: "JumpBallisticStart",
 	State.JUMP: "Jump",
 	State.FALL: "Fall",
 	State.BALLISTIC: "Ballistic",
@@ -144,6 +148,7 @@ const SKATE_GRAVITY := 100.0
 const SKATE_BOOST_MIN_TIME := 0.4
 const SKATE_BOOST_MAX_TIME := 0.8
 const SKATE_REDIRECT_ANGLE := 45.0 * PI / 180.0
+const SKATE_BALLISTIC_SPEED := 250.0
 
 # The "minimum fractional impulse" needed to wipeout, meaning what percentage
 # of the player's speed must be lost in an instant.
@@ -151,11 +156,13 @@ const WIPEOUT_MIN_FRACTIONAL_IMPULSE := 0.6
 # The "minimum impulse" needed to wipeout, meaning what absolute amount of
 # speed must be lost in an instant.
 const WIPEOUT_MIN_IMPULSE := 200.0
-const WIPEOUT_FRICTION := 600.0
+const WIPEOUT_FRICTION := 500.0
 const WIPEOUT_TIME := 1.5
 
-const JUMP_START_SPEED_NORMAL := 100.0
-const JUMP_START_SPEED_VERTICAL := 200.0
+const JUMP_START_SPEED := 300.0
+const JUMP_WALL_START_SPEED := 350.0
+const JUMP_WALL_START_ANGLE := 35.0 * PI / 180.0
+const JUMP_BALLISTIC_START_SPEED := 350.0
 
 const FALL_ACCELERATION := 800.0
 const FALL_FRICTION := 100.0
@@ -164,7 +171,7 @@ const FALL_MAX_SPEED_VERTICAL := 800.0
 
 const BALLISTIC_GRAVITY := 800.0
 # The angular speed at which the ballistic trajectory can be affected.
-const BALLISTIC_ANGULAR_SPEED := 230.0 * PI / 180.0
+const BALLISTIC_ANGULAR_SPEED := 30.0 * PI / 180.0
 # The acceleration that is applied to the trajectory if the max speed is
 # exceeded. Gravity is also stopped in that case.
 const BALLISTIC_ACCELERATION := 400.0
@@ -194,6 +201,7 @@ var previous_position := self.position
 var previous_velocity := self.velocity
 
 onready var animation_player := $Sprite/AnimationPlayer
+onready var ballistic_effect_sprite := $BallisticEffectSprite
 
 # Is the player on a surface, meaning on a floor, slope, or wall?
 func _on_surface() -> bool:
@@ -216,6 +224,8 @@ func _is_surface_state(state : int) -> bool:
 			|| state == State.SKATE \
 			|| state == State.SKATE_BOOST \
 			|| state == State.JUMP_START \
+			|| state == State.JUMP_WALL_START \
+			|| state == State.JUMP_BALLISTIC_START \
 			|| state == State.JUMP \
 			|| state == State.WIPEOUT \
 			|| state == State.DASH
@@ -251,7 +261,7 @@ func _apply_drag(drag : float, delta : float) -> void:
 			self.velocity += drag_delta
 
 func _ready() -> void:
-	pass
+	self.ballistic_effect_sprite.visible = false
 
 func _physics_process(delta):
 	var intent := _read_intent()
@@ -263,7 +273,7 @@ func _physics_process(delta):
 	# Transition between states.
 	_state_transition(delta, intent)
 	# Update the animation based on the state.
-	_animation_transition()
+	_visuals_process()
 	
 	# Print the state for debugging purposes.
 	if self.previous_state != self.state || self.previous_physics_state != self.physics_state:
@@ -380,12 +390,18 @@ func _state_process(delta : float, intent : Intent) -> void:
 		var boost := SKATE_BOOST_MIN_SPEED * boost_fraction + SKATE_BOOST_MAX_SPEED * (1.0 - boost_fraction)
 		self.velocity += skate_direction * surface_tangent * boost
 	elif self.state == State.WIPEOUT:
-		self.velocity.y += GRAVITY * delta
-		_apply_drag(WIPEOUT_FRICTION, delta)
+		if self.physics_state == PhysicsState.FLOOR || self.physics_state == PhysicsState.SLOPE:
+			_apply_drag(WIPEOUT_FRICTION, delta)
+		elif self.velocity.y < FALL_MAX_SPEED_VERTICAL:
+			self.velocity.y += GRAVITY * delta
 	elif self.state == State.JUMP_START:
 		# Launch the player into the air.
-		var jump_velocity := JUMP_START_SPEED_NORMAL * self.surface_normal + JUMP_START_SPEED_VERTICAL * Vector2.UP
-		self.velocity += jump_velocity
+		self.velocity.y = min(-JUMP_START_SPEED, self.velocity.y)
+	elif self.state == State.JUMP_WALL_START:
+		self.velocity.x = sign(self.surface_normal.x) * JUMP_WALL_START_SPEED * cos(JUMP_WALL_START_ANGLE)
+		self.velocity.y = -JUMP_WALL_START_SPEED * sin(JUMP_WALL_START_ANGLE)
+	elif self.state == State.JUMP_BALLISTIC_START:
+		self.velocity += self.surface_normal * JUMP_BALLISTIC_START_SPEED
 	elif self.state == State.JUMP || self.state == State.FALL:
 		# Apply gravity.
 		self.velocity.y += GRAVITY * delta
@@ -531,7 +547,7 @@ func _state_transition(delta : float, intent : Intent) -> void:
 			if self.state == State.BALLISTIC:
 				# If the player is ballistic, they will either crash or skate
 				# upon collision with the ground.
-				if intent.skate_transition && (impulse > -WIPEOUT_MIN_IMPULSE || fractional_impulse > -WIPEOUT_MIN_FRACTIONAL_IMPULSE):
+				if intent.skate_transition && self.velocity.length() >= SKATE_MIN_SPEED && (impulse > -WIPEOUT_MIN_IMPULSE || fractional_impulse > -WIPEOUT_MIN_FRACTIONAL_IMPULSE):
 					self.state = State.SKATE
 				else:
 					self.state = State.WIPEOUT
@@ -548,104 +564,130 @@ func _state_transition(delta : float, intent : Intent) -> void:
 				self.state = State.FALL
 			elif self.state == State.JUMP_START:
 				self.state = State.JUMP
+			elif self.state == State.JUMP_WALL_START:
+				self.state = State.JUMP
+			elif self.state == State.JUMP_BALLISTIC_START:
+				self.state = State.BALLISTIC
+			elif (self.state == State.SKATE || self.state == State.SKATE_BOOST) && self.velocity.length() >= SKATE_BALLISTIC_SPEED:
+				self.state = State.BALLISTIC
 			else:
 				self.state = _get_default_state(intent)
 	
-	# Update the player based on their state.
-	if self.state == State.STAND:
-		if intent.jump:
-			self.state = State.JUMP_START
-		elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
-			self.state = State.SKATE_START
-		elif self.physics_state != PhysicsState.FLOOR:
-			self.state = _get_default_state(intent)
-		elif self.velocity.length() > WALK_MAX_SPEED:
-			self.state = State.SLIDE
-			self.slide_timer = 0.0
-		elif intent.move_direction.x != 0:
-			self.state = State.WALK
-	elif self.state == State.WALK:
-		if intent.jump:
-			self.state = State.JUMP_START
-		elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
-			self.state = State.SKATE_START
-		elif self.physics_state != PhysicsState.FLOOR:
-			self.state = _get_default_state(intent)
-		elif self.velocity.length() > WALK_MAX_SPEED:
-			self.state = State.SLIDE
-			self.slide_timer = 0.0
-		elif intent.move_direction.x == 0:
-			self.state = State.STAND
-	elif self.state == State.SLIDE:
-		if intent.jump:
-			self.state = State.JUMP_START
-		elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
-			self.state = State.SKATE_START
-		elif self.slide_timer < SLIDE_MIN_TIME:
-			self.slide_timer += delta
-			if self.physics_state != PhysicsState.SLOPE && self.physics_state != PhysicsState.FLOOR:
-				self.state = _get_default_state(intent, true)
-		elif self.physics_state != PhysicsState.SLOPE:
-			self.state = _get_default_state(intent, true)
-	elif self.state == State.WALL_SLIDE:
-		if intent.jump:
-			self.state = State.JUMP_START
-		elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
-			self.state = State.SKATE_START
-		elif self.physics_state != PhysicsState.WALL:
-			self.state = _get_default_state(intent, true)
-		elif sign(intent.move_direction.x) == sign(self.surface_normal.x):
-			self.state = State.WALL_RELEASE
-	elif self.state == State.WALL_RELEASE:
-		# Shouldn't happen.
-		printerr("Failed to release wall.")
-		self.state = _get_default_state(intent)
-	elif self.state == State.SKATE_START:
-		if intent.jump:
-			self.state = State.JUMP_START
-		elif self.velocity.length() >= SKATE_MIN_SPEED:
-			self.state = State.SKATE
-		else:
-			# Shouldn't happen.
-			printerr("Failed to start skating.")
-			self.state = _get_default_state(intent)
-	elif self.state == State.SKATE:
-		self.skate_boost_timer += delta
-		if intent.jump:
-			self.state = State.JUMP_START
-		elif impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
-			self.state = State.WIPEOUT
-		elif self.velocity.length() < SKATE_MIN_SPEED:
-			self.state = _get_default_state(intent)
-			self.exhausted = true
-		elif intent.skate_boost:
-			if self.skate_boost_timer < SKATE_BOOST_MIN_TIME:
-				self.state = State.WIPEOUT
-			else:
-				self.state = State.SKATE_BOOST
-	elif self.state == State.SKATE_BOOST:
-		if intent.jump:
-			self.state = State.JUMP_START
-		else:
-			self.state = State.SKATE
-	elif self.state == State.WIPEOUT:
-		if (self.physics_state == PhysicsState.FLOOR || self.physics_state == PhysicsState.SLOPE) && self.velocity.length() < WALK_MAX_SPEED:
-			self.wipeout_timer += delta
-			if self.wipeout_timer > WIPEOUT_TIME:
+	# If the player didn't need to change states to transfer between surface
+	# and air states, then do any further transitions here.
+	if self.state == old_state:
+		if self.state == State.STAND:
+			if intent.jump:
+				self.state = State.JUMP_START
+			elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
+				self.state = State.SKATE_START
+			elif self.physics_state != PhysicsState.FLOOR:
 				self.state = _get_default_state(intent)
-	elif self.state == State.JUMP_START:
-		# Shouldn't happen.
-		printerr("Failed to jump.")
-		self.state = _get_default_state(intent)
-	elif self.state == State.JUMP:
-		if self.velocity.y >= 0.0:
+			elif self.velocity.length() > WALK_MAX_SPEED:
+				self.state = State.SLIDE
+				self.slide_timer = 0.0
+			elif intent.move_direction.x != 0:
+				self.state = State.WALK
+		elif self.state == State.WALK:
+			if intent.jump:
+				self.state = State.JUMP_START
+			elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
+				self.state = State.SKATE_START
+			elif self.physics_state != PhysicsState.FLOOR:
+				self.state = _get_default_state(intent)
+			elif self.velocity.length() > WALK_MAX_SPEED:
+				self.state = State.SLIDE
+				self.slide_timer = 0.0
+			elif intent.move_direction.x == 0:
+				self.state = State.STAND
+		elif self.state == State.SLIDE:
+			if intent.jump:
+				self.state = State.JUMP_START
+			elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
+				self.state = State.SKATE_START
+			elif self.slide_timer < SLIDE_MIN_TIME:
+				self.slide_timer += delta
+				if self.physics_state != PhysicsState.SLOPE && self.physics_state != PhysicsState.FLOOR:
+					self.state = _get_default_state(intent, true)
+			elif self.physics_state != PhysicsState.SLOPE:
+				self.state = _get_default_state(intent, true)
+		elif self.state == State.WALL_SLIDE:
+			if intent.jump:
+				self.state = State.JUMP_WALL_START
+			elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
+				self.state = State.SKATE_START
+			elif self.physics_state != PhysicsState.WALL:
+				self.state = _get_default_state(intent, true)
+			elif sign(intent.move_direction.x) == sign(self.surface_normal.x):
+				self.state = State.WALL_RELEASE
+		elif self.state == State.WALL_RELEASE:
+			# Shouldn't happen.
+			printerr("Failed to release wall.")
 			self.state = _get_default_state(intent)
-	elif self.state == State.FALL:
-		if self.velocity.y > FALL_MAX_SPEED_VERTICAL:
-			self.state = State.BALLISTIC
-	elif self.state == State.BALLISTIC:
-		if self.velocity.length() < BALLISTIC_MIN_SPEED:
-			self.state = State.FALL
+		elif self.state == State.SKATE_START:
+			if intent.jump:
+				self.state = State.JUMP_START
+			elif self.velocity.length() >= SKATE_MIN_SPEED:
+				self.state = State.SKATE
+			else:
+				# Shouldn't happen.
+				printerr("Failed to start skating.")
+				self.state = _get_default_state(intent)
+		elif self.state == State.SKATE:
+			self.skate_boost_timer += delta
+			if intent.jump:
+				if self.velocity.length() >= SKATE_BALLISTIC_SPEED:
+					self.state = State.JUMP_BALLISTIC_START
+				elif self.physics_state == PhysicsState.WALL:
+					self.state = State.JUMP_WALL_START
+				else:
+					self.state = State.JUMP_START
+			elif impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
+				self.state = State.WIPEOUT
+			elif self.velocity.length() < SKATE_MIN_SPEED:
+				self.state = _get_default_state(intent)
+				self.exhausted = true
+			elif intent.skate_boost:
+				if self.skate_boost_timer < SKATE_BOOST_MIN_TIME:
+					self.state = State.WIPEOUT
+				else:
+					self.state = State.SKATE_BOOST
+		elif self.state == State.SKATE_BOOST:
+			if intent.jump:
+				if self.velocity.length() >= SKATE_BALLISTIC_SPEED:
+					self.state = State.JUMP_BALLISTIC_START
+				elif self.physics_state == PhysicsState.WALL:
+					self.state = State.JUMP_WALL_START
+				else:
+					self.state = State.JUMP_START
+			else:
+				self.state = State.SKATE
+		elif self.state == State.WIPEOUT:
+			if (self.physics_state == PhysicsState.FLOOR || self.physics_state == PhysicsState.SLOPE) && self.velocity.length() < WALK_MAX_SPEED:
+				self.wipeout_timer += delta
+				if self.wipeout_timer > WIPEOUT_TIME:
+					self.state = _get_default_state(intent)
+		elif self.state == State.JUMP_START:
+			# Shouldn't happen.
+			printerr("Failed to jump.")
+			self.state = _get_default_state(intent)
+		elif self.state == State.JUMP_WALL_START:
+			printerr("Failed to wall jump.")
+			self.state = _get_default_state(intent)
+		elif self.state == State.JUMP_BALLISTIC_START:
+			printerr("Failed to ballistic jump.")
+			self.state = _get_default_state(intent)
+		elif self.state == State.JUMP:
+			if self.velocity.y >= 0.0:
+				self.state = _get_default_state(intent)
+		elif self.state == State.FALL:
+			if self.velocity.y > FALL_MAX_SPEED_VERTICAL:
+				self.state = State.BALLISTIC
+		elif self.state == State.BALLISTIC:
+			if impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
+				self.state = State.WIPEOUT
+			elif self.velocity.length() < BALLISTIC_MIN_SPEED:
+				self.state = State.FALL
 	
 	# Handle transitions into and away from different states.
 	if old_state != self.state:
@@ -681,7 +723,7 @@ func _get_default_state(intent : Intent, prefer_slide : bool = false) -> int:
 		printerr("Couldn't get default state for physics state ", PHYSICS_STATE_NAME[self.physics_state])
 		return State.STAND
 
-func _animation_transition() -> void:
+func _visuals_process() -> void:
 	var next_animation := ""
 	var current_animation : String = self.animation_player.current_animation
 	var is_playing : bool = self.animation_player.is_playing()
@@ -721,7 +763,7 @@ func _animation_transition() -> void:
 			next_animation = "WipeoutLeft"
 		else:
 			next_animation = "WipeoutRight"
-	elif self.state == State.JUMP_START || self.state == State.JUMP:
+	elif self.state == State.JUMP_START || self.state == State.JUMP_WALL_START || self.state == State.JUMP_BALLISTIC_START || self.state == State.JUMP:
 		if self.facing_direction == -1:
 			next_animation = "JumpLeft"
 		else:
@@ -731,7 +773,20 @@ func _animation_transition() -> void:
 			next_animation = "FallLeft"
 		else:
 			next_animation = "FallRight"
+	elif self.state == State.BALLISTIC:
+		if self.facing_direction == -1:
+			next_animation = "FallLeft"
+		else:
+			next_animation = "FallRight"
 	else:
 		printerr("No animation found for state ", STATE_NAME[self.state])
 	if self.animation_player.current_animation != next_animation:
 		self.animation_player.play(next_animation)
+	
+	# Effects.
+	if self.state == State.BALLISTIC || (self.state == State.SKATE || self.state == State.SKATE_BOOST) && self.velocity.length() >= SKATE_BALLISTIC_SPEED:
+		if !self.ballistic_effect_sprite.visible:
+			self.ballistic_effect_sprite.visible = true
+		self.ballistic_effect_sprite.rotation = self.velocity.angle()
+	else:
+		self.ballistic_effect_sprite.visible = false
