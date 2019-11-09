@@ -5,36 +5,17 @@ extends KinematicBody2D
 #   * Jumping goes higher if you hold button.
 #   * Jumping pushes you partly in the direction of the normal, and partly
 #     upwards.
-#   * Three kinds of jumps: Walking jumps go straight up, "moving" jumps put
-#     the player into the ballistic state and are affected by normals, and wall
-#     jumps which are basically a special type of walking jump.
 #   * Well-timed jumps just after hitting the ground can keep the player in
 #     ballistic state.
-# * Collisions when skating with wall result in wipeout. This should work by
-#   checking that if the velocity change from colliding with a surface takes
-#   you below the min skating velocity, the player wipes out.
 # * Make sliding off of a slope and onto a floor give a small velocity boost,
 #   to stop awkward situations where the player keeps trying to walk onto a
 #   slope.
 # * Some kind of ballistic arial system. Some thoughts on this:
-#   * If the player is moving fast enough, they enter a "ballistic" state
-#     where they can no longer accelerate as usual in the air.
-#   * Instead, pressing arrow keys tangent to their direction of motion will
-#     slightly adjust their angle.
-#   * Pressing arrow keys backwards from the direction of motion will slow down
-#     the player. If slowed down enough, enters normal arial movement.
 #   * The ballistic state can allow for redirection by dashes and well-timed
 #     wall-jumps.
 #   * The ballistic state allows for the skating state to be entered directly
-#     at high speed upon landing.
-#   * If the player misses entering the skating state on landing (from coming
-#     in at too high of an angle), they will instead wipe out.
-#   * The speed requirement is higher in the downward vertical direction than
-#     the others, to account for ordinary jumps.
-#   * In the ballistic state: air resistance and gravity are lessened.
-#   * To enter the ballistic state, do a jump or go flying into the air while
-#     skating. A jump will only enter the player into the ballistic state if
-#     the player is skating above a critical speed threshold.
+#     at high speed upon landing (do you have to press a button?)
+
 # The allowed player states.
 enum State {
 	STAND,
@@ -140,15 +121,18 @@ const SKATE_START_SPEED := 180.0
 const SKATE_BOOST_MAX_SPEED := 80.0
 const SKATE_BOOST_MIN_SPEED := 20.0
 const SKATE_MIN_SPEED := 120.0
-const SKATE_MAX_SPEED := 1000.0
 const SKATE_FRICTION := 80.0
-# Friction when going over the max speed or when slowing down.
-const SKATE_MAX_FRICTION := 300.0
+# Friction when the player tries to slow down.
+const SKATE_BRAKE_ACCELERATION := 400.0
 const SKATE_GRAVITY := 140.0
 const SKATE_BOOST_MIN_TIME := 0.4
 const SKATE_BOOST_MAX_TIME := 0.8
 const SKATE_REDIRECT_ANGLE := 30.0 * PI / 180.0
-const SKATE_BALLISTIC_SPEED := 250.0
+
+# Maximum skating speed before entering the ballistic state.
+const SKATE_MAX_SPEED := 320.0
+# Minimum skating speed to maintain the ballistic state.
+const SKATE_BALLISTIC_MIN_SPEED := 250.0
 
 # The "minimum fractional impulse" needed to wipeout, meaning what percentage
 # of the player's speed must be lost in an instant.
@@ -175,7 +159,7 @@ const BALLISTIC_ANGULAR_SPEED := 30.0 * PI / 180.0
 # The acceleration that is applied to the trajectory if the max speed is
 # exceeded. Gravity is also stopped in that case.
 const BALLISTIC_ACCELERATION := 400.0
-const BALLISTIC_MIN_SPEED := 300.0
+const BALLISTIC_MIN_SPEED := 200.0
 const BALLISTIC_MAX_SPEED := 1000.0
 const BALLISTIC_REDIRECT_ANGLE := 30.0 * PI / 180.0
 
@@ -191,6 +175,7 @@ var exhausted := false
 var exhausted_timer := 0.0
 var slide_timer := 0.0
 var skate_boost_timer := 0.0
+var skate_ballistic := false
 var wipeout_timer := 0.0
 
 # Store the previous state as well.
@@ -378,8 +363,8 @@ func _state_process(delta : float, intent : Intent) -> void:
 		var braking := false
 		if intent.move_direction.x != 0:
 			braking = sign(intent.move_direction.x) != sign(self.velocity.dot(surface_tangent))
-		if braking || self.velocity.length() > SKATE_MAX_SPEED:
-			_apply_drag(SKATE_MAX_FRICTION, delta)
+		if braking:
+			_apply_drag(SKATE_BRAKE_ACCELERATION, delta)
 		else:
 			_apply_drag(SKATE_FRICTION, delta)
 	elif self.state == State.SKATE_BOOST:
@@ -547,7 +532,7 @@ func _state_transition(delta : float, intent : Intent) -> void:
 			if self.state == State.BALLISTIC:
 				# If the player is ballistic, they will either crash or skate
 				# upon collision with the ground.
-				if intent.skate_transition && self.velocity.length() >= SKATE_MIN_SPEED && (impulse > -WIPEOUT_MIN_IMPULSE || fractional_impulse > -WIPEOUT_MIN_FRACTIONAL_IMPULSE):
+				if self.velocity.length() >= SKATE_MIN_SPEED && (impulse > -WIPEOUT_MIN_IMPULSE || fractional_impulse > -WIPEOUT_MIN_FRACTIONAL_IMPULSE):
 					self.state = State.SKATE
 				else:
 					self.state = State.WIPEOUT
@@ -568,7 +553,7 @@ func _state_transition(delta : float, intent : Intent) -> void:
 				self.state = State.JUMP
 			elif self.state == State.JUMP_BALLISTIC_START:
 				self.state = State.BALLISTIC
-			elif (self.state == State.SKATE || self.state == State.SKATE_BOOST) && self.velocity.length() >= SKATE_BALLISTIC_SPEED:
+			elif (self.state == State.SKATE || self.state == State.SKATE_BOOST) && self.skate_ballistic:
 				self.state = State.BALLISTIC
 			else:
 				self.state = _get_default_state(intent)
@@ -635,8 +620,14 @@ func _state_transition(delta : float, intent : Intent) -> void:
 				self.state = _get_default_state(intent)
 		elif self.state == State.SKATE:
 			self.skate_boost_timer += delta
+			if self.skate_ballistic:
+				if self.velocity.length() < SKATE_BALLISTIC_MIN_SPEED:
+					self.skate_ballistic = false
+			else:
+				if self.velocity.length() > SKATE_MAX_SPEED:
+					self.skate_ballistic = true
 			if intent.jump:
-				if self.velocity.length() >= SKATE_BALLISTIC_SPEED:
+				if self.skate_ballistic:
 					self.state = State.JUMP_BALLISTIC_START
 				elif self.physics_state == PhysicsState.WALL:
 					self.state = State.JUMP_WALL_START
@@ -654,7 +645,7 @@ func _state_transition(delta : float, intent : Intent) -> void:
 					self.state = State.SKATE_BOOST
 		elif self.state == State.SKATE_BOOST:
 			if intent.jump:
-				if self.velocity.length() >= SKATE_BALLISTIC_SPEED:
+				if self.skate_ballistic:
 					self.state = State.JUMP_BALLISTIC_START
 				elif self.physics_state == PhysicsState.WALL:
 					self.state = State.JUMP_WALL_START
@@ -696,9 +687,19 @@ func _state_transition(delta : float, intent : Intent) -> void:
 		if self.state == State.SLIDE:
 			self.slide_timer = 0.0
 		elif self.state == State.SKATE:
+			if old_state != State.SKATE_BOOST:
+				if old_state == State.BALLISTIC:
+					self.skate_ballistic = true
+				else:
+					self.skate_ballistic = false
 			self.skate_boost_timer = 0.0
 		elif self.state == State.WIPEOUT:
 			self.wipeout_timer = 0.0
+	
+	if self._on_surface() && !_is_surface_state(self.state):
+		printerr("On surface but state ", STATE_NAME[self.state], " is not a surface state.")
+	if !self._on_surface() && !_is_air_state(self.state):
+		printerr("In air but state ", STATE_NAME[self.state], " is not an air state.")
 
 # Gets an appropriate choice of state based on the physics state of the player.
 # This is used when resetting the player state.
@@ -784,7 +785,7 @@ func _visuals_process() -> void:
 		self.animation_player.play(next_animation)
 	
 	# Effects.
-	if self.state == State.BALLISTIC || (self.state == State.SKATE || self.state == State.SKATE_BOOST) && self.velocity.length() >= SKATE_BALLISTIC_SPEED:
+	if self.state == State.BALLISTIC || (self.state == State.SKATE || self.state == State.SKATE_BOOST) && self.skate_ballistic:
 		if !self.ballistic_effect_sprite.visible:
 			self.ballistic_effect_sprite.visible = true
 		self.ballistic_effect_sprite.rotation = self.velocity.angle()

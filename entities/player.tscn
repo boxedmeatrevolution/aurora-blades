@@ -318,7 +318,7 @@ position = Vector2( 0, -2 )
 texture = ExtResource( 2 )
 vframes = 4
 hframes = 6
-frame = 20
+frame = 8
 region_rect = Rect2( 0, 0, 24, 32 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Sprite"]
