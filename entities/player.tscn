@@ -350,7 +350,6 @@ visible = false
 texture = ExtResource( 3 )
 offset = Vector2( -5, 0 )
 hframes = 3
-frame = 1
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="BallisticEffectSprite"]
 anims/BallisticEffect = SubResource( 20 )

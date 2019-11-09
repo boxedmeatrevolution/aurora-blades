@@ -141,13 +141,13 @@ const SKATE_BOOST_MAX_SPEED := 80.0
 const SKATE_BOOST_MIN_SPEED := 20.0
 const SKATE_MIN_SPEED := 120.0
 const SKATE_MAX_SPEED := 1000.0
-const SKATE_FRICTION := 50.0
+const SKATE_FRICTION := 80.0
 # Friction when going over the max speed or when slowing down.
 const SKATE_MAX_FRICTION := 300.0
-const SKATE_GRAVITY := 100.0
+const SKATE_GRAVITY := 140.0
 const SKATE_BOOST_MIN_TIME := 0.4
 const SKATE_BOOST_MAX_TIME := 0.8
-const SKATE_REDIRECT_ANGLE := 45.0 * PI / 180.0
+const SKATE_REDIRECT_ANGLE := 30.0 * PI / 180.0
 const SKATE_BALLISTIC_SPEED := 250.0
 
 # The "minimum fractional impulse" needed to wipeout, meaning what percentage
@@ -166,7 +166,7 @@ const JUMP_BALLISTIC_START_SPEED := 350.0
 
 const FALL_ACCELERATION := 800.0
 const FALL_FRICTION := 100.0
-const FALL_MAX_SPEED_HORIZONTAL := 100.0
+const FALL_MAX_SPEED_HORIZONTAL := 150.0
 const FALL_MAX_SPEED_VERTICAL := 800.0
 
 const BALLISTIC_GRAVITY := 800.0
@@ -177,7 +177,7 @@ const BALLISTIC_ANGULAR_SPEED := 30.0 * PI / 180.0
 const BALLISTIC_ACCELERATION := 400.0
 const BALLISTIC_MIN_SPEED := 300.0
 const BALLISTIC_MAX_SPEED := 1000.0
-const BALLISTIC_REDIRECT_ANGLE := 45.0 * PI / 180.0
+const BALLISTIC_REDIRECT_ANGLE := 30.0 * PI / 180.0
 
 var state : int = State.FALL
 var physics_state : int = PhysicsState.AIR
