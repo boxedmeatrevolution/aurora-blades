@@ -35,6 +35,8 @@ enum State {
 	JUMP,
 	FALL,
 	BALLISTIC,
+	DASH_CHARGE,
+	DASH_START,
 	DASH
 }
 const STATE_NAME := {
@@ -53,6 +55,8 @@ const STATE_NAME := {
 	State.JUMP: "Jump",
 	State.FALL: "Fall",
 	State.BALLISTIC: "Ballistic",
+	State.DASH_CHARGE: "DashCharge",
+	State.DASH_START: "DashStart",
 	State.DASH: "Dash"
 }
 
@@ -76,10 +80,11 @@ const PHYSICS_STATE_NAME := {
 class Intent:
 	var move_direction := Vector2()
 	var jump := false
-	var dash := false
 	var skate_start := false
 	var skate_boost := false
 	var skate_transition := false
+	var dash_charge := false
+	var dash_start := false
 
 const FLOOR_ANGLE := 40.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
@@ -118,10 +123,10 @@ const WALL_RELEASE_START_SPEED := 50.0
 # Speed needed to launch the player into the skating state.
 const SKATE_START_MIN_SPEED := 40.0
 # Initial speed when entering the skate state.
-const SKATE_START_SPEED := 180.0
+const SKATE_START_SPEED := 220.0
 # Maximum speed gain when getting a perfect boost.
-const SKATE_BOOST_MAX_SPEED := 120.0
-const SKATE_BOOST_MIN_SPEED := 40.0
+const SKATE_BOOST_MAX_SPEED := 200.0
+const SKATE_BOOST_MIN_SPEED := 60.0
 const SKATE_MIN_SPEED := 120.0
 const SKATE_FRICTION := 80.0
 # Friction when the player tries to slow down.
@@ -129,10 +134,11 @@ const SKATE_BRAKE_ACCELERATION := 400.0
 const SKATE_GRAVITY := 140.0
 const SKATE_BOOST_MIN_TIME := 0.3
 const SKATE_BOOST_MAX_TIME := 0.8
-const SKATE_REDIRECT_ANGLE := 30.0 * PI / 180.0
+const SKATE_MAX_REDIRECT_ANGLE := 40.0 * PI / 180.0
+const SKATE_MAX_REDIRECT_FRACTION := 0.6
 
 # Maximum skating speed before entering the ballistic state.
-const SKATE_MAX_SPEED := 320.0
+const SKATE_MAX_SPEED := 350.0
 # Minimum skating speed to maintain the ballistic state.
 const SKATE_BALLISTIC_MIN_SPEED := 250.0
 
@@ -143,7 +149,7 @@ const WIPEOUT_MIN_FRACTIONAL_IMPULSE := 0.6
 # speed must be lost in an instant.
 const WIPEOUT_MIN_IMPULSE := 200.0
 const WIPEOUT_FRICTION := 500.0
-const WIPEOUT_TIME := 1.5
+const WIPEOUT_TIME := 0.8
 
 const JUMP_START_SPEED := 300.0
 const JUMP_WALL_START_SPEED := 350.0
@@ -153,7 +159,7 @@ const JUMP_BALLISTIC_START_SPEED := 350.0
 const FALL_ACCELERATION := 800.0
 const FALL_FRICTION := 100.0
 const FALL_MAX_SPEED_HORIZONTAL := 150.0
-const FALL_MAX_SPEED_VERTICAL := 800.0
+const FALL_MAX_SPEED_VERTICAL := 450.0
 
 const BALLISTIC_GRAVITY := 800.0
 # The angular speed at which the ballistic trajectory can be affected.
@@ -163,7 +169,22 @@ const BALLISTIC_ANGULAR_SPEED := 30.0 * PI / 180.0
 const BALLISTIC_ACCELERATION := 400.0
 const BALLISTIC_MIN_SPEED := 200.0
 const BALLISTIC_MAX_SPEED := 1000.0
-const BALLISTIC_REDIRECT_ANGLE := 30.0 * PI / 180.0
+const BALLISTIC_MAX_REDIRECT_ANGLE := 90.0 * PI / 180.0
+const BALLISTIC_MAX_REDIRECT_FRACTION := 0.5
+
+# The friction that brings the player to a halt while starting a dash.
+const DASH_CHARGE_FRICTION := 600.0
+# The maximum time the dash can be charged to gain benefit.
+const DASH_CHARGE_MAX_TIME := 0.4
+const DASH_CHARGE_WIPEOUT_TIME := 1.0
+
+const DASH_GRAVITY := 400.0
+const DASH_FRICTION := 100.0
+const DASH_BASE_SPEED := 300.0
+const DASH_MIN_SPEED_FRACTION := 0.2
+const DASH_MAX_SPEED_FRACTION := 0.8
+const DASH_MAX_TIME := 0.4
+const DASH_MAX_DISTANCE := 150.0
 
 var state : int = State.FALL
 var physics_state : int = PhysicsState.AIR
@@ -172,16 +193,22 @@ var physics_state : int = PhysicsState.AIR
 var surface_normal := Vector2()
 var velocity := Vector2()
 var facing_direction := -1
+
 # When the player is exhausted, they can no longer skate for a short period.
 var exhausted := false
 var exhausted_timer := 0.0
 var slide_timer := 0.0
-# This timer keeps track of how long the player has been skating for.
 var is_skating := false
 var is_skating_ballistic := false
+# This timer keeps track of how long the player has been skating for.
 var skate_timer := 0.0
 var skate_boost_timer := 0.0
 var wipeout_timer := 0.0
+var dash_stored_speed := 0.0
+var dash_charge_timer := 0.0
+var dash_velocity := Vector2()
+var dash_timer := 0.0
+var dash_distance := 0.0
 
 # Store the previous state as well.
 var previous_state := self.state
@@ -218,6 +245,8 @@ func _is_surface_state(state : int) -> bool:
 			|| state == State.JUMP_BALLISTIC_START \
 			|| state == State.JUMP \
 			|| state == State.WIPEOUT \
+			|| state == State.DASH_CHARGE \
+			|| state == State.DASH_START \
 			|| state == State.DASH
 
 # "Air states" are the opposite of surface states. Note that a state can be
@@ -228,17 +257,19 @@ func _is_air_state(state : int) -> bool:
 			|| state == State.FALL \
 			|| state == State.BALLISTIC \
 			|| state == State.WIPEOUT \
+			|| state == State.DASH_CHARGE \
+			|| state == State.DASH_START \
 			|| state == State.DASH
 
-# The maximum angle over which the player's velocity will be redirected without
-# loss when undergoing a velocity change.
-func _max_surface_redirect_angle() -> float:
+# Returns the fraction of the normal velocity that should be kept over a given
+# angle difference.
+func _redirect_normal_velocity(angle_difference : float) -> float:
 	if self.state == State.SKATE_START \
 			|| self.state == State.SKATE \
 			|| self.state == State.SKATE_BOOST:
-		return SKATE_REDIRECT_ANGLE
+		return clamp((SKATE_MAX_REDIRECT_ANGLE - angle_difference) / SKATE_MAX_REDIRECT_ANGLE, 0.0, 1.0) * SKATE_MAX_REDIRECT_FRACTION
 	elif self.state == State.BALLISTIC:
-		return BALLISTIC_REDIRECT_ANGLE
+		return clamp((BALLISTIC_MAX_REDIRECT_ANGLE - angle_difference) / BALLISTIC_MAX_REDIRECT_ANGLE, 0.0, 1.0) * BALLISTIC_MAX_REDIRECT_FRACTION
 	else:
 		return 0.0
 
@@ -290,14 +321,16 @@ func _read_intent() -> Intent:
 		intent.move_direction.y += 1
 	if Input.is_action_just_pressed("jump"):
 		intent.jump = true
-	if Input.is_action_just_pressed("dash"):
-		intent.dash = true
 	if Input.is_action_just_pressed("skate"):
 		intent.skate_boost = true
 	if Input.is_action_just_pressed("skate"):
 		intent.skate_start = true
 	if Input.is_action_pressed("skate"):
 		intent.skate_transition = true
+	if Input.is_action_just_pressed("dash"):
+		intent.dash_charge = true
+	if Input.is_action_just_released("dash"):
+		intent.dash_start = true
 	return intent
 
 # Updates the facing direction based on the state. Note that the facing
@@ -317,6 +350,8 @@ func _facing_direction_process(intent : Intent) -> void:
 			next_facing_direction = int(sign(self.surface_normal.x))
 	elif self.state == State.SKATE_START || self.state == State.SKATE || self.state == State.SKATE_BOOST:
 		next_facing_direction = int(sign(self.velocity.dot(surface_tangent)))
+	elif self.state == State.DASH_CHARGE || self.state == State.DASH_START:
+		next_facing_direction = int(sign(intent.move_direction.x))
 	if next_facing_direction != 0:
 		self.facing_direction = next_facing_direction
 
@@ -395,8 +430,11 @@ func _state_process(delta : float, intent : Intent) -> void:
 	elif self.state == State.JUMP || self.state == State.FALL:
 		# Apply gravity.
 		self.velocity.y += GRAVITY * delta
-		# Apply air friction.
-		_apply_drag(FALL_FRICTION, delta)
+		# Apply air friction (along x only).
+		if abs(self.velocity.x) <= FALL_FRICTION * delta:
+			self.velocity.x = 0.0
+		else:
+			self.velocity.x -= sign(self.velocity.x) * FALL_FRICTION * delta
 		# Air movement.
 		if abs(self.velocity.x) > FALL_MAX_SPEED_HORIZONTAL:
 			self.velocity.x -= sign(self.velocity.x) * FALL_ACCELERATION * delta
@@ -412,6 +450,20 @@ func _state_process(delta : float, intent : Intent) -> void:
 			# When in the ballistic state, the player's direction can be
 			# changed, but not the magnitude of the velocity.
 			self.velocity = self.velocity.rotated(angle_change_direction * BALLISTIC_ANGULAR_SPEED * delta)
+	elif self.state == State.DASH_CHARGE:
+		_apply_drag(DASH_CHARGE_FRICTION, delta)
+	elif self.state == State.DASH_START:
+		var dash_fraction := clamp(self.dash_charge_timer / DASH_CHARGE_MAX_TIME, 0.0, 1.0)
+		var dash_min_speed = max(self.dash_stored_speed, 0.0) * DASH_MIN_SPEED_FRACTION + DASH_BASE_SPEED
+		var dash_max_speed = max(self.dash_stored_speed, 0.0) * DASH_MAX_SPEED_FRACTION + DASH_BASE_SPEED
+		var dash_speed = dash_max_speed * dash_fraction + dash_min_speed * (1.0 - dash_fraction)
+		if intent.move_direction.length_squared() != 0.0:
+			self.velocity = dash_speed * intent.move_direction.normalized()
+		else:
+			self.velocity = dash_speed * self.facing_direction * Vector2.RIGHT
+	elif self.state == State.DASH:
+		self.velocity.y += DASH_GRAVITY * delta
+		_apply_drag(DASH_FRICTION, delta)
 	
 	# Clamp the velocity by the max speed.
 	self.velocity = self.velocity.clamped(MAX_SPEED)
@@ -470,9 +522,10 @@ func _position_process(delta : float, n : int = 4) -> void:
 		# First, modify the velocity as the player moves onto the surface.
 		var velocity_tangent := self.velocity.slide(new_surface_normal)
 		var velocity_normal := self.velocity.dot(new_surface_normal) * new_surface_normal
-		if self.velocity.length_squared() != 0.0 && velocity_tangent.length_squared() != 0.0 \
-				&& abs(self.velocity.angle_to(velocity_tangent)) <= _max_surface_redirect_angle():
-			self.velocity = velocity_tangent.normalized() * self.velocity.length()
+		if velocity_tangent.length_squared() != 0.0 && self.velocity.length_squared() != 0.0:
+			var angle_difference := self.velocity.angle_to(velocity_tangent)
+			var redirect_fraction := _redirect_normal_velocity(angle_difference)
+			self.velocity = velocity_tangent.normalized() * (velocity_tangent + redirect_fraction * velocity_normal).length()
 		else:
 			self.velocity = velocity_tangent
 	# Before committing to the new surface, make sure that there isn't a
@@ -573,6 +626,8 @@ func _state_transition(delta : float, intent : Intent) -> void:
 		if self.state == State.STAND:
 			if intent.jump:
 				self.state = State.JUMP_START
+			elif intent.dash_charge:
+				self.state = State.DASH_CHARGE
 			elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
 				self.state = State.SKATE_START
 			elif self.physics_state != PhysicsState.FLOOR:
@@ -584,6 +639,8 @@ func _state_transition(delta : float, intent : Intent) -> void:
 		elif self.state == State.WALK:
 			if intent.jump:
 				self.state = State.JUMP_START
+			elif intent.dash_charge:
+				self.state = State.DASH_CHARGE
 			elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
 				self.state = State.SKATE_START
 			elif self.physics_state != PhysicsState.FLOOR:
@@ -596,6 +653,8 @@ func _state_transition(delta : float, intent : Intent) -> void:
 		elif self.state == State.SLIDE:
 			if intent.jump:
 				self.state = State.JUMP_START
+			elif intent.dash_charge:
+				self.state = State.DASH_CHARGE
 			elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
 				self.state = State.SKATE_START
 			elif self.slide_timer < SLIDE_MIN_TIME:
@@ -607,6 +666,8 @@ func _state_transition(delta : float, intent : Intent) -> void:
 		elif self.state == State.WALL_SLIDE:
 			if intent.jump:
 				self.state = State.JUMP_WALL_START
+			elif intent.dash_charge:
+				self.state = State.DASH_CHARGE
 			elif intent.skate_start && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
 				self.state = State.SKATE_START
 			elif self.physics_state != PhysicsState.WALL:
@@ -620,12 +681,10 @@ func _state_transition(delta : float, intent : Intent) -> void:
 		elif self.state == State.SKATE_START:
 			if intent.jump:
 				self.state = State.JUMP_START
-			elif self.velocity.length() >= SKATE_MIN_SPEED:
-				self.state = State.SKATE
+			elif intent.dash_charge:
+				self.state = State.DASH_CHARGE
 			else:
-				# Shouldn't happen.
-				printerr("Failed to start skating.")
-				self.state = _get_default_state(intent)
+				self.state = State.SKATE
 		elif self.state == State.SKATE:
 			if self.is_skating_ballistic:
 				if self.velocity.length() < SKATE_BALLISTIC_MIN_SPEED:
@@ -640,6 +699,8 @@ func _state_transition(delta : float, intent : Intent) -> void:
 					self.state = State.JUMP_WALL_START
 				else:
 					self.state = State.JUMP_START
+			elif intent.dash_charge:
+				self.state = State.DASH_CHARGE
 			elif impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
 				self.state = State.WIPEOUT
 			elif self.velocity.length() < SKATE_MIN_SPEED:
@@ -658,6 +719,8 @@ func _state_transition(delta : float, intent : Intent) -> void:
 					self.state = State.JUMP_WALL_START
 				else:
 					self.state = State.JUMP_START
+			elif intent.dash_charge:
+				self.state = State.DASH_CHARGE
 			else:
 				self.state = State.SKATE
 		elif self.state == State.WIPEOUT:
@@ -676,16 +739,46 @@ func _state_transition(delta : float, intent : Intent) -> void:
 			printerr("Failed to ballistic jump.")
 			self.state = _get_default_state(intent)
 		elif self.state == State.JUMP:
-			if self.velocity.y >= 0.0:
+			if intent.dash_charge:
+				self.state = State.DASH_CHARGE
+			elif self.velocity.y >= 0.0:
 				self.state = _get_default_state(intent)
 		elif self.state == State.FALL:
-			if self.velocity.y > FALL_MAX_SPEED_VERTICAL:
+			if intent.dash_charge:
+				self.state = State.DASH_CHARGE
+			elif self.velocity.y > FALL_MAX_SPEED_VERTICAL:
 				self.state = State.BALLISTIC
 		elif self.state == State.BALLISTIC:
-			if impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
+			if intent.dash_charge:
+				self.state = State.DASH_CHARGE
+			elif impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
 				self.state = State.WIPEOUT
 			elif self.velocity.length() < BALLISTIC_MIN_SPEED:
 				self.state = State.FALL
+		elif self.state == State.DASH_CHARGE:
+			self.dash_charge_timer += delta
+			self.dash_stored_speed += self.previous_velocity.length() - self.velocity.length()
+			if intent.dash_start:
+				self.state = State.DASH_START
+			elif self.dash_charge_timer >= DASH_CHARGE_WIPEOUT_TIME:
+				self.state = State.WIPEOUT
+		elif self.state == State.DASH_START:
+			self.state = State.DASH
+		elif self.state == State.DASH:
+			self.dash_timer += delta
+			self.dash_distance += self.velocity.length() * delta
+			var disrupted := self.velocity.dot(self.dash_velocity) < (1.0 - 0.1) * self.dash_velocity.length_squared()
+			# Enter either the wipeout state, ballistic state, or skating state.
+			if disrupted || self.dash_timer > DASH_MAX_TIME || self.dash_distance > DASH_MAX_DISTANCE:
+				if _on_surface():
+					if self.velocity.length() >= SKATE_MIN_SPEED && (impulse > -WIPEOUT_MIN_IMPULSE || fractional_impulse > -WIPEOUT_MIN_FRACTIONAL_IMPULSE):
+						self.state = State.SKATE
+					else:
+						self.state = State.WIPEOUT
+				elif self.velocity.length() >= BALLISTIC_MIN_SPEED:
+					self.state = State.BALLISTIC
+				else:
+					self.state = _get_default_state(intent)
 	
 	# Handle transitions into and away from different states.
 	if old_state != self.state:
@@ -699,6 +792,13 @@ func _state_transition(delta : float, intent : Intent) -> void:
 				self.skate_boost_timer = 0.0
 		elif self.state == State.WIPEOUT:
 			self.wipeout_timer = 0.0
+		elif self.state == State.DASH_CHARGE:
+			self.dash_stored_speed = 0.0
+			self.dash_charge_timer = 0.0
+		elif self.state == State.DASH:
+			self.dash_velocity = self.velocity
+			self.dash_timer = 0.0
+			self.dash_distance = 0.0
 		
 		if self.state != State.SKATE && self.state != State.SKATE_BOOST && self.state != State.JUMP_BALLISTIC_START && self.state != State.BALLISTIC:
 			self.is_skating = false

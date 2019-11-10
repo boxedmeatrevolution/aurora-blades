@@ -314,6 +314,7 @@ __meta__ = {
 }
 
 [node name="Sprite" type="Sprite" parent="."]
+editor/display_folded = true
 position = Vector2( 0, -2 )
 texture = ExtResource( 2 )
 vframes = 4
