@@ -4,9 +4,9 @@ extends KinematicBody2D
 # * Sometimes just clamp at max velocity instead of doing a reverse
 #   acceleration. A reverse acceleration can make velocities go back and forth
 #   around the maximum, and can be kind of ugly. Example: wall slide.
-# * Store skate direction explicitly. The skate direction determines the way
-#   that the player skates. Can only change through turn-arounds on slopes/
-#   walls, or through arials.
+# * States for just after a full skate brake, where you can't move (but can
+#   still jump) for a brief moment. Start a skate at this point in the
+#   backwards direction can be done with big speed boost.
 # * Fix issue where tapping skate just after landing will wipe you out. Landing
 #   in skate mode shouldn't wipe you out if you try to boost too soon.
 # * Jumping rework:
@@ -31,7 +31,9 @@ enum State {
 	SLIDE,
 	WALL_SLIDE,
 	WALL_RELEASE,
+	PIVOT,
 	SKATE_START,
+	SKATE_PIVOT_START,
 	SKATE,
 	SKATE_BOOST,
 	SKATE_BRAKE,
@@ -49,7 +51,9 @@ const STATE_NAME := {
 	State.SLIDE: "Slide",
 	State.WALL_SLIDE: "WallSlide",
 	State.WALL_RELEASE: "WallRelease",
+	State.PIVOT: "Pivot",
 	State.SKATE_START: "SkateStart",
+	State.SKATE_PIVOT_START: "SkatePivotStart",
 	State.SKATE: "Skate",
 	State.SKATE_BOOST: "SkateBoost",
 	State.SKATE_BRAKE: "SkateBrake",
@@ -80,11 +84,11 @@ const PHYSICS_STATE_NAME := {
 
 # Represents what the player wants to do.
 class Intent:
-	var move_direction := Vector2()
+	var move_direction := Vector2.ZERO
 	var jump := false
 	var skate_start := false
 	var skate_boost := false
-	var skate_transition := false
+	var skate_brake := false
 
 const FLOOR_ANGLE := 5.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
@@ -122,10 +126,14 @@ const WALL_SLIDE_ACCELERATION := 600.0
 const WALL_SLIDE_SPEED := 50.0
 const WALL_RELEASE_START_SPEED := 50.0
 
+# The time that the player remains paused, briefly, at the end of a brake.
+const PIVOT_TIME := 0.25
+
 # Speed needed to launch the player into the skating state.
 const SKATE_START_MIN_SPEED := 40.0
 # Initial speed when entering the skate state.
-const SKATE_START_SPEED := 220.0
+const SKATE_START_SPEED := 120.0
+const SKATE_PIVOT_START_SPEED_FRACTION := 0.8
 # Maximum speed gain when getting a perfect boost.
 const SKATE_BOOST_MAX_SPEED := 200.0
 const SKATE_BOOST_MIN_SPEED := 60.0
@@ -163,7 +171,7 @@ const JUMP_BALLISTIC_START_SPEED := 350.0
 const FALL_ACCELERATION := 800.0
 const FALL_FRICTION := 100.0
 const FALL_MAX_SPEED_HORIZONTAL := 150.0
-const FALL_MAX_SPEED_VERTICAL := 300.0
+const FALL_MAX_SPEED_VERTICAL := 450.0
 
 const BALLISTIC_GRAVITY := 800.0
 # The angular speed at which the ballistic trajectory can be affected.
@@ -179,19 +187,19 @@ var state : int = State.FALL
 var physics_state : int = PhysicsState.AIR
 # The normal to the surface the player is on (only valid if `_on_surface`
 # returns true).
-var surface_normal := Vector2()
-var velocity := Vector2()
+var surface_normal := Vector2.ZERO
+var velocity := Vector2.ZERO
 var facing_direction := 1
 
-# When the player is exhausted, they can no longer skate for a short period.
-var exhausted := false
-var exhausted_timer := 0.0
 var skate_direction := 1
 var slide_timer := 0.0
 # This timer keeps track of how long the player has been skating for.
 var skate_timer := 0.0
 var skate_boost_timer := 0.0
 var wipeout_timer := 0.0
+# The amount of velocity stored when making a pivot.
+var pivot_stored_velocity := 0.0
+var pivot_timer := 0.0
 
 # Store the previous state as well.
 var previous_state := self.state
@@ -220,7 +228,9 @@ func _is_surface_state(state : int) -> bool:
 			|| state == State.SLIDE \
 			|| state == State.WALL_SLIDE \
 			|| state == State.WALL_RELEASE \
+			|| state == State.PIVOT \
 			|| state == State.SKATE_START \
+			|| state == State.SKATE_PIVOT_START \
 			|| state == State.SKATE \
 			|| state == State.SKATE_BOOST \
 			|| state == State.SKATE_BRAKE \
@@ -248,6 +258,7 @@ func _is_normal_state(state : int) -> bool:
 			|| state == State.SLIDE \
 			|| state == State.WALL_SLIDE \
 			|| state == State.WALL_RELEASE \
+			|| state == State.PIVOT \
 			|| state == State.JUMP_START \
 			|| state == State.JUMP_WALL_START \
 			|| state == State.JUMP \
@@ -258,6 +269,7 @@ func _is_normal_state(state : int) -> bool:
 # through wiping out (WIPEOUT).
 func _is_skate_state(state : int) -> bool:
 	return state == State.SKATE_START \
+			|| state == State.SKATE_PIVOT_START \
 			|| state == State.SKATE \
 			|| state == State.SKATE_BOOST \
 			|| state == State.SKATE_BRAKE \
@@ -271,13 +283,11 @@ func _is_stun_state(state : int) -> bool:
 # Returns the fraction of the normal velocity that should be kept over a given
 # angle difference.
 func _redirect_normal_velocity(angle_difference : float) -> float:
-	if self.state == State.SKATE_START \
-			|| self.state == State.SKATE \
-			|| self.state == State.SKATE_BOOST \
-			|| self.state == State.SKATE_BRAKE:
-		return clamp((SKATE_MAX_REDIRECT_ANGLE - angle_difference) / SKATE_MAX_REDIRECT_ANGLE, 0.0, 1.0) * SKATE_MAX_REDIRECT_FRACTION
-	elif self.state == State.BALLISTIC:
-		return clamp((BALLISTIC_MAX_REDIRECT_ANGLE - angle_difference) / BALLISTIC_MAX_REDIRECT_ANGLE, 0.0, 1.0) * BALLISTIC_MAX_REDIRECT_FRACTION
+	if _is_skate_state(self.state):
+		if _on_surface():
+			return clamp((SKATE_MAX_REDIRECT_ANGLE - angle_difference) / SKATE_MAX_REDIRECT_ANGLE, 0.0, 1.0) * SKATE_MAX_REDIRECT_FRACTION
+		else:
+			return clamp((BALLISTIC_MAX_REDIRECT_ANGLE - angle_difference) / BALLISTIC_MAX_REDIRECT_ANGLE, 0.0, 1.0) * BALLISTIC_MAX_REDIRECT_FRACTION
 	else:
 		return 0.0
 
@@ -285,7 +295,7 @@ func _apply_drag(drag : float, delta : float) -> void:
 	if self.velocity.length_squared() > 0.0:
 		var drag_delta := -drag * self.velocity.normalized() * delta
 		if drag >= 0 && drag_delta.length() >= self.velocity.length():
-			self.velocity = Vector2()
+			self.velocity = Vector2.ZERO
 		else:
 			self.velocity += drag_delta
 
@@ -318,7 +328,7 @@ func _physics_process(delta : float) -> void:
 	self.previous_velocity = self.velocity
 
 func _read_move_direction() -> Vector2:
-	var move_direction := Vector2()
+	var move_direction := Vector2.ZERO
 	if Input.is_action_pressed("move_left"):
 		move_direction.x -= 1
 	if Input.is_action_pressed("move_right"):
@@ -338,12 +348,16 @@ func _read_intent(move_direction : Vector2) -> Intent:
 	# skating when you are on the ground, but to boost when already skating.
 	if Input.is_action_just_pressed("jump"):
 		intent.jump = true
-	if Input.is_action_just_pressed("skate"):
-		intent.skate_boost = true
-	if Input.is_action_just_pressed("skate"):
-		intent.skate_start = true
-	if Input.is_action_pressed("skate"):
-		intent.skate_transition = true
+	if _on_surface():
+		if !_is_skate_state(self.state):
+			if Input.is_action_just_pressed("skate"):
+				intent.skate_start = true
+		if _is_skate_state(self.state):
+			if Input.is_action_just_pressed("skate"):
+				intent.skate_boost = true
+			if self.skate_direction == -1 && Input.is_action_pressed("move_right") \
+					|| self.skate_direction == 1 && Input.is_action_pressed("move_left"):
+				intent.skate_brake = true
 	return intent
 
 # Updates the facing direction based on the state. Note that the facing
@@ -403,6 +417,9 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 		self.velocity += self.surface_normal * WALL_RELEASE_START_SPEED
 	elif self.state == State.SKATE_START:
 		self.velocity = self.skate_direction * surface_tangent * SKATE_START_SPEED
+	elif self.state == State.SKATE_PIVOT_START:
+		var skate_speed := SKATE_START_SPEED + SKATE_PIVOT_START_SPEED_FRACTION * max(abs(self.pivot_stored_velocity) - SKATE_START_SPEED, 0.0)
+		self.velocity = self.skate_direction * surface_tangent * skate_speed
 	elif self.state == State.SKATE:
 		if self.physics_state == PhysicsState.FLOOR:
 			if self.velocity.dot(self.skate_direction * surface_tangent) > SKATE_MIN_SPEED:
@@ -415,6 +432,8 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 				_apply_drag(SKATE_FRICTION, delta)
 			else:
 				self.velocity += surface_tangent * surface_tangent.dot(GRAVITY * Vector2.DOWN) * delta
+	elif self.state == State.PIVOT:
+		self.velocity = Vector2.ZERO
 	elif self.state == State.SKATE_BOOST:
 		# If you boost too early, you wipe out. If you boost too late, it
 		# doesn't do very much.
@@ -474,7 +493,7 @@ func _position_process(delta : float, n : int = 4) -> void:
 		return
 	var delta_remainder := 0.0
 	var found_new_surface := false
-	var new_surface_normal := Vector2()
+	var new_surface_normal := Vector2.ZERO
 	# Handles a single update of the velocity by an amount `delta`.
 	var collision := move_and_collide(self.velocity * delta)
 	
@@ -570,8 +589,7 @@ func _handle_state_transition(old_state : int) -> bool:
 	if old_state != self.state:
 		# First handle transitions between skate states and non-skate states.
 		if !_is_skate_state(self.state) && _is_skate_state(old_state):
-			self.exhausted = true
-			self.exhausted_timer = 0.0
+			pass
 		if _is_skate_state(self.state) && !_is_skate_state(old_state):
 			self.skate_timer = 0.0
 			self.skate_boost_timer = 0.0
@@ -581,12 +599,19 @@ func _handle_state_transition(old_state : int) -> bool:
 			if self.skate_direction == 0:
 				self.skate_direction = self.facing_direction
 		
-		# And then state specific transitions.
-		if self.state == State.SLIDE:
+		if self.state == State.PIVOT:
+			self.pivot_timer = 0.0
+		elif self.state == State.SLIDE:
 			self.slide_timer = 0.0
+		elif self.state == State.SKATE_PIVOT_START:
+			self.skate_direction = -int(sign(self.pivot_stored_velocity))
+			if self.skate_direction == 0:
+				self.skate_direction = self.facing_direction
 		elif self.state == State.SKATE:
-			if old_state == State.SKATE_BOOST || old_state == State.SKATE_START:
+			if old_state == State.SKATE_BOOST || old_state == State.SKATE_START || old_state == State.SKATE_PIVOT_START:
 				self.skate_boost_timer = 0.0
+		elif self.state == State.SKATE_BRAKE:
+			self.pivot_stored_velocity = 0.0
 		elif self.state == State.WIPEOUT:
 			self.wipeout_timer = 0.0
 		return true
@@ -639,20 +664,15 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 	var surface_tangent = Vector2(-self.surface_normal.y, self.surface_normal.x)
 	
 	if _is_normal_state(self.state):
-		# The player cannot skate unless they are no longer exhausted.
-		if self.exhausted:
-			self.exhausted_timer += delta
-			if self.exhausted_timer > EXHAUSTED_TIME:
-				self.exhausted = false
-				self.exhausted_timer = 0.0
-		
 		# Input transitions take priority over all else.
 		if intent.jump && _is_surface_state(self.state) && self.state != State.JUMP:
 			if self.physics_state == PhysicsState.WALL:
 				self.state = State.JUMP_WALL_START
 			else:
 				self.state = State.JUMP_START
-		elif intent.skate_start && _is_surface_state(self.state) && self.state != State.JUMP && !self.exhausted && self.velocity.length() >= SKATE_START_MIN_SPEED:
+		elif intent.skate_start && self.state == State.PIVOT && self.pivot_stored_velocity != 0.0:
+			self.state = State.SKATE_PIVOT_START
+		elif intent.skate_start && _is_surface_state(self.state) && self.state != State.JUMP && self.velocity.length() >= SKATE_START_MIN_SPEED:
 			self.state = State.SKATE_START
 		# Then do transitions in between normal states.
 		elif self.state == State.STAND:
@@ -687,6 +707,10 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 			# Shouldn't happen.
 			printerr("Failed to release wall.")
 			self.state = _get_default_normal_state(intent)
+		elif self.state == State.PIVOT:
+			self.pivot_timer += delta
+			if self.pivot_timer > PIVOT_TIME:
+				self.state = _get_default_normal_state(intent)
 		elif self.state == State.JUMP_START:
 			# Shouldn't happen.
 			printerr("Failed to jump.")
@@ -719,9 +743,13 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 			self.state = State.WIPEOUT
 		elif intent.jump && _is_surface_state(self.state):
 			self.state = State.JUMP_BALLISTIC_START
-		elif sign(intent.move_direction.x) == -self.skate_direction && _is_surface_state(self.state) && self.state != State.SKATE_BRAKE:
+		elif intent.skate_brake && _is_surface_state(self.state) && self.state != State.SKATE_BRAKE:
 			self.state = State.SKATE_BRAKE
+		elif !intent.skate_brake && self.state == State.SKATE_BRAKE:
+			self.state = State.SKATE
 		elif self.state == State.SKATE_START:
+			self.state = State.SKATE
+		elif self.state == State.SKATE_PIVOT_START:
 			self.state = State.SKATE
 		elif intent.skate_boost:
 			if self.skate_boost_timer < SKATE_BOOST_MIN_TIME:
@@ -733,8 +761,9 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 		elif self.state == State.SKATE_BOOST:
 			self.state = State.SKATE
 		elif self.state == State.SKATE_BRAKE:
+			self.pivot_stored_velocity += (self.previous_velocity - self.velocity).dot(surface_tangent)
 			if self.velocity.length() < SKATE_BRAKE_MIN_SPEED:
-				self.state = _get_default_normal_state(intent)
+				self.state = State.PIVOT
 		elif self.state == State.BALLISTIC:
 			if impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
 				self.state = State.WIPEOUT
