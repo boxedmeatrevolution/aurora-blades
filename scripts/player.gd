@@ -4,11 +4,6 @@ extends KinematicBody2D
 # * Sometimes just clamp at max velocity instead of doing a reverse
 #   acceleration. A reverse acceleration can make velocities go back and forth
 #   around the maximum, and can be kind of ugly. Example: wall slide.
-# * States for just after a full skate brake, where you can't move (but can
-#   still jump) for a brief moment. Start a skate at this point in the
-#   backwards direction can be done with big speed boost.
-# * Fix issue where tapping skate just after landing will wipe you out. Landing
-#   in skate mode shouldn't wipe you out if you try to boost too soon.
 # * Jumping rework:
 #   * Jumping goes higher if you hold button.
 #   * Jumping pushes you partly in the direction of the normal, and partly
@@ -350,8 +345,12 @@ func _read_intent(move_direction : Vector2) -> Intent:
 		intent.jump = true
 	if _on_surface():
 		if !_is_skate_state(self.state):
-			if Input.is_action_just_pressed("skate"):
-				intent.skate_start = true
+			if self.state == State.PIVOT:
+				if sign(move_direction.x) == -sign(self.pivot_stored_velocity) && Input.is_action_just_pressed("skate"):
+					intent.skate_start = true
+			else:
+				if Input.is_action_just_pressed("skate"):
+					intent.skate_start = true
 		if _is_skate_state(self.state):
 			if Input.is_action_just_pressed("skate"):
 				intent.skate_boost = true
