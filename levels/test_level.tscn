@@ -1,16 +1,13 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://entities/player.tscn" type="PackedScene" id=1]
 [ext_resource path="res://entities/pixel_camera.tscn" type="PackedScene" id=2]
 [ext_resource path="res://tilesets/winter.tres" type="TileSet" id=3]
 
-[sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 1000, 32 )
-
 [node name="TestLevel" type="Node"]
 
 [node name="Player" parent="." instance=ExtResource( 1 )]
-position = Vector2( -16.2078, -77.4755 )
+position = Vector2( -94.131, -106.703 )
 
 [node name="Camera" parent="Player" instance=ExtResource( 2 )]
 
@@ -57,7 +54,3 @@ polygon = PoolVector2Array( 1024, 48, 1056, 80, 1088, 96, 1152, 96, 1184, 80, 12
 [node name="CollisionPolygon2D6" type="CollisionPolygon2D" parent="Blocks"]
 position = Vector2( -384, -176 )
 polygon = PoolVector2Array( 1024, 48, 1056, 80, 1088, 96, 1152, 96, 1184, 80, 1216, 48, 1216, 128, 1184, 160, 1056, 160, 1024, 128 )
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Blocks"]
-position = Vector2( -1904.59, -33.1972 )
-shape = SubResource( 1 )
