@@ -1,13 +1,12 @@
 extends KinematicBody2D
 
 # Things that need to be done:
-# * Make skating cling to hills better. Gliding should still be loose on the
-#   top of hills though.
+# * Decide whether gliding should loosen the player at tops of hills.
 # * "Skate dash" to the ground from the air.
 # * Sometimes just clamp at max velocity instead of doing a reverse
 #   acceleration. A reverse acceleration can make velocities go back and forth
 #   around the maximum, and can be kind of ugly. Example: wall slide.
-# * Add all animatoins.
+# * Add all animations.
 # * Jumping rework:
 #   * Only two types of jumps: forward jumps and upward jumps. On a wall, the
 #     forward jump takes you further up the wall, and the upward jump is like a
@@ -620,7 +619,7 @@ func _position_process(delta : float, n : int = 4) -> void:
 					new_surface_normal = test_collision.normal
 		if !found_new_surface:
 			var max_angle_change := _surface_stick_max_angle()
-			var test_displacement := self.velocity - self.velocity.rotated(-sign(self.velocity.dot(surface_tangent)) * max_angle_change)
+			var test_displacement := (self.velocity - self.velocity.rotated(-sign(self.velocity.dot(surface_tangent)) * max_angle_change)) * delta
 			var test_collision := move_and_collide(test_displacement, true, true, true)
 			if test_collision != null && test_collision.normal.y < 0:
 				var surface_angle := test_collision.normal.angle_to(Vector2.UP)
