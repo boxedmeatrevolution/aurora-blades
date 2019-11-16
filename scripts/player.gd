@@ -3,7 +3,7 @@ extends KinematicBody2D
 # Things that need to be done:
 # * Bugs:
 #   * Sometimes character doesn't stick to surfaces when skating when they
-#     should. Seems to happen at random.
+#     should. Seems to happen at random (fixed by tolerances?).
 #   * Weirdness when walljumping while skating makes player sometimes hit the
 #     wall immediately and start sliding (related to braking?)
 # * Decide whether gliding should loosen the player at tops of hills.
@@ -50,7 +50,9 @@ enum State {
 	JUMP_BALLISTIC_WALL_HIGH_START,
 	JUMP,
 	FALL,
-	BALLISTIC
+	BALLISTIC,
+	DIVE_START,
+	DIVE
 }
 const STATE_NAME := {
 	State.STAND: "Stand",
@@ -74,7 +76,9 @@ const STATE_NAME := {
 	State.JUMP_BALLISTIC_WALL_HIGH_START: "JumpBallisticWallHighStart",
 	State.JUMP: "Jump",
 	State.FALL: "Fall",
-	State.BALLISTIC: "Ballistic"
+	State.BALLISTIC: "Ballistic",
+	State.DIVE_START: "DiveStart",
+	State.DIVE: "Dive"
 }
 
 # The allowed physics states. The physics states are semi-independent of the
@@ -98,6 +102,7 @@ class Intent:
 	var move_direction := Vector2.ZERO
 	var jump_low := false
 	var jump_high := false
+	var dive := false
 	var skate_start := false
 	var skate_boost := false
 	var skate_glide := false
@@ -221,6 +226,12 @@ const BALLISTIC_MAX_SPEED := 1000.0
 const BALLISTIC_MAX_REDIRECT_ANGLE := 90.0 * PI / 180.0
 const BALLISTIC_MAX_REDIRECT_FRACTION := 0.5
 
+const DIVE_START_TIME := 0.2
+const DIVE_START_FRICTION := 3000.0
+const DIVE_TIME := 0.4
+const DIVE_ANGLE := 30.0 * PI / 180.0
+const DIVE_SPEED := 350.0
+
 var state : int = State.FALL
 var physics_state : int = PhysicsState.AIR
 # The normal to the surface the player is on (only valid if `_on_surface`
@@ -240,6 +251,9 @@ var wipeout_timer := 0.0
 # The amount of velocity stored when making a pivot.
 var pivot_stored_velocity := 0.0
 var pivot_timer := 0.0
+var dive_start_timer := 0.0
+var dive_timer := 0.0
+var dive_direction := 1
 
 # Store the previous state as well.
 var previous_state := self.state
@@ -288,9 +302,11 @@ func _is_surface_state(state : int) -> bool:
 # both an air state and a surface state. That simply means that the player may
 # be on a surface or in the air when they are in that state.
 func _is_air_state(state : int) -> bool:
-	return state == State.JUMP \
-			|| state == State.FALL \
+	return state == State.FALL \
 			|| state == State.BALLISTIC \
+			|| state == State.DIVE_START \
+			|| state == State.DIVE \
+			|| state == State.JUMP \
 			|| state == State.WIPEOUT
 
 # A "normal" state are those related to moving around at slow velocities with
@@ -303,10 +319,12 @@ func _is_normal_state(state : int) -> bool:
 			|| state == State.WALL_SLIDE \
 			|| state == State.WALL_RELEASE \
 			|| state == State.PIVOT \
+			|| state == State.WIPEOUT \
 			|| state == State.JUMP_START \
 			|| state == State.JUMP_WALL_START \
 			|| state == State.JUMP \
-			|| state == State.FALL
+			|| state == State.FALL \
+			|| state == State.DIVE_START
 
 # "Skate states" are those related to skating. While in a skate state, the only
 # way to transition to a normal state is through braking (SKATE_BRAKE) or
@@ -322,11 +340,19 @@ func _is_skate_state(state : int) -> bool:
 			|| state == State.JUMP_BALLISTIC_HIGH_START \
 			|| state == State.JUMP_BALLISTIC_WALL_LOW_START \
 			|| state == State.JUMP_BALLISTIC_WALL_HIGH_START \
-			|| state == State.BALLISTIC
+			|| state == State.BALLISTIC \
+			|| state == State.DIVE
 
 # A "stun state" is one in which the player cannot act.
 func _is_stun_state(state : int) -> bool:
-	return state == State.WIPEOUT
+	return state == State.WIPEOUT \
+			|| state == State.DIVE_START \
+			|| state == State.JUMP_START \
+			|| state == State.JUMP_WALL_START \
+			|| state == State.JUMP_BALLISTIC_LOW_START \
+			|| state == State.JUMP_BALLISTIC_HIGH_START \
+			|| state == State.JUMP_BALLISTIC_WALL_LOW_START \
+			|| state == State.JUMP_BALLISTIC_WALL_HIGH_START
 
 # A "pre-jump state" is one that the player enters right before intentionally
 # leaving a surface.
@@ -431,7 +457,7 @@ func _read_intent(move_direction : Vector2) -> Intent:
 			elif _is_normal_state(self.state):
 				intent.jump_high = true
 	if _on_surface(self.physics_state):
-		if !_is_skate_state(self.state):
+		if _is_normal_state(self.state):
 			if self.state == State.PIVOT:
 				if sign(move_direction.x) == -sign(self.pivot_stored_velocity) && Input.is_action_just_pressed("skate"):
 					intent.skate_start = true
@@ -455,8 +481,11 @@ func _read_intent(move_direction : Vector2) -> Intent:
 					intent.skate_brake = false
 			if !intent.skate_brake && Input.is_action_just_pressed("skate"):
 				intent.skate_boost = true
-	if !intent.skate_brake && Input.is_action_pressed("skate"):
-		intent.skate_glide = true
+		if !intent.skate_brake && Input.is_action_pressed("skate"):
+			intent.skate_glide = true
+	else:
+		if Input.is_action_just_pressed("skate"):
+			intent.dive = true
 	return intent
 
 # Updates the facing direction based on the state. Note that the facing
@@ -622,6 +651,11 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 			# When in the ballistic state, the player's direction can be
 			# changed, but not the magnitude of the velocity.
 			self.velocity = self.velocity.rotated(angle_change_direction * BALLISTIC_ANGULAR_SPEED * delta)
+	elif self.state == State.DIVE_START:
+		_apply_drag(DIVE_START_FRICTION, delta)
+	elif self.state == State.DIVE:
+		var dive_velocity = DIVE_SPEED * Vector2.DOWN.rotated(-sign(self.dive_direction) * DIVE_ANGLE)
+		self.velocity = dive_velocity
 	
 	# Clamp the velocity by the absolute max speed.
 	self.velocity = self.velocity.clamped(MAX_SPEED)
@@ -769,6 +803,11 @@ func _handle_state_transition(old_state : int) -> bool:
 			self.skate_glide_timer = 0.0
 		elif self.state == State.SKATE_BRAKE:
 			self.pivot_stored_velocity = 0.0
+		elif self.state == State.DIVE_START:
+			self.dive_start_timer = 0.0
+			self.dive_direction = self.facing_direction
+		elif self.state == State.DIVE:
+			self.dive_timer = 0.0
 		elif self.state == State.WIPEOUT:
 			self.wipeout_timer = 0.0
 		return true
@@ -817,18 +856,21 @@ func _state_transition_physics(intent : Intent) -> bool:
 
 func _state_transition(delta : float, intent : Intent) -> bool:
 	var old_state := self.state
-	var surface_tangent = Vector2(-self.surface_normal.y, self.surface_normal.x)
+	var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
+	var can_act := !_is_stun_state(self.state)
 	
 	if _is_normal_state(self.state):
 		# Input transitions take priority over all else.
-		if intent.jump_high && _is_surface_state(self.state) && self.state != State.JUMP:
+		if can_act && intent.jump_high && _is_surface_state(self.state) && self.state != State.JUMP:
 			if self.physics_state == PhysicsState.WALL:
 				self.state = State.JUMP_WALL_START
 			else:
 				self.state = State.JUMP_START
-		elif intent.skate_start && self.state == State.PIVOT && self.pivot_stored_velocity != 0.0:
+		elif can_act && intent.dive && _is_air_state(self.state):
+			self.state = State.DIVE_START
+		elif can_act && intent.skate_start && self.state == State.PIVOT && self.pivot_stored_velocity != 0.0:
 			self.state = State.SKATE_PIVOT_START
-		elif intent.skate_start && _is_surface_state(self.state) && self.state != State.JUMP && self.velocity.length() >= SKATE_START_MIN_SPEED:
+		elif can_act && intent.skate_start && _is_surface_state(self.state) && self.state != State.JUMP && self.velocity.length() >= SKATE_START_MIN_SPEED:
 			self.state = State.SKATE_START
 		# Then do transitions in between normal states.
 		elif self.state == State.STAND:
@@ -867,6 +909,11 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 			self.pivot_timer += delta
 			if self.pivot_timer > PIVOT_TIME:
 				self.state = _get_default_normal_state(intent)
+		elif self.state == State.WIPEOUT:
+			if (self.physics_state == PhysicsState.FLOOR || self.physics_state == PhysicsState.SLOPE) && self.velocity.length() < WALK_MAX_SPEED:
+				self.wipeout_timer += delta
+				if self.wipeout_timer > WIPEOUT_TIME:
+					self.state = _get_default_normal_state(intent)
 		elif self.state == State.JUMP_START:
 			# Shouldn't happen.
 			printerr("Failed to jump.")
@@ -879,6 +926,10 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 				self.state = _get_default_normal_state(intent)
 		elif self.state == State.FALL:
 			pass
+		elif self.state == State.DIVE_START:
+			self.dive_start_timer += delta
+			if self.dive_start_timer > DIVE_START_TIME:
+				self.state = State.DIVE
 	elif _is_skate_state(self.state):
 		self.skate_timer += delta
 		self.skate_boost_timer += delta
@@ -897,7 +948,9 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 		
 		if impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
 			self.state = State.WIPEOUT
-		elif (intent.jump_low || intent.jump_high) && _is_surface_state(self.state):
+		elif can_act && intent.dive && _is_air_state(self.state):
+			self.state = State.DIVE_START
+		elif can_act && (intent.jump_low || intent.jump_high) && _is_surface_state(self.state):
 			if self.physics_state == PhysicsState.WALL:
 				if intent.jump_high:
 					self.state = State.JUMP_BALLISTIC_WALL_HIGH_START
@@ -910,9 +963,9 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 					self.state = State.JUMP_BALLISTIC_LOW_START
 		# TODO: decide on additional condition like:
 		# (abs(self.surface_normal.angle_to(Vector2.UP)) <= WALK_MAX_ANGLE || self.skate_direction == int(sign(self.surface_normal.x)))
-		elif intent.skate_brake && _is_surface_state(self.state) && self.state != State.SKATE_BRAKE:
+		elif can_act && intent.skate_brake && _is_surface_state(self.state) && self.state != State.SKATE_BRAKE:
 			self.state = State.SKATE_BRAKE
-		elif !intent.skate_brake && self.state == State.SKATE_BRAKE:
+		elif can_act && !intent.skate_brake && self.state == State.SKATE_BRAKE:
 			self.state = State.SKATE
 		elif self.state == State.SKATE_START:
 			self.state = State.SKATE
@@ -945,12 +998,10 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 				|| self.state == State.JUMP_BALLISTIC_WALL_HIGH_START:
 			printerr("Failed to ballistic jump.")
 			self.state = _get_default_normal_state(intent)
-	elif _is_stun_state(self.state):
-		if self.state == State.WIPEOUT:
-			if (self.physics_state == PhysicsState.FLOOR || self.physics_state == PhysicsState.SLOPE) && self.velocity.length() < WALK_MAX_SPEED:
-				self.wipeout_timer += delta
-				if self.wipeout_timer > WIPEOUT_TIME:
-					self.state = _get_default_normal_state(intent)
+		elif self.state == State.DIVE:
+			self.dive_timer += delta
+			if self.dive_timer > DIVE_TIME:
+				self.state = State.BALLISTIC
 	
 	if self._on_surface(self.physics_state) && !_is_surface_state(self.state):
 		printerr("On surface but state ", STATE_NAME[self.state], " is not a surface state.")
