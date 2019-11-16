@@ -2,24 +2,18 @@ extends KinematicBody2D
 
 # Things that need to be done:
 # * Bugs:
-#   * Sometimes character doesn't stick to surfaces when skating when they
-#     should. Seems to happen at random (fixed by tolerances?).
-#   * Weirdness when walljumping while skating makes player sometimes hit the
-#     wall immediately and start sliding (related to braking?)
-# * Make braking work on slopes, but not bring you to a stop (no transitioning
-#   to walk state by braking on slopes).
-# * Decide whether gliding should loosen the player at tops of hills.
-# * "Skate dash" to the ground from the air.
+#   * Velocity redirection works very wierdly sometimes, particularly when
+#     coming in from the air.
+# * Downhill walljumps can feel unintuitive because of the huge gain in
+#   velocity after just barely turning around at the top.
+# * It's very easy to accidentally dash into the ground, especially when
+#   about to land when skating and wanting to boost. There should probably be
+#   a ramping friction when starting it in the air, and if you hit the ground
+#   it gets canceled.
 # * Sometimes just clamp at max velocity instead of doing a reverse
 #   acceleration. A reverse acceleration can make velocities go back and forth
 #   around the maximum, and can be kind of ugly. Example: wall slide.
 # * Add all animations.
-# * Jumping rework:
-#   * Only two types of jumps: forward jumps and upward jumps. On a wall, the
-#     forward jump takes you further up the wall, and the upward jump is like a
-#     wall jump.
-#   * Well-timed jumps just after hitting the ground can chain for greater
-#     velocity boost?
 # * Make sliding off of a slope and onto a floor give a small velocity boost,
 #   to stop awkward situations where the player keeps trying to walk onto a
 #   slope.
@@ -144,7 +138,7 @@ const SLIDE_SPEED := 140.0
 # Minimum speed before entering a walk.
 const SLIDE_MIN_SPEED := 100.0
 # Minimum time to slide for on a flat surface before entering a walk.
-const SLIDE_MIN_TIME := 0.2
+const SLIDE_MIN_TIME := 0.4
 
 const WALL_SLIDE_ACCELERATION := 600.0
 const WALL_SLIDE_SPEED := 50.0
@@ -165,7 +159,7 @@ const SKATE_BOOST_MIN_TIME := 0.1
 const SKATE_BOOST_MAX_TIME := 0.8
 # The minimum time which the player will feel regular friction at the start
 # of the glide.
-const SKATE_FRICTION_LOW := 50.0
+const SKATE_FRICTION_LOW := 30.0
 const SKATE_FRICTION_HIGH := 200.0
 const SKATE_FRICTION_TRANSITION_SPEED := 300.0
 const SKATE_GLIDE_FRICTION_TIME := 0.1
@@ -181,13 +175,15 @@ const SKATE_BRAKE_FRICTION := 800.0
 const SKATE_BRAKE_MIN_SPEED := 10.0
 const SKATE_BRAKE_SLOPE_MIN_SPEED := 100.0
 
+const SKATE_STICK_ANGLE := 30.0 * PI / 180.0
 const SKATE_GRAVITY := 200.0
+const SKATE_MIN_REDIRECT_ANGLE := 30.0 * PI / 180.0
 const SKATE_MAX_REDIRECT_ANGLE := 40.0 * PI / 180.0
-const SKATE_MAX_REDIRECT_FRACTION := 0.6
+const SKATE_MAX_REDIRECT_FRACTION := 1.0
 
 # The "minimum fractional impulse" needed to wipeout, meaning what percentage
 # of the player's speed must be lost in an instant.
-const WIPEOUT_MIN_FRACTIONAL_IMPULSE := 0.6
+const WIPEOUT_MIN_FRACTIONAL_IMPULSE := 0.8
 # The "minimum impulse" needed to wipeout, meaning what absolute amount of
 # speed must be lost in an instant.
 const WIPEOUT_MIN_IMPULSE := 200.0
@@ -223,16 +219,17 @@ const BALLISTIC_GRAVITY := 800.0
 # The angular speed at which the ballistic trajectory can be affected.
 const BALLISTIC_ANGULAR_SPEED := 30.0 * PI / 180.0
 # The acceleration that is applied to the trajectory if the max speed is
-# exceeded. Gravity is also stopped in that case.
+# exceeded.
 const BALLISTIC_ACCELERATION := 400.0
 const BALLISTIC_MAX_SPEED := 1000.0
-const BALLISTIC_MAX_REDIRECT_ANGLE := 90.0 * PI / 180.0
-const BALLISTIC_MAX_REDIRECT_FRACTION := 0.5
+const BALLISTIC_MIN_REDIRECT_ANGLE := 30.0 * PI / 180.0
+const BALLISTIC_MAX_REDIRECT_ANGLE := 80.0 * PI / 180.0
+const BALLISTIC_MAX_REDIRECT_FRACTION := 1.0
 
 const DIVE_START_TIME := 0.2
 const DIVE_START_FRICTION := 3000.0
 const DIVE_TIME := 0.4
-const DIVE_ANGLE := 30.0 * PI / 180.0
+const DIVE_ANGLE := 40.0 * PI / 180.0
 const DIVE_SPEED := 350.0
 
 var state : int = State.FALL
@@ -371,11 +368,13 @@ func _is_prejump_state(state : int) -> bool:
 # Returns the fraction of the normal velocity that should be kept over a given
 # angle difference.
 func _redirect_normal_velocity(angle_difference : float) -> float:
+	angle_difference = abs(angle_difference)
 	if _is_skate_state(self.state):
-		if _on_surface(self.physics_state):
-			return clamp((SKATE_MAX_REDIRECT_ANGLE - angle_difference) / SKATE_MAX_REDIRECT_ANGLE, 0.0, 1.0) * SKATE_MAX_REDIRECT_FRACTION
-		else:
-			return clamp((BALLISTIC_MAX_REDIRECT_ANGLE - angle_difference) / BALLISTIC_MAX_REDIRECT_ANGLE, 0.0, 1.0) * BALLISTIC_MAX_REDIRECT_FRACTION
+		var on_surface = _on_surface(self.physics_state)
+		var min_redirect_angle := SKATE_MIN_REDIRECT_ANGLE if on_surface else BALLISTIC_MIN_REDIRECT_ANGLE
+		var max_redirect_angle := SKATE_MAX_REDIRECT_ANGLE if on_surface else BALLISTIC_MAX_REDIRECT_ANGLE
+		var max_redirect_fraction := SKATE_MAX_REDIRECT_FRACTION if on_surface else BALLISTIC_MAX_REDIRECT_FRACTION
+		return max_redirect_fraction * clamp((max_redirect_angle - angle_difference) / (max_redirect_angle - min_redirect_angle), 0.0, 1.0)
 	else:
 		return 0.0
 
@@ -384,7 +383,7 @@ func _surface_stick_max_angle() -> float:
 	if _is_prejump_state(self.state):
 		return 0.0
 	elif _is_skate_state(self.state):
-		return 30.0 * PI / 180.0
+		return SKATE_STICK_ANGLE
 	else:
 		return 0.0
 
@@ -407,7 +406,6 @@ func _ready() -> void:
 	self.ballistic_effect_sprite.visible = false
 
 func _physics_process(delta : float) -> void:
-	#print(self.velocity.length())
 	var move_direction := _read_move_direction()
 	_facing_direction_process(move_direction)
 	# Update the velocities based on the current state.
@@ -622,7 +620,7 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 		var jump_angle := -PI / 2.0
 		if wall_jump:
 			var angle_increase := JUMP_BALLISTIC_WALL_HIGH_ANGLE if high_jump else JUMP_BALLISTIC_WALL_LOW_ANGLE
-			var surface_angle := surface_tangent.angle_to(Vector2.RIGHT)
+			var surface_angle := (-sign(self.skate_direction) * surface_tangent).angle_to(Vector2.RIGHT)
 			jump_angle = surface_angle - float(self.skate_direction) * angle_increase
 		elif surface_tangent.x != 0.0:
 			var slope_increase := JUMP_BALLISTIC_HIGH_SLOPE if high_jump else JUMP_BALLISTIC_LOW_SLOPE
@@ -700,35 +698,37 @@ func _position_process(delta : float, n : int = 4) -> void:
 		if self.velocity.x != 0:
 			var velocity_slope := self.velocity.y / self.velocity.x
 			var max_slope_change := _surface_stick_max_slope()
-			var extreme_slope := velocity_slope + max_slope_change
-			var test_displacement := tolerance_factor * Vector2.DOWN * velocity.x * delta * max_slope_change
-			var test_collision := move_and_collide(test_displacement, true, true, true)
-			if test_collision != null && test_collision.normal.y < 0:
-				# If a surface below the player was found, then check that the
-				# slope is acceptably close to the slope of the previous slope
-				# that the player was on.
-				var surface_slope := test_collision.normal.x / abs(test_collision.normal.y)
-				var surface_angle := test_collision.normal.angle_to(Vector2.UP)
-				var slope_condition := false
-				if self.velocity.x < 0:
-					slope_condition = surface_slope >= extreme_slope
-				else:
-					slope_condition = surface_slope <= extreme_slope
-				if abs(surface_angle) <= WALL_ANGLE && slope_condition:
-					self.position += test_collision.travel
-					found_new_surface = true
-					new_surface_normal = test_collision.normal
+			if max_slope_change > 0.0:
+				var extreme_slope := velocity_slope + max_slope_change
+				var test_displacement := tolerance_factor * Vector2.DOWN * velocity.x * delta * max_slope_change
+				var test_collision := move_and_collide(test_displacement, true, true, true)
+				if test_collision != null && test_collision.normal.y < 0:
+					# If a surface below the player was found, then check that the
+					# slope is acceptably close to the slope of the previous slope
+					# that the player was on.
+					var surface_slope := test_collision.normal.x / abs(test_collision.normal.y)
+					var surface_angle := test_collision.normal.angle_to(Vector2.UP)
+					var slope_condition := false
+					if self.velocity.x < 0:
+						slope_condition = surface_slope >= extreme_slope
+					else:
+						slope_condition = surface_slope <= extreme_slope
+					if abs(surface_angle) <= WALL_ANGLE && slope_condition:
+						self.position += test_collision.travel
+						found_new_surface = true
+						new_surface_normal = test_collision.normal
 		if !found_new_surface:
 			var max_angle_change := _surface_stick_max_angle()
-			var test_displacement := tolerance_factor * (self.velocity - self.velocity.rotated(-sign(self.velocity.dot(surface_tangent)) * max_angle_change)) * delta
-			var test_collision := move_and_collide(test_displacement, true, true, true)
-			if test_collision != null && test_collision.normal.y < 0:
-				var surface_angle := test_collision.normal.angle_to(Vector2.UP)
-				var surface_angle_relative := test_collision.normal.angle_to(self.surface_normal)
-				if abs(surface_angle) <= WALL_ANGLE && abs(surface_angle_relative) <= max_angle_change:
-					self.position += test_collision.travel
-					found_new_surface = true
-					new_surface_normal = test_collision.normal
+			if max_angle_change > 0.0:
+				var test_displacement := tolerance_factor * (self.velocity - self.velocity.rotated(-sign(self.velocity.dot(surface_tangent)) * max_angle_change)) * delta
+				var test_collision := move_and_collide(test_displacement, true, true, true)
+				if test_collision != null && test_collision.normal.y < 0:
+					var surface_angle := test_collision.normal.angle_to(Vector2.UP)
+					var surface_angle_relative := test_collision.normal.angle_to(self.surface_normal)
+					if abs(surface_angle) <= WALL_ANGLE && abs(surface_angle_relative) <= max_angle_change:
+						self.position += test_collision.travel
+						found_new_surface = true
+						new_surface_normal = test_collision.normal
 	# If the player landed on a new surface, we need to adjust the state.
 	if found_new_surface:
 		# First, modify the velocity as the player moves onto the surface.
