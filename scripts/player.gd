@@ -1,14 +1,13 @@
 extends KinematicBody2D
 
 # Things that need to be done:
-# * Rework how braking inputs are read: allow braking out of the air, and
-#   disallow braking near to a turn-around.
 # * Make skating cling to hills better. Gliding should still be loose on the
 #   top of hills though.
 # * "Skate dash" to the ground from the air.
 # * Sometimes just clamp at max velocity instead of doing a reverse
 #   acceleration. A reverse acceleration can make velocities go back and forth
 #   around the maximum, and can be kind of ugly. Example: wall slide.
+# * Add all animatoins.
 # * Jumping rework:
 #   * Only two types of jumps: forward jumps and upward jumps. On a wall, the
 #     forward jump takes you further up the wall, and the upward jump is like a
@@ -295,6 +294,14 @@ func _is_skate_state(state : int) -> bool:
 func _is_stun_state(state : int) -> bool:
 	return state == State.WIPEOUT
 
+# A "pre-jump state" is one that the player enters right before intentionally
+# leaving a surface.
+func _is_prejump_state(state : int) -> bool:
+	return state == State.WALL_RELEASE \
+			|| state == State.JUMP_START \
+			|| state == State.JUMP_WALL_START \
+			|| state == State.JUMP_BALLISTIC_START
+
 # Returns the fraction of the normal velocity that should be kept over a given
 # angle difference.
 func _redirect_normal_velocity(angle_difference : float) -> float:
@@ -306,11 +313,21 @@ func _redirect_normal_velocity(angle_difference : float) -> float:
 	else:
 		return 0.0
 
-func _surface_stick_gravity() -> float:
-	if _is_skate_state(self.state):
-		return BALLISTIC_GRAVITY
+# Returns a range of angles over which the player should "cling" to a surface.
+func _surface_stick_max_angle() -> float:
+	if _is_prejump_state(self.state):
+		return 0.0
+	elif _is_skate_state(self.state):
+		return 30.0 * PI / 180.0
 	else:
-		return GRAVITY
+		return 0.0
+
+func _surface_stick_max_slope() -> float:
+	var surface_gravity := BALLISTIC_GRAVITY if _is_skate_state(self.state) else GRAVITY
+	if _is_prejump_state(self.state):
+		return 0.0
+	else:
+		return 0.5 * surface_gravity / self.velocity.x * SURFACE_DROP_TIME
 
 func _apply_drag(drag : float, delta : float) -> void:
 	if self.velocity.length_squared() > 0.0:
@@ -554,6 +571,7 @@ func _position_process(delta : float, n : int = 4) -> void:
 	if n <= 0 || delta <= 0 || self.velocity.length_squared() == 0:
 		return
 	var delta_remainder := 0.0
+	var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
 	var found_new_surface := false
 	var new_surface_normal := Vector2.ZERO
 	# Handles a single update of the velocity by an amount `delta`.
@@ -575,10 +593,13 @@ func _position_process(delta : float, n : int = 4) -> void:
 	elif _on_surface(self.physics_state) && collision == null:
 		delta_remainder = 0.0
 		# If the player used to be on a surface, then we should try to stick
-		# to whatever surface may still be below them.
+		# to whatever surface may still be below them. We do this in two ways:
+		# First, by checking for a surface at some slope beneath the player,
+		# and second, by checking for a surface at some angle beneath the
+		# player. 
 		if self.velocity.x != 0:
 			var velocity_slope := self.velocity.y / self.velocity.x
-			var max_slope_change := 0.5 * _surface_stick_gravity() / self.velocity.x * SURFACE_DROP_TIME
+			var max_slope_change := _surface_stick_max_slope()
 			var extreme_slope := velocity_slope + max_slope_change
 			var test_displacement := Vector2.DOWN * velocity.x * delta * max_slope_change
 			var test_collision := move_and_collide(test_displacement, true, true, true)
@@ -594,6 +615,17 @@ func _position_process(delta : float, n : int = 4) -> void:
 				else:
 					slope_condition = surface_slope <= extreme_slope
 				if abs(surface_angle) <= WALL_ANGLE && slope_condition:
+					self.position += test_collision.travel
+					found_new_surface = true
+					new_surface_normal = test_collision.normal
+		if !found_new_surface:
+			var max_angle_change := _surface_stick_max_angle()
+			var test_displacement := self.velocity - self.velocity.rotated(-sign(self.velocity.dot(surface_tangent)) * max_angle_change)
+			var test_collision := move_and_collide(test_displacement, true, true, true)
+			if test_collision != null && test_collision.normal.y < 0:
+				var surface_angle := test_collision.normal.angle_to(Vector2.UP)
+				var surface_angle_relative := test_collision.normal.angle_to(self.surface_normal)
+				if abs(surface_angle) <= WALL_ANGLE && abs(surface_angle_relative) <= max_angle_change:
 					self.position += test_collision.travel
 					found_new_surface = true
 					new_surface_normal = test_collision.normal
