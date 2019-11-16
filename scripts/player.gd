@@ -6,6 +6,8 @@ extends KinematicBody2D
 #     should. Seems to happen at random (fixed by tolerances?).
 #   * Weirdness when walljumping while skating makes player sometimes hit the
 #     wall immediately and start sliding (related to braking?)
+# * Make braking work on slopes, but not bring you to a stop (no transitioning
+#   to walk state by braking on slopes).
 # * Decide whether gliding should loosen the player at tops of hills.
 # * "Skate dash" to the ground from the air.
 # * Sometimes just clamp at max velocity instead of doing a reverse
@@ -177,6 +179,7 @@ const SKATE_ACCELERATION := 150.0
 const SKATE_BRAKE_FRICTION := 800.0
 # The minimum speed the player can brake to on both slopes and the floor.
 const SKATE_BRAKE_MIN_SPEED := 10.0
+const SKATE_BRAKE_SLOPE_MIN_SPEED := 100.0
 
 const SKATE_GRAVITY := 200.0
 const SKATE_MAX_REDIRECT_ANGLE := 40.0 * PI / 180.0
@@ -580,7 +583,8 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 	elif self.state == State.SKATE_BRAKE:
 		self.velocity += surface_tangent * surface_tangent.dot(SKATE_GRAVITY * Vector2.DOWN) * delta
 		if self.velocity.dot(self.skate_direction * surface_tangent) > 0.0:
-			_apply_drag(SKATE_BRAKE_FRICTION, delta)
+			if abs(self.surface_normal.angle_to(Vector2.UP)) <= WALK_MAX_ANGLE || self.skate_direction * surface_tangent.y < 0.0 || self.velocity.length() > SKATE_BRAKE_SLOPE_MIN_SPEED:
+				_apply_drag(SKATE_BRAKE_FRICTION, delta)
 	elif self.state == State.WIPEOUT:
 		if self.physics_state == PhysicsState.FLOOR || self.physics_state == PhysicsState.SLOPE:
 			self.velocity += surface_tangent * surface_tangent.dot(GRAVITY * Vector2.DOWN) * delta
@@ -987,7 +991,7 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 			self.state = State.SKATE
 		elif self.state == State.SKATE_BRAKE:
 			self.pivot_stored_velocity += (self.previous_velocity - self.velocity).dot(surface_tangent)
-			if self.velocity.length() < SKATE_BRAKE_MIN_SPEED:
+			if abs(self.surface_normal.angle_to(Vector2.UP)) <= WALK_MAX_ANGLE && self.velocity.length() < SKATE_BRAKE_MIN_SPEED:
 				self.state = State.PIVOT
 		elif self.state == State.BALLISTIC:
 			if impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
