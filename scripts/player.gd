@@ -926,6 +926,8 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 			printerr("Failed to wall jump.")
 			self.state = _get_default_normal_state(intent)
 		elif self.state == State.JUMP:
+			if !_on_surface(self.physics_state):
+				self.state = _get_default_normal_state(intent)
 			if self.velocity.y >= 0.0:
 				self.state = _get_default_normal_state(intent)
 		elif self.state == State.FALL:
