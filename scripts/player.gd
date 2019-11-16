@@ -1,6 +1,11 @@
 extends KinematicBody2D
 
 # Things that need to be done:
+# * Bugs:
+#   * Sometimes character doesn't stick to surfaces when skating when they
+#     should. Seems to happen at random.
+#   * Weirdness when walljumping while skating makes player sometimes hit the
+#     wall immediately and start sliding (related to braking?)
 # * Decide whether gliding should loosen the player at tops of hills.
 # * "Skate dash" to the ground from the air.
 # * Sometimes just clamp at max velocity instead of doing a reverse
@@ -39,7 +44,10 @@ enum State {
 	WIPEOUT,
 	JUMP_START,
 	JUMP_WALL_START,
-	JUMP_BALLISTIC_START,
+	JUMP_BALLISTIC_LOW_START,
+	JUMP_BALLISTIC_HIGH_START,
+	JUMP_BALLISTIC_WALL_LOW_START,
+	JUMP_BALLISTIC_WALL_HIGH_START,
 	JUMP,
 	FALL,
 	BALLISTIC
@@ -60,7 +68,10 @@ const STATE_NAME := {
 	State.WIPEOUT: "Wipeout",
 	State.JUMP_START: "JumpStart",
 	State.JUMP_WALL_START: "JumpWallStart",
-	State.JUMP_BALLISTIC_START: "JumpBallisticStart",
+	State.JUMP_BALLISTIC_LOW_START: "JumpBallisticLowStart",
+	State.JUMP_BALLISTIC_HIGH_START: "JumpBallisticHighStart",
+	State.JUMP_BALLISTIC_WALL_LOW_START: "JumpBallisticWallLowStart",
+	State.JUMP_BALLISTIC_WALL_HIGH_START: "JumpBallisticWallHighStart",
 	State.JUMP: "Jump",
 	State.FALL: "Fall",
 	State.BALLISTIC: "Ballistic"
@@ -85,7 +96,8 @@ const PHYSICS_STATE_NAME := {
 # Represents what the player wants to do.
 class Intent:
 	var move_direction := Vector2.ZERO
-	var jump := false
+	var jump_low := false
+	var jump_high := false
 	var skate_start := false
 	var skate_boost := false
 	var skate_glide := false
@@ -149,8 +161,8 @@ const SKATE_GLIDE_FRICTION_TIME := 0.1
 # Skating friction does not act below this speed. If the player slows down
 # below this speed on level ground, they will experience a slight acceleration
 # bringing them back up to this speed.
-const SKATE_MIN_SPEED := 100.0
-const SKATE_ACCELERATION := 40.0
+const SKATE_MIN_SPEED := 150.0
+const SKATE_ACCELERATION := 150.0
 
 # Friction when the player tries to slow down.
 const SKATE_BRAKE_FRICTION := 800.0
@@ -174,8 +186,21 @@ const JUMP_START_SPEED := 300.0
 const JUMP_WALL_START_SPEED := 350.0
 const JUMP_WALL_START_ANGLE := 35.0 * PI / 180.0
 
-const JUMP_BALLISTIC_START_SPEED := 300.0
-const JUMP_BALLISTIC_START_SPEED_SOFT := 200.0
+const JUMP_BALLISTIC_LOW_BASE_SPEED := 100.0
+const JUMP_BALLISTIC_LOW_SPEED_FACTOR := 1.0
+const JUMP_BALLISTIC_LOW_SLOPE := 1.0
+
+const JUMP_BALLISTIC_HIGH_BASE_SPEED := 200.0
+const JUMP_BALLISTIC_HIGH_SPEED_FACTOR := 0.6
+const JUMP_BALLISTIC_HIGH_SLOPE := 2.0 
+
+const JUMP_BALLISTIC_WALL_LOW_BASE_SPEED := 120.0
+const JUMP_BALLISTIC_WALL_LOW_SPEED_FACTOR := 0.8
+const JUMP_BALLISTIC_WALL_LOW_ANGLE := 20.0 * PI / 180.0
+
+const JUMP_BALLISTIC_WALL_HIGH_BASE_SPEED := 250.0
+const JUMP_BALLISTIC_WALL_HIGH_SPEED_FACTOR := 0.4
+const JUMP_BALLISTIC_WALL_HIGH_ANGLE := 45.0 * PI / 180.0
 
 const FALL_ACCELERATION := 800.0
 const FALL_FRICTION := 100.0
@@ -248,7 +273,10 @@ func _is_surface_state(state : int) -> bool:
 			|| state == State.SKATE_BRAKE \
 			|| state == State.JUMP_START \
 			|| state == State.JUMP_WALL_START \
-			|| state == State.JUMP_BALLISTIC_START \
+			|| state == State.JUMP_BALLISTIC_LOW_START \
+			|| state == State.JUMP_BALLISTIC_HIGH_START \
+			|| state == State.JUMP_BALLISTIC_WALL_LOW_START \
+			|| state == State.JUMP_BALLISTIC_WALL_HIGH_START \
 			|| state == State.JUMP \
 			|| state == State.WIPEOUT
 
@@ -286,7 +314,10 @@ func _is_skate_state(state : int) -> bool:
 			|| state == State.SKATE_BOOST \
 			|| state == State.SKATE_GLIDE \
 			|| state == State.SKATE_BRAKE \
-			|| state == State.JUMP_BALLISTIC_START \
+			|| state == State.JUMP_BALLISTIC_LOW_START \
+			|| state == State.JUMP_BALLISTIC_HIGH_START \
+			|| state == State.JUMP_BALLISTIC_WALL_LOW_START \
+			|| state == State.JUMP_BALLISTIC_WALL_HIGH_START \
 			|| state == State.BALLISTIC
 
 # A "stun state" is one in which the player cannot act.
@@ -299,7 +330,10 @@ func _is_prejump_state(state : int) -> bool:
 	return state == State.WALL_RELEASE \
 			|| state == State.JUMP_START \
 			|| state == State.JUMP_WALL_START \
-			|| state == State.JUMP_BALLISTIC_START
+			|| state == State.JUMP_BALLISTIC_LOW_START \
+			|| state == State.JUMP_BALLISTIC_HIGH_START \
+			|| state == State.JUMP_BALLISTIC_WALL_LOW_START \
+			|| state == State.JUMP_BALLISTIC_WALL_HIGH_START
 
 # Returns the fraction of the normal velocity that should be kept over a given
 # angle difference.
@@ -380,12 +414,18 @@ func _read_move_direction() -> Vector2:
 func _read_intent(move_direction : Vector2) -> Intent:
 	var intent := Intent.new()
 	intent.move_direction = move_direction
-	# Get input from the user.
-	# TODO: Perhaps some of these should be conditional depending on the
-	# current state. For example, pressing the skate button means to start
-	# skating when you are on the ground, but to boost when already skating.
+	# Get input from the user. The intent structure represents the action that
+	# the player wants to do, not the input that the player actually did, so
+	# parts of it are conditional on the current state.
 	if Input.is_action_just_pressed("jump"):
-		intent.jump = true
+		if _on_surface(self.physics_state):
+			if _is_skate_state(self.state):
+				if move_direction.y < 0 || move_direction.x * self.skate_direction < 0:
+					intent.jump_high = true
+				else:
+					intent.jump_low = true
+			elif _is_normal_state(self.state):
+				intent.jump_high = true
 	if _on_surface(self.physics_state):
 		if !_is_skate_state(self.state):
 			if self.state == State.PIVOT:
@@ -521,21 +561,41 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 	elif self.state == State.JUMP_WALL_START:
 		self.velocity.x = sign(self.surface_normal.x) * JUMP_WALL_START_SPEED * cos(JUMP_WALL_START_ANGLE)
 		self.velocity.y = -JUMP_WALL_START_SPEED * sin(JUMP_WALL_START_ANGLE)
-	elif self.state == State.JUMP_BALLISTIC_START:
-		var jump_direction := Vector2.ZERO
-		var jump_speed := JUMP_BALLISTIC_START_SPEED
-		if self.physics_state == PhysicsState.FLOOR || self.physics_state == PhysicsState.SLOPE:
-			if move_direction.length_squared() == 0.0:
-				jump_direction = self.surface_normal
-			else:
-				jump_direction = move_direction
-				if self.surface_normal.angle_to(jump_direction) > 45.0 * PI / 180.0:
-					jump_direction = self.surface_normal.rotated(45.0 * PI / 180.0)
-				elif self.surface_normal.angle_to(jump_direction) < -45.0 * PI / 180.0:
-					jump_direction = self.surface_normal.rotated(-45.0 * PI / 180.0)
-		elif self.physics_state == PhysicsState.WALL:
-			pass
-		self.velocity += jump_speed * jump_direction
+	elif self.state == State.JUMP_BALLISTIC_LOW_START \
+			|| self.state == State.JUMP_BALLISTIC_HIGH_START \
+			|| self.state == State.JUMP_BALLISTIC_WALL_LOW_START \
+			|| self.state == State.JUMP_BALLISTIC_WALL_HIGH_START:
+		var high_jump = self.state == State.JUMP_BALLISTIC_HIGH_START || self.state == State.JUMP_BALLISTIC_WALL_HIGH_START
+		var wall_jump = self.state == State.JUMP_BALLISTIC_WALL_LOW_START || self.state == State.JUMP_BALLISTIC_WALL_HIGH_START
+		var base_speed := 0.0
+		var speed_factor := 0.0
+		match self.state:
+			State.JUMP_BALLISTIC_LOW_START:
+				base_speed = JUMP_BALLISTIC_LOW_BASE_SPEED
+				speed_factor = JUMP_BALLISTIC_LOW_SPEED_FACTOR
+			State.JUMP_BALLISTIC_HIGH_START:
+				base_speed = JUMP_BALLISTIC_HIGH_BASE_SPEED
+				speed_factor = JUMP_BALLISTIC_HIGH_SPEED_FACTOR
+			State.JUMP_BALLISTIC_WALL_LOW_START:
+				base_speed = JUMP_BALLISTIC_WALL_LOW_BASE_SPEED
+				speed_factor = JUMP_BALLISTIC_WALL_LOW_SPEED_FACTOR
+			State.JUMP_BALLISTIC_WALL_HIGH_START:
+				base_speed = JUMP_BALLISTIC_WALL_HIGH_BASE_SPEED
+				speed_factor = JUMP_BALLISTIC_WALL_HIGH_SPEED_FACTOR
+		var jump_speed := base_speed + self.velocity.length() * speed_factor
+		var jump_angle := -PI / 2.0
+		if wall_jump:
+			var angle_increase := JUMP_BALLISTIC_WALL_HIGH_ANGLE if high_jump else JUMP_BALLISTIC_WALL_LOW_ANGLE
+			var surface_angle := surface_tangent.angle_to(Vector2.RIGHT)
+			jump_angle = surface_angle - float(self.skate_direction) * angle_increase
+		elif surface_tangent.x != 0.0:
+			var slope_increase := JUMP_BALLISTIC_HIGH_SLOPE if high_jump else JUMP_BALLISTIC_LOW_SLOPE
+			var surface_slope := float(self.skate_direction) * surface_tangent.y / surface_tangent.x
+			var jump_slope := surface_slope - slope_increase
+			jump_angle = atan2(jump_slope, float(self.skate_direction))
+		var jump_velocity := jump_speed * Vector2(cos(jump_angle), sin(jump_angle))
+		print(jump_velocity)
+		self.velocity = jump_velocity
 	elif self.state == State.JUMP || self.state == State.FALL:
 		# Apply gravity.
 		self.velocity.y += GRAVITY * delta
@@ -731,14 +791,13 @@ func _state_transition_physics(intent : Intent) -> bool:
 		# If the player is in the air but not in an air-compatible state, then
 		# transition into the correct air state.
 		if !_is_air_state(self.state):
-			if self.state == State.WALL_RELEASE:
-				self.state = State.FALL
-			elif self.state == State.JUMP_START:
-				self.state = State.JUMP
-			elif self.state == State.JUMP_WALL_START:
-				self.state = State.JUMP
-			elif self.state == State.JUMP_BALLISTIC_START:
-				self.state = State.BALLISTIC
+			if _is_prejump_state(self.state):
+				if _is_skate_state(self.state):
+					self.state = State.BALLISTIC
+				elif self.state == State.WALL_RELEASE:
+					self.state = State.FALL
+				else:
+					self.state = State.JUMP
 			elif _is_skate_state(self.state):
 				self.state = _get_default_skate_state(intent)
 			elif _is_normal_state(self.state):
@@ -759,7 +818,7 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 	
 	if _is_normal_state(self.state):
 		# Input transitions take priority over all else.
-		if intent.jump && _is_surface_state(self.state) && self.state != State.JUMP:
+		if intent.jump_high && _is_surface_state(self.state) && self.state != State.JUMP:
 			if self.physics_state == PhysicsState.WALL:
 				self.state = State.JUMP_WALL_START
 			else:
@@ -835,8 +894,17 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 		
 		if impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
 			self.state = State.WIPEOUT
-		elif intent.jump && _is_surface_state(self.state):
-			self.state = State.JUMP_BALLISTIC_START
+		elif (intent.jump_low || intent.jump_high) && _is_surface_state(self.state):
+			if self.physics_state == PhysicsState.WALL:
+				if intent.jump_high:
+					self.state = State.JUMP_BALLISTIC_WALL_HIGH_START
+				else:
+					self.state = State.JUMP_BALLISTIC_WALL_LOW_START
+			else:
+				if intent.jump_high:
+					self.state = State.JUMP_BALLISTIC_HIGH_START
+				else:
+					self.state = State.JUMP_BALLISTIC_LOW_START
 		# TODO: decide on additional condition like:
 		# (abs(self.surface_normal.angle_to(Vector2.UP)) <= WALK_MAX_ANGLE || self.skate_direction == int(sign(self.surface_normal.x)))
 		elif intent.skate_brake && _is_surface_state(self.state) && self.state != State.SKATE_BRAKE:
@@ -868,7 +936,10 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 		elif self.state == State.BALLISTIC:
 			if impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
 				self.state = State.WIPEOUT
-		elif self.state == State.JUMP_BALLISTIC_START:
+		elif self.state == State.JUMP_BALLISTIC_LOW_START \
+				|| self.state == State.JUMP_BALLISTIC_HIGH_START \
+				|| self.state == State.JUMP_BALLISTIC_WALL_LOW_START \
+				|| self.state == State.JUMP_BALLISTIC_WALL_HIGH_START:
 			printerr("Failed to ballistic jump.")
 			self.state = _get_default_normal_state(intent)
 	elif _is_stun_state(self.state):
@@ -955,7 +1026,7 @@ func _visuals_process() -> void:
 			next_animation = "WipeoutLeft"
 		else:
 			next_animation = "WipeoutRight"
-	elif self.state == State.JUMP_START || self.state == State.JUMP_WALL_START || self.state == State.JUMP_BALLISTIC_START || self.state == State.JUMP:
+	elif _is_prejump_state(self.state) || self.state == State.JUMP:
 		if self.facing_direction == -1:
 			next_animation = "JumpLeft"
 		else:
