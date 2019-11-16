@@ -107,13 +107,17 @@ const FLOOR_ANGLE := 5.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
 const WALL_ANGLE := 100.0 * PI / 180.0
 
-# If the player would land on the ground in this amount of time after leaving
-# the ground, then don't bother letting the player leave the ground at all.
-const SURFACE_DROP_TIME := 0.3
 # If the player is registered as leaving a surface, but the surface remains
 # within this distance of the player, then don't let the player leave the
 # surface.
 const SURFACE_PADDING := 0.5
+# How much tolerance to have when searching whether the player should stick to
+# nearby surface that is curving away.
+const SURFACE_STICK_SEARCH_TOLERANCE := 0.2
+
+# If the player would land on the ground in this amount of time after leaving
+# the ground, then don't bother letting the player leave the ground at all.
+const SURFACE_DROP_TIME := 0.3
 
 # The regular force of gravity. Depending on the state of the player, they may
 # experience a different amount of gravity than this.
@@ -543,7 +547,6 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 			velocity_delta = self.skate_boost_timer / SKATE_BOOST_MIN_TIME * SKATE_BOOST_MIN_SPEED
 		else:
 			velocity_delta = (1.0 - boost) * SKATE_BOOST_MIN_SPEED + boost * SKATE_BOOST_MAX_SPEED
-		print(self.velocity.length(), ", ", velocity_delta / self.skate_boost_timer)
 		self.velocity += self.skate_direction * surface_tangent * velocity_delta
 	elif self.state == State.SKATE_BRAKE:
 		self.velocity += surface_tangent * surface_tangent.dot(SKATE_GRAVITY * Vector2.DOWN) * delta
@@ -594,7 +597,6 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 			var jump_slope := surface_slope - slope_increase
 			jump_angle = atan2(jump_slope, float(self.skate_direction))
 		var jump_velocity := jump_speed * Vector2(cos(jump_angle), sin(jump_angle))
-		print(jump_velocity)
 		self.velocity = jump_velocity
 	elif self.state == State.JUMP || self.state == State.FALL:
 		# Apply gravity.
@@ -655,12 +657,13 @@ func _position_process(delta : float, n : int = 4) -> void:
 		# to whatever surface may still be below them. We do this in two ways:
 		# First, by checking for a surface at some slope beneath the player,
 		# and second, by checking for a surface at some angle beneath the
-		# player. 
+		# player.
+		var tolerance_factor := 1.0 + SURFACE_STICK_SEARCH_TOLERANCE
 		if self.velocity.x != 0:
 			var velocity_slope := self.velocity.y / self.velocity.x
 			var max_slope_change := _surface_stick_max_slope()
 			var extreme_slope := velocity_slope + max_slope_change
-			var test_displacement := Vector2.DOWN * velocity.x * delta * max_slope_change
+			var test_displacement := tolerance_factor * Vector2.DOWN * velocity.x * delta * max_slope_change
 			var test_collision := move_and_collide(test_displacement, true, true, true)
 			if test_collision != null && test_collision.normal.y < 0:
 				# If a surface below the player was found, then check that the
@@ -679,7 +682,7 @@ func _position_process(delta : float, n : int = 4) -> void:
 					new_surface_normal = test_collision.normal
 		if !found_new_surface:
 			var max_angle_change := _surface_stick_max_angle()
-			var test_displacement := (self.velocity - self.velocity.rotated(-sign(self.velocity.dot(surface_tangent)) * max_angle_change)) * delta
+			var test_displacement := tolerance_factor * (self.velocity - self.velocity.rotated(-sign(self.velocity.dot(surface_tangent)) * max_angle_change)) * delta
 			var test_collision := move_and_collide(test_displacement, true, true, true)
 			if test_collision != null && test_collision.normal.y < 0:
 				var surface_angle := test_collision.normal.angle_to(Vector2.UP)
