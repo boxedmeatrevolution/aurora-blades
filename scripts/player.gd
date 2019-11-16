@@ -1,15 +1,20 @@
 extends KinematicBody2D
 
 # Things that need to be done:
+# * Rework how braking inputs are read: allow braking out of the air, and
+#   disallow braking near to a turn-around.
+# * Make skating cling to hills better. Gliding should still be loose on the
+#   top of hills though.
+# * "Skate dash" to the ground from the air.
 # * Sometimes just clamp at max velocity instead of doing a reverse
 #   acceleration. A reverse acceleration can make velocities go back and forth
 #   around the maximum, and can be kind of ugly. Example: wall slide.
 # * Jumping rework:
-#   * Jumping goes higher if you hold button.
-#   * Jumping pushes you partly in the direction of the normal, and partly
-#     upwards.
-#   * Well-timed jumps just after hitting the ground can keep the player in
-#     ballistic state.
+#   * Only two types of jumps: forward jumps and upward jumps. On a wall, the
+#     forward jump takes you further up the wall, and the upward jump is like a
+#     wall jump.
+#   * Well-timed jumps just after hitting the ground can chain for greater
+#     velocity boost?
 # * Make sliding off of a slope and onto a floor give a small velocity boost,
 #   to stop awkward situations where the player keeps trying to walk onto a
 #   slope.
@@ -133,25 +138,24 @@ const SKATE_START_MIN_SPEED := 40.0
 const SKATE_START_SPEED := 150.0
 const SKATE_PIVOT_START_SPEED_FRACTION := 0.8
 # The speed gained when making a boost.
-const SKATE_BOOST_SPEED := 60.0
-const SKATE_BOOST_BASE_SPEED := 15.0
+const SKATE_BOOST_MAX_SPEED := 110.0
+const SKATE_BOOST_MIN_SPEED := 20.0
+const SKATE_BOOST_MIN_TIME := 0.1
 const SKATE_BOOST_MAX_TIME := 0.8
-# The friction reduction from holding a glide.
-const SKATE_GLIDE_FRICTION_FRACTION := 0.1
 # The minimum time which the player will feel regular friction at the start
 # of the glide.
+const SKATE_FRICTION_LOW := 50.0
+const SKATE_FRICTION_HIGH := 200.0
+const SKATE_FRICTION_TRANSITION_SPEED := 300.0
 const SKATE_GLIDE_FRICTION_TIME := 0.1
 # Skating friction does not act below this speed. If the player slows down
 # below this speed on level ground, they will experience a slight acceleration
 # bringing them back up to this speed.
 const SKATE_MIN_SPEED := 100.0
 const SKATE_ACCELERATION := 40.0
-# The coefficient of friction for skating. Friction is proportional to the
-# square of the velocity.
-const SKATE_FRICTION_COEFF := 15.0 / (100.0 * 100.0)
 
 # Friction when the player tries to slow down.
-const SKATE_BRAKE_FRICTION := 400.0
+const SKATE_BRAKE_FRICTION := 800.0
 # The minimum speed the player can brake to on both slopes and the floor.
 const SKATE_BRAKE_MIN_SPEED := 10.0
 
@@ -221,10 +225,10 @@ onready var animation_player := $Sprite/AnimationPlayer
 onready var ballistic_effect_sprite := $BallisticEffectSprite
 
 # Is the player on a surface, meaning on a floor, slope, or wall?
-func _on_surface() -> bool:
-	return self.physics_state == PhysicsState.FLOOR \
-			|| self.physics_state == PhysicsState.SLOPE \
-			|| self.physics_state == PhysicsState.WALL
+func _on_surface(physics_state : int) -> bool:
+	return physics_state == PhysicsState.FLOOR \
+			|| physics_state == PhysicsState.SLOPE \
+			|| physics_state == PhysicsState.WALL
 
 # "Surface states" are those player states which are meant to be compatible
 # with the player moving on a surface. If the player is in one of these states,
@@ -295,7 +299,7 @@ func _is_stun_state(state : int) -> bool:
 # angle difference.
 func _redirect_normal_velocity(angle_difference : float) -> float:
 	if _is_skate_state(self.state):
-		if _on_surface():
+		if _on_surface(self.physics_state):
 			return clamp((SKATE_MAX_REDIRECT_ANGLE - angle_difference) / SKATE_MAX_REDIRECT_ANGLE, 0.0, 1.0) * SKATE_MAX_REDIRECT_FRACTION
 		else:
 			return clamp((BALLISTIC_MAX_REDIRECT_ANGLE - angle_difference) / BALLISTIC_MAX_REDIRECT_ANGLE, 0.0, 1.0) * BALLISTIC_MAX_REDIRECT_FRACTION
@@ -366,7 +370,7 @@ func _read_intent(move_direction : Vector2) -> Intent:
 	# skating when you are on the ground, but to boost when already skating.
 	if Input.is_action_just_pressed("jump"):
 		intent.jump = true
-	if _on_surface():
+	if _on_surface(self.physics_state):
 		if !_is_skate_state(self.state):
 			if self.state == State.PIVOT:
 				if sign(move_direction.x) == -sign(self.pivot_stored_velocity) && Input.is_action_just_pressed("skate"):
@@ -378,6 +382,10 @@ func _read_intent(move_direction : Vector2) -> Intent:
 			if self.state != State.SKATE_BRAKE:
 				if self.skate_direction == -1 && Input.is_action_just_pressed("move_right") \
 						|| self.skate_direction == 1 && Input.is_action_just_pressed("move_left"):
+					intent.skate_brake = true
+				if !_on_surface(self.previous_physics_state) && \
+						(self.skate_direction == -1 && Input.is_action_pressed("move_right") \
+						|| self.skate_direction == 1 && Input.is_action_pressed("move_left")):
 					intent.skate_brake = true
 			else:
 				if self.skate_direction == -1 && Input.is_action_pressed("move_right") \
@@ -454,9 +462,11 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 		var skate_speed := SKATE_START_SPEED + SKATE_PIVOT_START_SPEED_FRACTION * max(abs(self.pivot_stored_velocity) - SKATE_START_SPEED, 0.0)
 		self.velocity = self.skate_direction * surface_tangent * skate_speed
 	elif self.state == State.SKATE || self.state == State.SKATE_GLIDE:
-		var friction := SKATE_FRICTION_COEFF * self.velocity.length_squared()
+		var friction := SKATE_FRICTION_LOW
+		if self.velocity.length() > SKATE_FRICTION_TRANSITION_SPEED:
+			friction = SKATE_FRICTION_HIGH
 		if self.state == State.SKATE_GLIDE && self.skate_glide_timer > SKATE_GLIDE_FRICTION_TIME:
-			friction *= SKATE_GLIDE_FRICTION_FRACTION
+			friction = SKATE_FRICTION_LOW
 		if self.physics_state == PhysicsState.FLOOR:
 			if self.velocity.dot(self.skate_direction * surface_tangent) > SKATE_MIN_SPEED:
 				_apply_drag(friction, delta)
@@ -469,8 +479,16 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 			else:
 				self.velocity += surface_tangent * surface_tangent.dot(GRAVITY * Vector2.DOWN) * delta
 	elif self.state == State.SKATE_BOOST:
-		var boost := clamp(self.skate_boost_timer / SKATE_BOOST_MAX_TIME, 0.0, 1.0)
-		self.velocity += self.skate_direction * surface_tangent * (boost * SKATE_BOOST_SPEED + SKATE_BOOST_BASE_SPEED)
+		var boost := (self.skate_boost_timer - SKATE_BOOST_MIN_TIME) / (SKATE_BOOST_MAX_TIME - SKATE_BOOST_MIN_TIME)
+		var velocity_delta := 0.0
+		if boost > 1.0:
+			velocity_delta = SKATE_BOOST_MAX_SPEED
+		elif boost < 0.0:
+			velocity_delta = self.skate_boost_timer / SKATE_BOOST_MIN_TIME * SKATE_BOOST_MIN_SPEED
+		else:
+			velocity_delta = (1.0 - boost) * SKATE_BOOST_MIN_SPEED + boost * SKATE_BOOST_MAX_SPEED
+		print(self.velocity.length(), ", ", velocity_delta / self.skate_boost_timer)
+		self.velocity += self.skate_direction * surface_tangent * velocity_delta
 	elif self.state == State.SKATE_BRAKE:
 		self.velocity += surface_tangent * surface_tangent.dot(SKATE_GRAVITY * Vector2.DOWN) * delta
 		if self.velocity.dot(self.skate_direction * surface_tangent) > 0.0:
@@ -554,7 +572,7 @@ func _position_process(delta : float, n : int = 4) -> void:
 		delta_remainder = collision.remainder.length() / velocity.length()
 		found_new_surface = true
 		new_surface_normal = collision.normal
-	elif _on_surface() && collision == null:
+	elif _on_surface(self.physics_state) && collision == null:
 		delta_remainder = 0.0
 		# If the player used to be on a surface, then we should try to stick
 		# to whatever surface may still be below them.
@@ -593,7 +611,7 @@ func _position_process(delta : float, n : int = 4) -> void:
 	# Before committing to the new surface, make sure that there isn't a
 	# better choice of surface to be on by looking in the direction of the
 	# last surface the player was on.
-	if _on_surface():
+	if _on_surface(self.physics_state):
 		var test_collision := move_and_collide(-self.surface_normal * SURFACE_PADDING, true, true, true)
 		if test_collision != null:
 			var test_normal := test_collision.normal
@@ -667,7 +685,7 @@ func _handle_state_transition(old_state : int) -> bool:
 # basically means air-to-surface and surface-to-air state transitions.
 func _state_transition_physics(intent : Intent) -> bool:
 	var old_state := self.state
-	if _on_surface():
+	if _on_surface(self.physics_state):
 		# If `_on_surface` is true, then the player must be in a surface state.
 		# In case the player is not, make a transition into one of the surface
 		# states.
@@ -697,9 +715,9 @@ func _state_transition_physics(intent : Intent) -> bool:
 			else:
 				self.state = State.WIPEOUT
 	
-	if self._on_surface() && !_is_surface_state(self.state):
+	if self._on_surface(self.physics_state) && !_is_surface_state(self.state):
 		printerr("On surface but state ", STATE_NAME[self.state], " is not a surface state.")
-	if !self._on_surface() && !_is_air_state(self.state):
+	if !self._on_surface(self.physics_state) && !_is_air_state(self.state):
 		printerr("In air but state ", STATE_NAME[self.state], " is not an air state.")
 	
 	return _handle_state_transition(old_state)
@@ -771,7 +789,7 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 	elif _is_skate_state(self.state):
 		self.skate_timer += delta
 		self.skate_boost_timer += delta
-		if _on_surface():
+		if _on_surface(self.physics_state):
 			if self.velocity.dot(self.skate_direction * surface_tangent) < 0.0:
 				if self.physics_state == PhysicsState.SLOPE || self.physics_state == PhysicsState.WALL:
 					self.skate_direction = -self.skate_direction
@@ -788,6 +806,8 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 			self.state = State.WIPEOUT
 		elif intent.jump && _is_surface_state(self.state):
 			self.state = State.JUMP_BALLISTIC_START
+		# TODO: decide on additional condition like:
+		# (abs(self.surface_normal.angle_to(Vector2.UP)) <= WALK_MAX_ANGLE || self.skate_direction == int(sign(self.surface_normal.x)))
 		elif intent.skate_brake && _is_surface_state(self.state) && self.state != State.SKATE_BRAKE:
 			self.state = State.SKATE_BRAKE
 		elif !intent.skate_brake && self.state == State.SKATE_BRAKE:
@@ -827,9 +847,9 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 				if self.wipeout_timer > WIPEOUT_TIME:
 					self.state = _get_default_normal_state(intent)
 	
-	if self._on_surface() && !_is_surface_state(self.state):
+	if self._on_surface(self.physics_state) && !_is_surface_state(self.state):
 		printerr("On surface but state ", STATE_NAME[self.state], " is not a surface state.")
-	if !self._on_surface() && !_is_air_state(self.state):
+	if !self._on_surface(self.physics_state) && !_is_air_state(self.state):
 		printerr("In air but state ", STATE_NAME[self.state], " is not an air state.")
 	
 	return _handle_state_transition(old_state)
@@ -837,7 +857,7 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 # Gets an appropriate choice of state based on the physics state of the player.
 # This is used when resetting the player state.
 func _get_default_normal_state(intent : Intent, prefer_slide : bool = false) -> int:
-	if !_on_surface():
+	if !_on_surface(self.physics_state):
 		return State.FALL
 	else:
 		var surface_angle = self.surface_normal.angle_to(Vector2.UP)
