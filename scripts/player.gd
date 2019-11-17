@@ -9,8 +9,6 @@ extends KinematicBody2D
 # * Possibility: A gradual v^2 friction force that is an obstacle to getting
 #   very large amounts of velocity.
 # * Bugs:
-#   * Velocity redirection works very wierdly sometimes, particularly when
-#     coming in from the air.
 #   * If boosting while the animation is still going, just schedule another
 #     boost for right after the current one is finished.
 # * Downhill walljumps can feel unintuitive because of the huge gain in
@@ -22,15 +20,7 @@ extends KinematicBody2D
 # * Sometimes just clamp at max velocity instead of doing a reverse
 #   acceleration. A reverse acceleration can make velocities go back and forth
 #   around the maximum, and can be kind of ugly. Example: wall slide.
-# * Add all animations.
-# * Make sliding off of a slope and onto a floor give a small velocity boost,
-#   to stop awkward situations where the player keeps trying to walk onto a
-#   slope.
-# * Some kind of ballistic arial system. Some thoughts on this:
-#   * The ballistic state can allow for redirection by dashes and well-timed
-#     wall-jumps.
-#   * The ballistic state allows for the skating state to be entered directly
-#     at high speed upon landing (do you have to press a button?)
+# * Make glow only appear when in a "killer" state above a certain velocity.
 
 # The allowed player states.
 enum State {
@@ -227,8 +217,9 @@ const FALL_MAX_SPEED_HORIZONTAL := 150.0
 const FALL_MAX_SPEED_VERTICAL := 450.0
 
 const BALLISTIC_GRAVITY := 800.0
-# The tangential acceleration at which the ballistic trajectory can be changed.
-const BALLISTIC_NORMAL_ACCELERATION := 60.0
+# The normal acceleration at which the ballistic trajectory can be changed.
+const BALLISTIC_ACCELERATION_NORMAL := 400.0
+const BALLISTIC_ACCELERATION_TANGENT := 200.0
 # The acceleration that is applied to the trajectory if the max speed is
 # exceeded.
 const BALLISTIC_FRICTION := 400.0
@@ -668,18 +659,24 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 			_apply_drag(BALLISTIC_FRICTION, delta)
 		else:
 			self.velocity.y += BALLISTIC_GRAVITY * delta
-		var velocity_normal = Vector2(-self.velocity.y, self.velocity.x)
-		if velocity_normal.length_squared() != 0.0:
+		var velocity_normal := Vector2(-self.velocity.y, self.velocity.x)
+		var velocity_tangent := self.velocity
+		if velocity_tangent.length_squared() != 0.0 && velocity_normal.length_squared() != 0.0:
 			velocity_normal = velocity_normal.normalized()
-			velocity_normal *= sign(velocity_normal.dot(move_direction))
-			self.velocity += velocity_normal * BALLISTIC_NORMAL_ACCELERATION * delta
+			velocity_tangent = velocity_tangent.normalized()
+			if move_direction.length_squared() != 0.0:
+				var direction := move_direction.normalized()
+				var normal_component := velocity_normal.dot(direction) / BALLISTIC_ACCELERATION_NORMAL
+				var tangent_component := velocity_tangent.dot(direction) / BALLISTIC_ACCELERATION_TANGENT
+				var scale := sqrt(1.0 / (normal_component * normal_component + tangent_component * tangent_component))
+				self.velocity += scale * direction * delta
 	elif self.state == State.DIVE_CHARGE:
 		if self.velocity.length() >= DIVE_CHARGE_FRICTION_MIN_SPEED:
 			_apply_drag(DIVE_CHARGE_FRICTION, delta)
 		else:
 			self.velocity = DIVE_CHARGE_SPEED * Vector2.UP
 	elif self.state == State.DIVE_START:
-		var dive_velocity = DIVE_SPEED * Vector2.DOWN.rotated(-sign(self.dive_direction) * DIVE_ANGLE)
+		var dive_velocity := DIVE_SPEED * Vector2.DOWN.rotated(-sign(self.dive_direction) * DIVE_ANGLE)
 		self.velocity = dive_velocity
 	elif self.state == State.DIVE:
 		self.velocity.y += DIVE_GRAVITY
