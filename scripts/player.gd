@@ -195,12 +195,12 @@ const JUMP_START_SPEED := 300.0
 const JUMP_WALL_START_SPEED := 350.0
 const JUMP_WALL_START_ANGLE := 35.0 * PI / 180.0
 
-const JUMP_BALLISTIC_LOW_BASE_SPEED := 150.0
-const JUMP_BALLISTIC_LOW_SPEED_FACTOR := 1.0
+const JUMP_BALLISTIC_LOW_BASE_SPEED := 300.0
+const JUMP_BALLISTIC_LOW_SPEED_FACTOR := 0.5
 const JUMP_BALLISTIC_LOW_SLOPE := 1.2
 
-const JUMP_BALLISTIC_HIGH_BASE_SPEED := 250.0
-const JUMP_BALLISTIC_HIGH_SPEED_FACTOR := 0.6
+const JUMP_BALLISTIC_HIGH_BASE_SPEED := 350.0
+const JUMP_BALLISTIC_HIGH_SPEED_FACTOR := 0.3
 const JUMP_BALLISTIC_HIGH_SLOPE := 2.0
 
 const JUMP_BALLISTIC_WALL_LOW_BASE_SPEED := 200.0
@@ -212,7 +212,7 @@ const JUMP_BALLISTIC_WALL_HIGH_SPEED_FACTOR := 0.4
 const JUMP_BALLISTIC_WALL_HIGH_ANGLE := 45.0 * PI / 180.0
 
 # The time before the player gains control when doing a ballistic jump.
-const JUMP_BALLISTIC_CONTROL_TIME := 0.2
+const JUMP_BALLISTIC_CONTROL_TIME := 0.3
 
 const FALL_ACCELERATION := 800.0
 const FALL_FRICTION := 100.0
@@ -450,6 +450,7 @@ func _physics_process(delta : float) -> void:
 	# Print the state for debugging purposes.
 	if self.previous_state != self.state || self.previous_physics_state != self.physics_state:
 		print(PHYSICS_STATE_NAME[self.physics_state], "; ", STATE_NAME[self.state])
+	print(self.velocity.length())
 	
 	self.previous_state = self.state
 	self.previous_physics_state = self.physics_state
@@ -669,11 +670,11 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 		else:
 			self.velocity.x += move_direction.x * FALL_ACCELERATION * delta
 	elif self.state == State.BALLISTIC:
+		var is_high_speed := self.velocity.length() > BALLISTIC_FRICTION_TRANSITION_SPEED
+		var friction := BALLISTIC_FRICTION_HIGH if is_high_speed else BALLISTIC_FRICTION_LOW
+		_apply_drag(friction, delta)
+		self.velocity.y += BALLISTIC_GRAVITY * delta
 		if self.air_timer >= JUMP_BALLISTIC_CONTROL_TIME:
-			var is_high_speed := self.velocity.length() > BALLISTIC_FRICTION_TRANSITION_SPEED
-			var friction := BALLISTIC_FRICTION_HIGH if is_high_speed else BALLISTIC_FRICTION_LOW
-			_apply_drag(friction, delta)
-			self.velocity.y += BALLISTIC_GRAVITY * delta
 			var velocity_normal := Vector2(-self.velocity.y, self.velocity.x)
 			var velocity_tangent := self.velocity
 			if velocity_tangent.length_squared() != 0.0 && velocity_normal.length_squared() != 0.0:
