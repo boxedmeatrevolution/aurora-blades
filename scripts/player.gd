@@ -1,9 +1,18 @@
 extends KinematicBody2D
 
 # Things that need to be done:
+# * Redirect reservoir: After every velocity redirect, there is a reservoir
+#   that slowly empties. When empty, velocity redirects are no longer as
+#   efficient. The reservoir refills with time. Purpose: to keep a super-fast
+#   player from just whipping around tight bends without consequence. (It looks
+#   weird, like the player should be slowed down signficantly).
+# * Possibility: A gradual v^2 friction force that is an obstacle to getting
+#   very large amounts of velocity.
 # * Bugs:
 #   * Velocity redirection works very wierdly sometimes, particularly when
 #     coming in from the air.
+#   * If boosting while the animation is still going, just schedule another
+#     boost for right after the current one is finished.
 # * Downhill walljumps can feel unintuitive because of the huge gain in
 #   velocity after just barely turning around at the top.
 # * It's very easy to accidentally dash into the ground, especially when
@@ -47,6 +56,7 @@ enum State {
 	JUMP,
 	FALL,
 	BALLISTIC,
+	DIVE_CHARGE,
 	DIVE_START,
 	DIVE
 }
@@ -73,6 +83,7 @@ const STATE_NAME := {
 	State.JUMP: "Jump",
 	State.FALL: "Fall",
 	State.BALLISTIC: "Ballistic",
+	State.DIVE_CHARGE: "DiveCharge",
 	State.DIVE_START: "DiveStart",
 	State.DIVE: "Dive"
 }
@@ -160,7 +171,7 @@ const SKATE_BOOST_MAX_TIME := 0.8
 # The minimum time which the player will feel regular friction at the start
 # of the glide.
 const SKATE_FRICTION_LOW := 30.0
-const SKATE_FRICTION_HIGH := 200.0
+const SKATE_FRICTION_HIGH := 400.0
 const SKATE_FRICTION_TRANSITION_SPEED := 300.0
 const SKATE_GLIDE_FRICTION_TIME := 0.1
 # Skating friction does not act below this speed. If the player slows down
@@ -226,11 +237,15 @@ const BALLISTIC_MIN_REDIRECT_ANGLE := 30.0 * PI / 180.0
 const BALLISTIC_MAX_REDIRECT_ANGLE := 80.0 * PI / 180.0
 const BALLISTIC_MAX_REDIRECT_FRACTION := 1.0
 
-const DIVE_START_TIME := 0.2
-const DIVE_START_FRICTION := 3000.0
-const DIVE_TIME := 0.4
-const DIVE_ANGLE := 40.0 * PI / 180.0
-const DIVE_SPEED := 350.0
+const DIVE_CHARGE_TIME := 0.4
+const DIVE_CHARGE_FRICTION := 2000.0
+const DIVE_CHARGE_FRICTION_MIN_SPEED := 100.0
+const DIVE_CHARGE_SPEED := 80.0
+const DIVE_TIME := 0.5
+const DIVE_ANGLE := 45.0 * PI / 180.0
+const DIVE_SPEED := 300.0
+const DIVE_GRAVITY := 20.0
+const DIVE_FRICTION := 50.0
 
 var state : int = State.FALL
 var physics_state : int = PhysicsState.AIR
@@ -251,7 +266,7 @@ var wipeout_timer := 0.0
 # The amount of velocity stored when making a pivot.
 var pivot_stored_velocity := 0.0
 var pivot_timer := 0.0
-var dive_start_timer := 0.0
+var dive_charge_timer := 0.0
 var dive_timer := 0.0
 var dive_direction := 1
 
@@ -296,7 +311,8 @@ func _is_surface_state(state : int) -> bool:
 			|| state == State.JUMP_BALLISTIC_WALL_LOW_START \
 			|| state == State.JUMP_BALLISTIC_WALL_HIGH_START \
 			|| state == State.JUMP \
-			|| state == State.WIPEOUT
+			|| state == State.WIPEOUT \
+			|| state == State.DIVE_CHARGE
 
 # "Air states" are the opposite of surface states. Note that a state can be
 # both an air state and a surface state. That simply means that the player may
@@ -307,7 +323,8 @@ func _is_air_state(state : int) -> bool:
 			|| state == State.DIVE_START \
 			|| state == State.DIVE \
 			|| state == State.JUMP \
-			|| state == State.WIPEOUT
+			|| state == State.WIPEOUT \
+			|| state == State.DIVE_CHARGE
 
 # A "normal" state are those related to moving around at slow velocities with
 # normal platforming controls. While in a normal state, the only way to
@@ -324,7 +341,7 @@ func _is_normal_state(state : int) -> bool:
 			|| state == State.JUMP_WALL_START \
 			|| state == State.JUMP \
 			|| state == State.FALL \
-			|| state == State.DIVE_START
+			|| state == State.DIVE_CHARGE
 
 # "Skate states" are those related to skating. While in a skate state, the only
 # way to transition to a normal state is through braking (SKATE_BRAKE) or
@@ -341,12 +358,15 @@ func _is_skate_state(state : int) -> bool:
 			|| state == State.JUMP_BALLISTIC_WALL_LOW_START \
 			|| state == State.JUMP_BALLISTIC_WALL_HIGH_START \
 			|| state == State.BALLISTIC \
+			|| state == State.DIVE_START \
 			|| state == State.DIVE
 
 # A "stun state" is one in which the player cannot act.
 func _is_stun_state(state : int) -> bool:
 	return state == State.WIPEOUT \
+			|| state == State.DIVE_CHARGE \
 			|| state == State.DIVE_START \
+			|| state == State.DIVE \
 			|| state == State.JUMP_START \
 			|| state == State.JUMP_WALL_START \
 			|| state == State.JUMP_BALLISTIC_LOW_START \
@@ -407,7 +427,6 @@ func _ready() -> void:
 
 func _physics_process(delta : float) -> void:
 	var move_direction := _read_move_direction()
-	_facing_direction_process(move_direction)
 	# Update the velocities based on the current state.
 	_state_process(delta, move_direction)
 	# Step the position forward by the timestep.
@@ -419,6 +438,7 @@ func _physics_process(delta : float) -> void:
 	if _state_transition(delta, intent):
 		intent = _read_intent(move_direction)
 	# Update the animation based on the state.
+	_facing_direction_process(move_direction)
 	_visuals_process()
 	
 	# Print the state for debugging purposes.
@@ -653,11 +673,17 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 			# When in the ballistic state, the player's direction can be
 			# changed, but not the magnitude of the velocity.
 			self.velocity = self.velocity.rotated(angle_change_direction * BALLISTIC_ANGULAR_SPEED * delta)
+	elif self.state == State.DIVE_CHARGE:
+		if self.velocity.length() >= DIVE_CHARGE_FRICTION_MIN_SPEED:
+			_apply_drag(DIVE_CHARGE_FRICTION, delta)
+		else:
+			self.velocity = DIVE_CHARGE_SPEED * Vector2.UP
 	elif self.state == State.DIVE_START:
-		_apply_drag(DIVE_START_FRICTION, delta)
-	elif self.state == State.DIVE:
 		var dive_velocity = DIVE_SPEED * Vector2.DOWN.rotated(-sign(self.dive_direction) * DIVE_ANGLE)
 		self.velocity = dive_velocity
+	elif self.state == State.DIVE:
+		self.velocity.y += DIVE_GRAVITY
+		_apply_drag(DIVE_FRICTION, delta)
 	
 	# Clamp the velocity by the absolute max speed.
 	self.velocity = self.velocity.clamped(MAX_SPEED)
@@ -807,8 +833,8 @@ func _handle_state_transition(old_state : int) -> bool:
 			self.skate_glide_timer = 0.0
 		elif self.state == State.SKATE_BRAKE:
 			self.pivot_stored_velocity = 0.0
-		elif self.state == State.DIVE_START:
-			self.dive_start_timer = 0.0
+		elif self.state == State.DIVE_CHARGE:
+			self.dive_charge_timer = 0.0
 			self.dive_direction = self.facing_direction
 		elif self.state == State.DIVE:
 			self.dive_timer = 0.0
@@ -871,7 +897,7 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 			else:
 				self.state = State.JUMP_START
 		elif can_act && intent.dive && _is_air_state(self.state):
-			self.state = State.DIVE_START
+			self.state = State.DIVE_CHARGE
 		elif can_act && intent.skate_start && self.state == State.PIVOT && self.pivot_stored_velocity != 0.0:
 			self.state = State.SKATE_PIVOT_START
 		elif can_act && intent.skate_start && _is_surface_state(self.state) && self.state != State.JUMP && self.velocity.length() >= SKATE_START_MIN_SPEED:
@@ -932,10 +958,10 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 				self.state = _get_default_normal_state(intent)
 		elif self.state == State.FALL:
 			pass
-		elif self.state == State.DIVE_START:
-			self.dive_start_timer += delta
-			if self.dive_start_timer > DIVE_START_TIME:
-				self.state = State.DIVE
+		elif self.state == State.DIVE_CHARGE:
+			self.dive_charge_timer += delta
+			if self.dive_charge_timer > DIVE_CHARGE_TIME:
+				self.state = State.DIVE_START
 	elif _is_skate_state(self.state):
 		self.skate_timer += delta
 		self.skate_boost_timer += delta
@@ -945,6 +971,10 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 					self.skate_direction = -self.skate_direction
 				else:
 					printerr("Flipped skate direction on floor.")
+		else:
+			var velocity_sign := int(sign(self.velocity.x))
+			if velocity_sign * self.skate_direction == -1:
+				self.skate_direction = velocity_sign
 		
 		# Impulse is used to determine if the player has crashed into a wall.
 		var impulse := self.velocity.length() - self.previous_velocity.length()
@@ -955,7 +985,7 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 		if impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
 			self.state = State.WIPEOUT
 		elif can_act && intent.dive && _is_air_state(self.state):
-			self.state = State.DIVE_START
+			self.state = State.DIVE_CHARGE
 		elif can_act && (intent.jump_low || intent.jump_high) && _is_surface_state(self.state):
 			if self.physics_state == PhysicsState.WALL:
 				if intent.jump_high:
@@ -1004,6 +1034,8 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 				|| self.state == State.JUMP_BALLISTIC_WALL_HIGH_START:
 			printerr("Failed to ballistic jump.")
 			self.state = _get_default_normal_state(intent)
+		elif self.state == State.DIVE_START:
+			self.state = State.DIVE
 		elif self.state == State.DIVE:
 			self.dive_timer += delta
 			if self.dive_timer > DIVE_TIME:
@@ -1070,17 +1102,28 @@ func _visuals_process() -> void:
 			next_animation = "WallSlideLeft"
 		else:
 			next_animation = "WallSlideRight"
-	elif self.state == State.SKATE_START || self.state == State.SKATE_BOOST:
-		if self.facing_direction == -1:
-			next_animation = "SkateBoostLeft"
-		else:
-			next_animation = "SkateBoostRight"
 	elif self.state == State.SKATE:
 		if !is_playing || (current_animation != "SkateBoostLeft" && current_animation != "SkateBoostRight"):
 			if self.facing_direction == -1:
 				next_animation = "SkateLeft"
 			else:
 				next_animation = "SkateRight"
+	elif self.state == State.SKATE_START || self.state == State.SKATE_BOOST || self.state == State.SKATE_PIVOT_START:
+		if self.facing_direction == -1:
+			next_animation = "SkateBoostLeft"
+		else:
+			next_animation = "SkateBoostRight"
+	elif self.state == State.SKATE_GLIDE:
+		if !is_playing || (current_animation != "SkateBoostLeft" && current_animation != "SkateBoostRight"):
+			if self.facing_direction == -1:
+				next_animation = "SkateGlideLeft"
+			else:
+				next_animation = "SkateGlideRight"
+	elif self.state == State.SKATE_BRAKE || self.state == State.PIVOT:
+		if self.facing_direction == -1:
+			next_animation = "SkateBrakeLeft"
+		else:
+			next_animation = "SkateBrakeRight"
 	elif self.state == State.WIPEOUT:
 		if self.facing_direction == -1:
 			next_animation = "WipeoutLeft"
@@ -1098,12 +1141,21 @@ func _visuals_process() -> void:
 			next_animation = "FallRight"
 	elif self.state == State.BALLISTIC:
 		if self.facing_direction == -1:
-			next_animation = "FallLeft"
+			next_animation = "BallisticLeft"
 		else:
-			next_animation = "FallRight"
+			next_animation = "BallisticRight"
+	elif self.state == State.DIVE_CHARGE:
+		if self.facing_direction == -1:
+			next_animation = "DiveChargeLeft"
+		else:
+			next_animation = "DiveChargeRight"
+	elif self.state == State.DIVE:
+		if self.facing_direction == -1:
+			next_animation = "DiveLeft"
+		else:
+			next_animation = "DiveRight"
 	else:
-		pass
-		#printerr("No animation found for state ", STATE_NAME[self.state])
+		printerr("No animation found for state ", STATE_NAME[self.state])
 	if self.animation_player.current_animation != next_animation:
 		self.animation_player.play(next_animation)
 	

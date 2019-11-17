@@ -1,8 +1,104 @@
-[gd_scene load_steps=24 format=2]
+[gd_scene load_steps=34 format=2]
 
 [ext_resource path="res://scripts/player.gd" type="Script" id=1]
 [ext_resource path="res://sprites/player.png" type="Texture" id=2]
 [ext_resource path="res://sprites/player_boost_effect.png" type="Texture" id=3]
+
+[sub_resource type="Animation" id=25]
+resource_name = "BallisticLeft"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 32 ]
+}
+
+[sub_resource type="Animation" id=26]
+resource_name = "BallisticRight"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 33 ]
+}
+
+[sub_resource type="Animation" id=29]
+resource_name = "DiveChargeLeft"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 31 ]
+}
+
+[sub_resource type="Animation" id=30]
+resource_name = "DiveChargeRight"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 34 ]
+}
+
+[sub_resource type="Animation" id=27]
+resource_name = "DiveLeft"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 30 ]
+}
+
+[sub_resource type="Animation" id=28]
+resource_name = "DiveRight"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 35 ]
+}
 
 [sub_resource type="Animation" id=1]
 resource_name = "FallLeft"
@@ -100,6 +196,70 @@ tracks/0/keys = {
 "values": [ 21, 22, 23 ]
 }
 
+[sub_resource type="Animation" id=21]
+resource_name = "SkateBrakeLeft"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 24 ]
+}
+
+[sub_resource type="Animation" id=22]
+resource_name = "SkateBrakeRight"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 29 ]
+}
+
+[sub_resource type="Animation" id=23]
+resource_name = "SkateGlideLeft"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 25 ]
+}
+
+[sub_resource type="Animation" id=24]
+resource_name = "SkateGlideRight"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 28 ]
+}
+
 [sub_resource type="Animation" id=7]
 resource_name = "SkateLeft"
 loop = true
@@ -113,7 +273,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 1,
-"values": [ 18 ]
+"values": [ 26 ]
 }
 
 [sub_resource type="Animation" id=8]
@@ -129,7 +289,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 1,
-"values": [ 23 ]
+"values": [ 27 ]
 }
 
 [sub_resource type="Animation" id=9]
@@ -314,21 +474,30 @@ __meta__ = {
 }
 
 [node name="Sprite" type="Sprite" parent="."]
-editor/display_folded = true
 position = Vector2( 0, -2 )
 texture = ExtResource( 2 )
-vframes = 4
+vframes = 6
 hframes = 6
-frame = 8
+frame = 18
 region_rect = Rect2( 0, 0, 24, 32 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Sprite"]
+anims/BallisticLeft = SubResource( 25 )
+anims/BallisticRight = SubResource( 26 )
+anims/DiveChargeLeft = SubResource( 29 )
+anims/DiveChargeRight = SubResource( 30 )
+anims/DiveLeft = SubResource( 27 )
+anims/DiveRight = SubResource( 28 )
 anims/FallLeft = SubResource( 1 )
 anims/FallRight = SubResource( 2 )
 anims/JumpLeft = SubResource( 3 )
 anims/JumpRight = SubResource( 4 )
 anims/SkateBoostLeft = SubResource( 5 )
 anims/SkateBoostRight = SubResource( 6 )
+anims/SkateBrakeLeft = SubResource( 21 )
+anims/SkateBrakeRight = SubResource( 22 )
+anims/SkateGlideLeft = SubResource( 23 )
+anims/SkateGlideRight = SubResource( 24 )
 anims/SkateLeft = SubResource( 7 )
 anims/SkateRight = SubResource( 8 )
 anims/SlideLeft = SubResource( 9 )
