@@ -227,11 +227,11 @@ const FALL_MAX_SPEED_HORIZONTAL := 150.0
 const FALL_MAX_SPEED_VERTICAL := 450.0
 
 const BALLISTIC_GRAVITY := 800.0
-# The angular speed at which the ballistic trajectory can be affected.
-const BALLISTIC_ANGULAR_SPEED := 30.0 * PI / 180.0
+# The tangential acceleration at which the ballistic trajectory can be changed.
+const BALLISTIC_NORMAL_ACCELERATION := 60.0
 # The acceleration that is applied to the trajectory if the max speed is
 # exceeded.
-const BALLISTIC_ACCELERATION := 400.0
+const BALLISTIC_FRICTION := 400.0
 const BALLISTIC_MAX_SPEED := 1000.0
 const BALLISTIC_MIN_REDIRECT_ANGLE := 30.0 * PI / 180.0
 const BALLISTIC_MAX_REDIRECT_ANGLE := 80.0 * PI / 180.0
@@ -243,8 +243,8 @@ const DIVE_CHARGE_FRICTION_MIN_SPEED := 100.0
 const DIVE_CHARGE_SPEED := 80.0
 const DIVE_TIME := 0.5
 const DIVE_ANGLE := 45.0 * PI / 180.0
-const DIVE_SPEED := 300.0
-const DIVE_GRAVITY := 20.0
+const DIVE_SPEED := 350.0
+const DIVE_GRAVITY := 10.0
 const DIVE_FRICTION := 50.0
 
 var state : int = State.FALL
@@ -665,14 +665,14 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 			self.velocity.x += move_direction.x * FALL_ACCELERATION * delta
 	elif self.state == State.BALLISTIC:
 		if self.velocity.length() > BALLISTIC_MAX_SPEED:
-			_apply_drag(BALLISTIC_ACCELERATION, delta)
+			_apply_drag(BALLISTIC_FRICTION, delta)
 		else:
 			self.velocity.y += BALLISTIC_GRAVITY * delta
-		var angle_change_direction := sign(self.velocity.angle_to(move_direction))
-		if angle_change_direction != 0:
-			# When in the ballistic state, the player's direction can be
-			# changed, but not the magnitude of the velocity.
-			self.velocity = self.velocity.rotated(angle_change_direction * BALLISTIC_ANGULAR_SPEED * delta)
+		var velocity_normal = Vector2(-self.velocity.y, self.velocity.x)
+		if velocity_normal.length_squared() != 0.0:
+			velocity_normal = velocity_normal.normalized()
+			velocity_normal *= sign(velocity_normal.dot(move_direction))
+			self.velocity += velocity_normal * BALLISTIC_NORMAL_ACCELERATION * delta
 	elif self.state == State.DIVE_CHARGE:
 		if self.velocity.length() >= DIVE_CHARGE_FRICTION_MIN_SPEED:
 			_apply_drag(DIVE_CHARGE_FRICTION, delta)
@@ -1149,7 +1149,7 @@ func _visuals_process() -> void:
 			next_animation = "DiveChargeLeft"
 		else:
 			next_animation = "DiveChargeRight"
-	elif self.state == State.DIVE:
+	elif self.state == State.DIVE_START || self.state == State.DIVE:
 		if self.facing_direction == -1:
 			next_animation = "DiveLeft"
 		else:
