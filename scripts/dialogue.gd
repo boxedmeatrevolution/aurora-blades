@@ -14,14 +14,17 @@ onready var speech_label := $Box/PanelContainer/HBoxContainer/MarginContainer2/V
 
 export(Array, GDScript) var speech_generators := []
 
-var speech : Speech = null
+var current_speech : Speech = null
 var line_index := 0
+var current_line : Speech.Line = null
+var scroll_speed := 2
+var line_finished := false
 var active := false
 
 func _activate():
 	if !self.active:
-		self.line_index = 0
-		if _update_dialogue_box():
+		self.line_index = -1
+		if _update_dialogue_box_line():
 			self.active = true
 			self.box.visible = true
 			emit_signal("dialogue_start")
@@ -40,37 +43,55 @@ func _ready():
 
 func _play(index : int) -> void:
 	var speech_generator := self.speech_generators[index] as GDScript
-	self.speech = null
+	self.current_speech = null
 	if speech_generator != null:
 		var speech_object := speech_generator.new()
 		if speech_object is Speech:
-			self.speech = speech_object
-	if self.speech == null:
-		printerr("Couldn't load speech ", index)
+			self.current_speech = speech_object
+	if self.current_speech == null:
+		printerr("Couldn't load current_speech ", index)
 	else:
 		_activate()
 
-func _update_dialogue_box() -> bool:
-	if self.line_index < 0 || self.line_index >= self.speech.lines.size():
+func _update_dialogue_box_line() -> bool:
+	self.line_index += 1
+	if self.line_index < 0 || self.line_index >= self.current_speech.lines.size():
 		return false
-	var line := self.speech.lines[self.line_index] as Speech.Line
-	if line == null:
-		printerr("Couldn't read line ", self.line_index, " from speech.")
+	self.current_line = self.current_speech.lines[self.line_index] as Speech.Line
+	if self.current_line == null:
+		printerr("Couldn't read line ", self.line_index, " from current_speech.")
 		return false
 	else:
-		var actor := line.actor
-		var speech := line.speech
+		self.scroll_speed = 1
+		self.line_finished = false
+		var actor := self.current_line.actor
+		var current_speech := self.current_line.speech
 		self.portrait.texture = actor.portrait
 		self.name_label.text = actor.name
-		self.speech_label.text = line.speech
+		self.speech_label.text = ""
 		return true
+
+func _update_dialogue_box_char() -> bool:
+	var current_str : String = self.speech_label.text
+	var diff := self.current_line.speech.length() - current_str.length()
+	var finished := true
+	if diff > self.scroll_speed:
+		diff = self.scroll_speed
+		finished = false
+	var next_str := self.current_line.speech.substr(current_str.length(), diff)
+	self.speech_label.text = str(current_str, next_str)
+	return finished
 
 func _process(delta):
 	if self.active:
 		if Input.is_action_just_pressed("ui_accept"):
-			self.line_index += 1
-			if !_update_dialogue_box():
-				_deactivate()
+			if self.line_finished:
+				if !_update_dialogue_box_line():
+					_deactivate()
+			else:
+				self.scroll_speed = 4
+		if _update_dialogue_box_char():
+			self.line_finished = true
 	else:
 		if Input.is_action_just_pressed("ui_focus_next"):
 			_play(0)
