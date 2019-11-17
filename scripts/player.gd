@@ -1165,11 +1165,11 @@ func _animation_process() -> void:
 		self.animation_player.play(next_animation)
 
 func _effects_process(delta : float) -> void:
-	if self.state == State.BALLISTIC:
-		self.ballistic_effect_sprite.visible = true
-		self.ballistic_effect_sprite.rotation = self.velocity.angle()
-	else:
-		self.ballistic_effect_sprite.visible = false
+#	if self.state == State.BALLISTIC:
+#		self.ballistic_effect_sprite.visible = true
+#		self.ballistic_effect_sprite.rotation = self.velocity.angle()
+#	else:
+#		self.ballistic_effect_sprite.visible = false
 	
 	var drag_condition = self.state == State.SKATE && self.velocity.length() > SKATE_FRICTION_TRANSITION_SPEED
 	self.drag_effect_sprite.scale.x = self.skate_direction

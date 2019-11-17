@@ -537,6 +537,7 @@ shape = SubResource( 19 )
 texture = ExtResource( 3 )
 offset = Vector2( -5, 0 )
 hframes = 3
+frame = 1
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="BallisticEffectSprite"]
 autoplay = "BallisticEffect"
@@ -546,7 +547,7 @@ anims/BallisticEffect = SubResource( 20 )
 texture = ExtResource( 4 )
 offset = Vector2( 4, -4 )
 hframes = 4
-frame = 2
+frame = 3
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="DragEffectSprite"]
 autoplay = "DragEffect"
