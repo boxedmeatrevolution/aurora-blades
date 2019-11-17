@@ -161,7 +161,7 @@ const SKATE_BOOST_MAX_TIME := 0.8
 # The minimum time which the player will feel regular friction at the start
 # of the glide.
 const SKATE_FRICTION_LOW := 30.0
-const SKATE_FRICTION_HIGH := 400.0
+const SKATE_FRICTION_HIGH := 200.0
 const SKATE_FRICTION_TRANSITION_SPEED := 300.0
 const SKATE_GLIDE_FRICTION_TIME := 0.1
 # Skating friction does not act below this speed. If the player slows down
@@ -238,6 +238,11 @@ const DIVE_SPEED := 350.0
 const DIVE_GRAVITY := 10.0
 const DIVE_FRICTION := 50.0
 
+const EFFECT_DRAG_MIN_TIME := 0.4
+const EFFECT_DRAG_MIN_PERSIST_TIME := 0.4
+var effect_drag_time := 0.0
+var effect_drag_persist_time := 0.0
+
 var state : int = State.FALL
 var physics_state : int = PhysicsState.AIR
 # The normal to the surface the player is on (only valid if `_on_surface`
@@ -270,6 +275,7 @@ var previous_velocity := self.velocity
 
 onready var animation_player := $Sprite/AnimationPlayer
 onready var ballistic_effect_sprite := $BallisticEffectSprite
+onready var drag_effect_sprite := $DragEffectSprite
 
 # Is the player on a surface, meaning on a floor, slope, or wall?
 func _on_surface(physics_state : int) -> bool:
@@ -415,6 +421,7 @@ func _apply_drag(drag : float, delta : float) -> void:
 
 func _ready() -> void:
 	self.ballistic_effect_sprite.visible = false
+	self.drag_effect_sprite.visible = false
 
 func _physics_process(delta : float) -> void:
 	var move_direction := _read_move_direction()
@@ -430,7 +437,8 @@ func _physics_process(delta : float) -> void:
 		intent = _read_intent(move_direction)
 	# Update the animation based on the state.
 	_facing_direction_process(move_direction)
-	_visuals_process()
+	_animation_process()
+	_effects_process(delta)
 	
 	# Print the state for debugging purposes.
 	if self.previous_state != self.state || self.previous_physics_state != self.physics_state:
@@ -1075,7 +1083,7 @@ func _get_default_skate_state(intent : Intent) -> int:
 	else:
 		return State.SKATE
 
-func _visuals_process() -> void:
+func _animation_process() -> void:
 	var next_animation := ""
 	var current_animation : String = self.animation_player.current_animation
 	var is_playing : bool = self.animation_player.is_playing()
@@ -1155,11 +1163,24 @@ func _visuals_process() -> void:
 		printerr("No animation found for state ", STATE_NAME[self.state])
 	if self.animation_player.current_animation != next_animation:
 		self.animation_player.play(next_animation)
-	
-	# Effects.
+
+func _effects_process(delta : float) -> void:
 	if self.state == State.BALLISTIC:
-		if !self.ballistic_effect_sprite.visible:
-			self.ballistic_effect_sprite.visible = true
+		self.ballistic_effect_sprite.visible = true
 		self.ballistic_effect_sprite.rotation = self.velocity.angle()
 	else:
 		self.ballistic_effect_sprite.visible = false
+	
+	var drag_condition = self.state == State.SKATE && self.velocity.length() > SKATE_FRICTION_TRANSITION_SPEED
+	self.drag_effect_sprite.scale.x = self.skate_direction
+	if !drag_condition:
+		self.effect_drag_time = 0.0
+	if self.drag_effect_sprite.visible:
+		self.effect_drag_persist_time += delta
+		if !drag_condition && self.effect_drag_persist_time > EFFECT_DRAG_MIN_PERSIST_TIME:
+			self.drag_effect_sprite.visible = false
+	else:
+		self.effect_drag_time += delta
+		if self.effect_drag_time > EFFECT_DRAG_MIN_TIME:
+			self.drag_effect_sprite.visible = true
+			self.effect_drag_persist_time = 0.0

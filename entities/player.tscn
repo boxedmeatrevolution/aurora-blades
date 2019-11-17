@@ -1,8 +1,9 @@
-[gd_scene load_steps=34 format=2]
+[gd_scene load_steps=36 format=2]
 
 [ext_resource path="res://scripts/player.gd" type="Script" id=1]
 [ext_resource path="res://sprites/player.png" type="Texture" id=2]
 [ext_resource path="res://sprites/player_boost_effect.png" type="Texture" id=3]
+[ext_resource path="res://sprites/player_drag_effect.png" type="Texture" id=4]
 
 [sub_resource type="Animation" id=25]
 resource_name = "BallisticLeft"
@@ -466,6 +467,23 @@ tracks/0/keys = {
 "values": [ 0, 1, 2 ]
 }
 
+[sub_resource type="Animation" id=31]
+resource_name = "DragEffect"
+length = 0.4
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 0, 1, 2, 3 ]
+}
+
 [node name="Player" type="KinematicBody2D"]
 collision_mask = 2
 script = ExtResource( 1 )
@@ -474,11 +492,11 @@ __meta__ = {
 }
 
 [node name="Sprite" type="Sprite" parent="."]
+editor/display_folded = true
 position = Vector2( 0, -2 )
 texture = ExtResource( 2 )
 vframes = 6
 hframes = 6
-frame = 18
 region_rect = Rect2( 0, 0, 24, 32 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Sprite"]
@@ -516,10 +534,20 @@ visible = false
 shape = SubResource( 19 )
 
 [node name="BallisticEffectSprite" type="Sprite" parent="."]
-visible = false
 texture = ExtResource( 3 )
 offset = Vector2( -5, 0 )
 hframes = 3
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="BallisticEffectSprite"]
+autoplay = "BallisticEffect"
 anims/BallisticEffect = SubResource( 20 )
+
+[node name="DragEffectSprite" type="Sprite" parent="."]
+texture = ExtResource( 4 )
+offset = Vector2( 4, -4 )
+hframes = 4
+frame = 2
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="DragEffectSprite"]
+autoplay = "DragEffect"
+anims/DragEffect = SubResource( 31 )
