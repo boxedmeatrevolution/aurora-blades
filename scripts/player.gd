@@ -219,14 +219,18 @@ const FALL_MAX_SPEED_VERTICAL := 450.0
 const BALLISTIC_GRAVITY := 800.0
 # The normal acceleration at which the ballistic trajectory can be changed.
 const BALLISTIC_ACCELERATION_NORMAL := 400.0
-const BALLISTIC_ACCELERATION_TANGENT := 200.0
+# The forward tangent acceleration at both low and high speeds.
+const BALLISTIC_ACCELERATION_TANGENT_FORWARD_LOW := 200.0
+const BALLISTIC_ACCELERATION_TANGENT_FORWARD_HIGH := 40.0
+const BALLISTIC_ACCELERATION_TANGENT_REVERSE := 200.0
 # The acceleration that is applied to the trajectory if the max speed is
 # exceeded.
-const BALLISTIC_FRICTION := 400.0
-const BALLISTIC_MAX_SPEED := 1000.0
+const BALLISTIC_FRICTION_LOW := 30.0
+const BALLISTIC_FRICTION_HIGH := 200.0
+const BALLISTIC_FRICTION_TRANSITION_SPEED := 400.0
 const BALLISTIC_MIN_REDIRECT_ANGLE := 30.0 * PI / 180.0
 const BALLISTIC_MAX_REDIRECT_ANGLE := 80.0 * PI / 180.0
-const BALLISTIC_MAX_REDIRECT_FRACTION := 1.0
+const BALLISTIC_MAX_REDIRECT_FRACTION := 0.5
 
 const DIVE_CHARGE_TIME := 0.4
 const DIVE_CHARGE_FRICTION := 2000.0
@@ -661,19 +665,26 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 		else:
 			self.velocity.x += move_direction.x * FALL_ACCELERATION * delta
 	elif self.state == State.BALLISTIC:
-		if self.velocity.length() > BALLISTIC_MAX_SPEED:
-			_apply_drag(BALLISTIC_FRICTION, delta)
-		else:
-			self.velocity.y += BALLISTIC_GRAVITY * delta
+		var is_high_speed := self.velocity.length() > BALLISTIC_FRICTION_TRANSITION_SPEED
+		var friction := BALLISTIC_FRICTION_HIGH if is_high_speed else BALLISTIC_FRICTION_LOW
+		_apply_drag(friction, delta)
+		self.velocity.y += BALLISTIC_GRAVITY * delta
 		var velocity_normal := Vector2(-self.velocity.y, self.velocity.x)
 		var velocity_tangent := self.velocity
 		if velocity_tangent.length_squared() != 0.0 && velocity_normal.length_squared() != 0.0:
 			velocity_normal = velocity_normal.normalized()
 			velocity_tangent = velocity_tangent.normalized()
 			if move_direction.length_squared() != 0.0:
+				# To choose the acceleration vector, we treat the allowed
+				# accelerations as a splicing of two ellipses.
 				var direction := move_direction.normalized()
-				var normal_component := velocity_normal.dot(direction) / BALLISTIC_ACCELERATION_NORMAL
-				var tangent_component := velocity_tangent.dot(direction) / BALLISTIC_ACCELERATION_TANGENT
+				var normal_component := velocity_normal.dot(direction)
+				var tangent_component := velocity_tangent.dot(direction)
+				normal_component /= BALLISTIC_ACCELERATION_NORMAL
+				if direction.dot(velocity_tangent) > 0.0:
+					tangent_component /= BALLISTIC_ACCELERATION_TANGENT_FORWARD_HIGH if is_high_speed else BALLISTIC_ACCELERATION_TANGENT_FORWARD_LOW
+				else:
+					tangent_component /= -BALLISTIC_ACCELERATION_TANGENT_REVERSE
 				var scale := sqrt(1.0 / (normal_component * normal_component + tangent_component * tangent_component))
 				self.velocity += scale * direction * delta
 	elif self.state == State.DIVE_CHARGE:

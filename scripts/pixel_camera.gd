@@ -7,6 +7,7 @@ onready var base_size := self.root.size
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	self.get_tree().connect("screen_resized", self, "_screen_resized")
+	self.get_tree().set_debug_collisions_hint(true)
 	self.root.set_attach_to_screen_rect(self.root.get_visible_rect())
 	_screen_resized()
 
