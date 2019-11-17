@@ -1,14 +1,14 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://entities/player.tscn" type="PackedScene" id=1]
 [ext_resource path="res://entities/ui/pixel_camera.tscn" type="PackedScene" id=2]
 [ext_resource path="res://tilesets/winter.tres" type="TileSet" id=3]
 [ext_resource path="res://entities/ui/dialogue.tscn" type="PackedScene" id=4]
+[ext_resource path="res://dialogue/introduction.gd" type="Script" id=5]
 
 [node name="TestLevel" type="Node"]
 
 [node name="Player" parent="." instance=ExtResource( 1 )]
-editor/display_folded = true
 position = Vector2( -94.131, -106.703 )
 
 [node name="PixelCamera" parent="Player" instance=ExtResource( 2 )]
@@ -77,3 +77,8 @@ polygon = PoolVector2Array( -1056, -80, -1088, -64, -1120, -32, -1296, 320, -132
 polygon = PoolVector2Array( -1568, 80, -1312, 208, -1296, 208, -1280, 192, -1536, 64 )
 
 [node name="Dialogue" parent="." instance=ExtResource( 4 )]
+speech_generators = [ ExtResource( 5 ) ]
+[connection signal="dialogue_end" from="Dialogue" to="Player" method="_on_dialogue_end"]
+[connection signal="dialogue_end" from="Dialogue" to="Player/PixelCamera" method="_on_dialogue_end"]
+[connection signal="dialogue_start" from="Dialogue" to="Player" method="_on_dialogue_start"]
+[connection signal="dialogue_start" from="Dialogue" to="Player/PixelCamera" method="_on_dialogue_start"]

@@ -1,17 +1,35 @@
 extends Camera2D
 
 onready var viewport := self.get_viewport()
-onready var root := self.get_tree().get_root()
-onready var base_size := self.root.size
+onready var base_size := self.viewport.size
+
+const DEFAULT_DRAG_MARGINS := 0.2
+
+func _get_viewport_rect_centered() -> Rect2:
+	var viewport_rect := self.viewport.get_visible_rect()
+	var shift := -viewport_rect.position - 0.5 * viewport_rect.size
+	viewport_rect.position += shift
+	return viewport_rect
+
+func _set_drag_region(rect : Rect2) -> void:
+	var viewport_rect := _get_viewport_rect_centered()
+	self.drag_margin_left = rect.position.x / viewport_rect.position.x
+	self.drag_margin_right = rect.end.x / viewport_rect.end.x
+	self.drag_margin_top = rect.position.y / viewport_rect.position.y
+	self.drag_margin_bottom = rect.end.y / viewport_rect.end.y
 
 # Called when the node enters the scene tree for the first time.
-func _ready():
+func _ready() -> void:
 	self.get_tree().connect("screen_resized", self, "_screen_resized")
 	self.get_tree().set_debug_collisions_hint(true)
-	self.root.set_attach_to_screen_rect(self.root.get_visible_rect())
+	self.viewport.set_attach_to_screen_rect(self.viewport.get_visible_rect())
 	_screen_resized()
+	var drag_region := _get_viewport_rect_centered()
+	drag_region.position *= DEFAULT_DRAG_MARGINS
+	drag_region.size *= DEFAULT_DRAG_MARGINS
+	_set_drag_region(drag_region)
 
-func _process(delta):
+func _process(delta) -> void:
 	# TODO: Note: this is buggy on Wayland (I think).
 	if Input.is_action_just_pressed("ui_fullscreen"):
 		OS.window_fullscreen = !OS.window_fullscreen
@@ -31,3 +49,17 @@ func _screen_resized() -> void:
 		max(upper_left.y, 0),
 		max(upper_left.x, 0) + odd_offset.x,
 		max(upper_left.y, 0) + odd_offset.y)
+
+
+func _on_dialogue_start():
+	var drag_region := _get_viewport_rect_centered()
+	drag_region.end.y = 0.0
+	drag_region.position += 0.5 * (1.0 - DEFAULT_DRAG_MARGINS) * drag_region.size
+	drag_region.size *= DEFAULT_DRAG_MARGINS
+	_set_drag_region(drag_region)
+
+func _on_dialogue_end():
+	var drag_region := _get_viewport_rect_centered()
+	drag_region.position *= DEFAULT_DRAG_MARGINS
+	drag_region.size *= DEFAULT_DRAG_MARGINS
+	_set_drag_region(drag_region)

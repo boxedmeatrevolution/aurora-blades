@@ -273,6 +273,8 @@ var dive_charge_timer := 0.0
 var dive_timer := 0.0
 var has_dive := true
 
+var in_dialogue := false
+
 # Store the previous state as well.
 var previous_state := self.state
 var previous_physics_state := self.physics_state
@@ -457,6 +459,8 @@ func _physics_process(delta : float) -> void:
 	self.previous_velocity = self.velocity
 
 func _read_move_direction() -> Vector2:
+	if self.in_dialogue:
+		return Vector2.ZERO
 	var move_direction := Vector2.ZERO
 	if Input.is_action_pressed("move_left"):
 		move_direction.x -= 1
@@ -469,6 +473,8 @@ func _read_move_direction() -> Vector2:
 	return move_direction
 
 func _read_intent(move_direction : Vector2) -> Intent:
+	if self.in_dialogue:
+		return Intent.new()
 	var intent := Intent.new()
 	intent.move_direction = move_direction
 	# Get input from the user. The intent structure represents the action that
@@ -1208,3 +1214,9 @@ func _effects_process(delta : float) -> void:
 		if self.effect_drag_time > EFFECT_DRAG_MIN_TIME:
 			self.drag_effect_sprite.visible = true
 			self.effect_drag_persist_time = 0.0
+
+func _on_dialogue_start():
+	self.in_dialogue = true
+
+func _on_dialogue_end():
+	self.in_dialogue = false
