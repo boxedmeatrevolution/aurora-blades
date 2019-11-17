@@ -233,12 +233,11 @@ const DIVE_CHARGE_FRICTION := 2000.0
 const DIVE_CHARGE_FRICTION_MIN_SPEED := 100.0
 const DIVE_CHARGE_SPEED := 80.0
 const DIVE_TIME := 0.5
-const DIVE_ANGLE := 45.0 * PI / 180.0
-const DIVE_SPEED := 350.0
-const DIVE_GRAVITY := 10.0
+const DIVE_SPEED := 400.0
+const DIVE_GRAVITY := 8.0
 const DIVE_FRICTION := 50.0
 
-const EFFECT_DRAG_MIN_TIME := 0.4
+const EFFECT_DRAG_MIN_TIME := 0.3
 const EFFECT_DRAG_MIN_PERSIST_TIME := 0.4
 var effect_drag_time := 0.0
 var effect_drag_persist_time := 0.0
@@ -264,7 +263,7 @@ var pivot_stored_velocity := 0.0
 var pivot_timer := 0.0
 var dive_charge_timer := 0.0
 var dive_timer := 0.0
-var dive_direction := 1
+var has_dive := true
 
 # Store the previous state as well.
 var previous_state := self.state
@@ -503,9 +502,8 @@ func _read_intent(move_direction : Vector2) -> Intent:
 				intent.skate_boost = true
 		if !intent.skate_brake && Input.is_action_pressed("skate"):
 			intent.skate_glide = true
-	else:
-		if Input.is_action_just_pressed("skate"):
-			intent.dive = true
+	if Input.is_action_just_pressed("dive"):
+		intent.dive = true
 	return intent
 
 # Updates the facing direction based on the state. Note that the facing
@@ -684,8 +682,11 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 		else:
 			self.velocity = DIVE_CHARGE_SPEED * Vector2.UP
 	elif self.state == State.DIVE_START:
-		var dive_velocity := DIVE_SPEED * Vector2.DOWN.rotated(-sign(self.dive_direction) * DIVE_ANGLE)
-		self.velocity = dive_velocity
+		var direction := move_direction
+		if direction.length_squared() == 0.0:
+			direction = Vector2(self.facing_direction, 1.0)
+		direction = direction.normalized()
+		self.velocity = DIVE_SPEED * direction
 	elif self.state == State.DIVE:
 		self.velocity.y += DIVE_GRAVITY
 		_apply_drag(DIVE_FRICTION, delta)
@@ -840,7 +841,7 @@ func _handle_state_transition(old_state : int) -> bool:
 			self.pivot_stored_velocity = 0.0
 		elif self.state == State.DIVE_CHARGE:
 			self.dive_charge_timer = 0.0
-			self.dive_direction = self.facing_direction
+			self.has_dive = false
 		elif self.state == State.DIVE:
 			self.dive_timer = 0.0
 		elif self.state == State.WIPEOUT:
@@ -893,6 +894,11 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 	var old_state := self.state
 	var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
 	var can_act := !_is_stun_state(self.state)
+	# The reason we check for not being in an air state (instead of being in a
+	# ground state) is because some states (like JUMP) are both air states and
+	# ground states, but should not restock dives.
+	if !_is_air_state(self.state):
+		self.has_dive = true
 	
 	if _is_normal_state(self.state):
 		# Input transitions take priority over all else.
@@ -901,7 +907,7 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 				self.state = State.JUMP_WALL_START
 			else:
 				self.state = State.JUMP_START
-		elif can_act && intent.dive && _is_air_state(self.state):
+		elif can_act && intent.dive && self.has_dive:
 			self.state = State.DIVE_CHARGE
 		elif can_act && intent.skate_start && self.state == State.PIVOT && self.pivot_stored_velocity != 0.0:
 			self.state = State.SKATE_PIVOT_START
@@ -989,7 +995,7 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 		
 		if impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
 			self.state = State.WIPEOUT
-		elif can_act && intent.dive && _is_air_state(self.state):
+		elif can_act && intent.dive && self.has_dive:
 			self.state = State.DIVE_CHARGE
 		elif can_act && (intent.jump_low || intent.jump_high) && _is_surface_state(self.state):
 			if self.physics_state == PhysicsState.WALL:
@@ -1172,12 +1178,12 @@ func _effects_process(delta : float) -> void:
 #		self.ballistic_effect_sprite.visible = false
 	
 	var drag_condition = self.state == State.SKATE && self.velocity.length() > SKATE_FRICTION_TRANSITION_SPEED
-	self.drag_effect_sprite.scale.x = self.skate_direction
+	self.drag_effect_sprite.rotation = -self.velocity.angle_to(Vector2.RIGHT)
 	if !drag_condition:
 		self.effect_drag_time = 0.0
 	if self.drag_effect_sprite.visible:
 		self.effect_drag_persist_time += delta
-		if !drag_condition && self.effect_drag_persist_time > EFFECT_DRAG_MIN_PERSIST_TIME:
+		if !drag_condition && (!_on_surface(self.physics_state) || self.effect_drag_persist_time > EFFECT_DRAG_MIN_PERSIST_TIME):
 			self.drag_effect_sprite.visible = false
 	else:
 		self.effect_drag_time += delta
