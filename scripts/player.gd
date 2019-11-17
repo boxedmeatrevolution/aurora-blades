@@ -177,7 +177,7 @@ const SKATE_BRAKE_MIN_SPEED := 10.0
 const SKATE_BRAKE_SLOPE_MIN_SPEED := 100.0
 
 const SKATE_STICK_ANGLE := 30.0 * PI / 180.0
-const SKATE_GRAVITY := 200.0
+const SKATE_GRAVITY := 400.0
 const SKATE_MIN_REDIRECT_ANGLE := 30.0 * PI / 180.0
 const SKATE_MAX_REDIRECT_ANGLE := 40.0 * PI / 180.0
 const SKATE_MAX_REDIRECT_FRACTION := 1.0
@@ -187,7 +187,7 @@ const SKATE_MAX_REDIRECT_FRACTION := 1.0
 const WIPEOUT_MIN_FRACTIONAL_IMPULSE := 0.8
 # The "minimum impulse" needed to wipeout, meaning what absolute amount of
 # speed must be lost in an instant.
-const WIPEOUT_MIN_IMPULSE := 200.0
+const WIPEOUT_MIN_IMPULSE := 300.0
 const WIPEOUT_FRICTION := 500.0
 const WIPEOUT_TIME := 0.8
 
@@ -210,6 +210,9 @@ const JUMP_BALLISTIC_WALL_LOW_ANGLE := 30.0 * PI / 180.0
 const JUMP_BALLISTIC_WALL_HIGH_BASE_SPEED := 350.0
 const JUMP_BALLISTIC_WALL_HIGH_SPEED_FACTOR := 0.4
 const JUMP_BALLISTIC_WALL_HIGH_ANGLE := 45.0 * PI / 180.0
+
+# The time before the player gains control when doing a ballistic jump.
+const JUMP_BALLISTIC_CONTROL_TIME := 0.2
 
 const FALL_ACCELERATION := 800.0
 const FALL_FRICTION := 100.0
@@ -262,6 +265,7 @@ var skate_timer := 0.0
 var skate_boost_timer := 0.0
 var skate_glide_timer := 0.0
 var wipeout_timer := 0.0
+var air_timer := 0.0
 # The amount of velocity stored when making a pivot.
 var pivot_stored_velocity := 0.0
 var pivot_timer := 0.0
@@ -665,28 +669,29 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 		else:
 			self.velocity.x += move_direction.x * FALL_ACCELERATION * delta
 	elif self.state == State.BALLISTIC:
-		var is_high_speed := self.velocity.length() > BALLISTIC_FRICTION_TRANSITION_SPEED
-		var friction := BALLISTIC_FRICTION_HIGH if is_high_speed else BALLISTIC_FRICTION_LOW
-		_apply_drag(friction, delta)
-		self.velocity.y += BALLISTIC_GRAVITY * delta
-		var velocity_normal := Vector2(-self.velocity.y, self.velocity.x)
-		var velocity_tangent := self.velocity
-		if velocity_tangent.length_squared() != 0.0 && velocity_normal.length_squared() != 0.0:
-			velocity_normal = velocity_normal.normalized()
-			velocity_tangent = velocity_tangent.normalized()
-			if move_direction.length_squared() != 0.0:
-				# To choose the acceleration vector, we treat the allowed
-				# accelerations as a splicing of two ellipses.
-				var direction := move_direction.normalized()
-				var normal_component := velocity_normal.dot(direction)
-				var tangent_component := velocity_tangent.dot(direction)
-				normal_component /= BALLISTIC_ACCELERATION_NORMAL
-				if direction.dot(velocity_tangent) > 0.0:
-					tangent_component /= BALLISTIC_ACCELERATION_TANGENT_FORWARD_HIGH if is_high_speed else BALLISTIC_ACCELERATION_TANGENT_FORWARD_LOW
-				else:
-					tangent_component /= -BALLISTIC_ACCELERATION_TANGENT_REVERSE
-				var scale := sqrt(1.0 / (normal_component * normal_component + tangent_component * tangent_component))
-				self.velocity += scale * direction * delta
+		if self.air_timer >= JUMP_BALLISTIC_CONTROL_TIME:
+			var is_high_speed := self.velocity.length() > BALLISTIC_FRICTION_TRANSITION_SPEED
+			var friction := BALLISTIC_FRICTION_HIGH if is_high_speed else BALLISTIC_FRICTION_LOW
+			_apply_drag(friction, delta)
+			self.velocity.y += BALLISTIC_GRAVITY * delta
+			var velocity_normal := Vector2(-self.velocity.y, self.velocity.x)
+			var velocity_tangent := self.velocity
+			if velocity_tangent.length_squared() != 0.0 && velocity_normal.length_squared() != 0.0:
+				velocity_normal = velocity_normal.normalized()
+				velocity_tangent = velocity_tangent.normalized()
+				if move_direction.length_squared() != 0.0:
+					# To choose the acceleration vector, we treat the allowed
+					# accelerations as a splicing of two ellipses.
+					var direction := move_direction.normalized()
+					var normal_component := velocity_normal.dot(direction)
+					var tangent_component := velocity_tangent.dot(direction)
+					normal_component /= BALLISTIC_ACCELERATION_NORMAL
+					if direction.dot(velocity_tangent) > 0.0:
+						tangent_component /= BALLISTIC_ACCELERATION_TANGENT_FORWARD_HIGH if is_high_speed else BALLISTIC_ACCELERATION_TANGENT_FORWARD_LOW
+					else:
+						tangent_component /= -BALLISTIC_ACCELERATION_TANGENT_REVERSE
+					var scale := sqrt(1.0 / (normal_component * normal_component + tangent_component * tangent_component))
+					self.velocity += scale * direction * delta
 	elif self.state == State.DIVE_CHARGE:
 		if self.velocity.length() >= DIVE_CHARGE_FRICTION_MIN_SPEED:
 			_apply_drag(DIVE_CHARGE_FRICTION, delta)
@@ -908,8 +913,10 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 	# The reason we check for not being in an air state (instead of being in a
 	# ground state) is because some states (like JUMP) are both air states and
 	# ground states, but should not restock dives.
+	self.air_timer += delta
 	if !_is_air_state(self.state):
 		self.has_dive = true
+		self.air_timer = 0.0
 	
 	if _is_normal_state(self.state):
 		# Input transitions take priority over all else.
