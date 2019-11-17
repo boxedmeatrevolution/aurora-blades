@@ -212,14 +212,14 @@ const JUMP_BALLISTIC_WALL_HIGH_SPEED_FACTOR := 0.4
 const JUMP_BALLISTIC_WALL_HIGH_ANGLE := 45.0 * PI / 180.0
 
 # The time before the player gains control when doing a ballistic jump.
-const JUMP_BALLISTIC_CONTROL_TIME := 0.3
+const JUMP_BALLISTIC_CONTROL_TIME := 0.2
 
 const FALL_ACCELERATION := 800.0
 const FALL_FRICTION := 100.0
 const FALL_MAX_SPEED_HORIZONTAL := 150.0
 const FALL_MAX_SPEED_VERTICAL := 450.0
 
-const BALLISTIC_GRAVITY := 800.0
+const BALLISTIC_GRAVITY := 600.0
 # The normal acceleration at which the ballistic trajectory can be changed.
 const BALLISTIC_ACCELERATION_NORMAL := 400.0
 # The forward tangent acceleration at both low and high speeds.
@@ -450,7 +450,6 @@ func _physics_process(delta : float) -> void:
 	# Print the state for debugging purposes.
 	if self.previous_state != self.state || self.previous_physics_state != self.physics_state:
 		print(PHYSICS_STATE_NAME[self.physics_state], "; ", STATE_NAME[self.state])
-	print(self.velocity.length())
 	
 	self.previous_state = self.state
 	self.previous_physics_state = self.physics_state
