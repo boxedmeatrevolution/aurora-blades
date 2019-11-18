@@ -499,8 +499,8 @@ func _read_intent(move_direction : Vector2) -> Intent:
 					intent.skate_start = true
 		if _is_skate_state(self.state):
 			if self.state != State.SKATE_BRAKE:
-				if self.skate_direction == -1 && Input.is_action_just_pressed("move_right") \
-						|| self.skate_direction == 1 && Input.is_action_just_pressed("move_left"):
+				if self.skate_direction == -1 && Input.is_action_pressed("move_right") \
+						|| self.skate_direction == 1 && Input.is_action_pressed("move_left"):
 					intent.skate_brake = true
 				if !_on_surface(self.previous_physics_state) && \
 						(self.skate_direction == -1 && Input.is_action_pressed("move_right") \
