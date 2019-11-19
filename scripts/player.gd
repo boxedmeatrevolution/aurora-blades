@@ -1,6 +1,11 @@
 extends KinematicBody2D
 
 # Things that need to be done:
+# * Use the new wall_collision variable to clean up some code, such as:
+#   * Wipeout collisions
+#   * Dashing into walls
+#   * Jumping into walls and bonk head
+#   * Etc.
 # * Redirect reservoir: After every velocity redirect, there is a reservoir
 #   that slowly empties. When empty, velocity redirects are no longer as
 #   efficient. The reservoir refills with time. Purpose: to keep a super-fast
@@ -104,6 +109,20 @@ class Intent:
 	var skate_boost := false
 	var skate_glide := false
 	var skate_brake := false
+
+# Stores information about types of collisions encountered during a physics
+# step.
+class CollisionInfo:
+	var floor_collision := false
+	var slope_collision := false
+	var wall_collision := false
+	var ceiling_collision := false
+	
+	func merge(other : CollisionInfo) -> void:
+		self.floor_collision = self.floor_collision || other.floor_collision
+		self.slope_collision = self.slope_collision || other.slope_collision
+		self.wall_collision = self.wall_collision || other.wall_collision
+		self.ceiling_collision = self.ceiling_collision || other.ceiling_collision
 
 const FLOOR_ANGLE := 5.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
@@ -398,8 +417,13 @@ func _is_prejump_state(state : int) -> bool:
 			|| state == State.JUMP_BALLISTIC_WALL_LOW_START \
 			|| state == State.JUMP_BALLISTIC_WALL_HIGH_START
 
-# Returns the fraction of the normal velocity that should be kept over a given
-# angle difference.
+# Returns what the tangent velocity should be given the tangent and normal
+# components. Both arguments are positive.
+func _redirect_velocity(velocity_tangent : float, velocity_normal : float) -> float:
+	var angle_difference = atan2(velocity_normal, velocity_tangent)
+	var redirect_fraction := _redirect_normal_velocity(angle_difference)
+	return Vector2(velocity_tangent, redirect_fraction * velocity_normal).length()
+
 func _redirect_normal_velocity(angle_difference : float) -> float:
 	angle_difference = abs(angle_difference)
 	if _is_skate_state(self.state):
@@ -444,12 +468,12 @@ func _physics_process(delta : float) -> void:
 	# Update the velocities based on the current state.
 	_state_process(delta, move_direction)
 	# Step the position forward by the timestep.
-	_position_process(delta)
+	var collision_info := _position_process(delta)
 	# Transition between states.
 	var intent := _read_intent(move_direction)
 	if _state_transition_physics(intent):
 		intent = _read_intent(move_direction)
-	if _state_transition(delta, intent):
+	if _state_transition(delta, intent, collision_info):
 		intent = _read_intent(move_direction)
 	# Update the animation based on the state.
 	_facing_direction_process(move_direction)
@@ -723,10 +747,11 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 	self.velocity = self.velocity.clamped(MAX_SPEED)
 
 # Steps the position forward by a small amount based on the current velocity.
-func _position_process(delta : float, n : int = 4) -> void:
+func _position_process(delta : float, n : int = 4) -> CollisionInfo:
+	var collision_info := CollisionInfo.new()
 	# Exit if the maximum number of iterations has been reached.
 	if n <= 0 || delta <= 0 || self.velocity.length_squared() == 0:
-		return
+		return collision_info
 	var delta_remainder := 0.0
 	var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
 	var found_new_surface := false
@@ -795,11 +820,11 @@ func _position_process(delta : float, n : int = 4) -> void:
 		var velocity_tangent := self.velocity.slide(new_surface_normal)
 		var velocity_normal := self.velocity.dot(new_surface_normal) * new_surface_normal
 		if velocity_tangent.length_squared() != 0.0 && self.velocity.length_squared() != 0.0:
-			var angle_difference := self.velocity.angle_to(velocity_tangent)
-			var redirect_fraction := _redirect_normal_velocity(angle_difference)
-			self.velocity = velocity_tangent.normalized() * (velocity_tangent + redirect_fraction * velocity_normal).length()
+			self.velocity = velocity_tangent.normalized() * _redirect_velocity(velocity_tangent.length(), velocity_normal.length())
 		else:
 			self.velocity = velocity_tangent
+		# Record information about the collision.
+		collision_info.merge(_handle_collision_physics_state_transition(new_surface_normal))
 	# Before committing to the new surface, make sure that there isn't a
 	# better choice of surface to be on by looking in the direction of the
 	# last surface the player was on.
@@ -819,24 +844,33 @@ func _position_process(delta : float, n : int = 4) -> void:
 				# Choose the more horizontal surface.
 				if !found_new_surface || test_normal.dot(Vector2.UP) > new_surface_normal.dot(Vector2.UP):
 					self.position += test_collision.travel
-					var velocity_tangent := self.velocity.slide(test_collision.normal)
-					self.velocity = velocity_tangent
+					self.velocity = self.velocity.slide(test_collision.normal)
 					found_new_surface = true
 					new_surface_normal = test_normal
 	if found_new_surface:
-		var new_surface_angle := new_surface_normal.angle_to(Vector2.UP)
+		collision_info.merge(_handle_collision_physics_state_transition(new_surface_normal))
 		self.surface_normal = new_surface_normal
-		if abs(new_surface_angle) <= FLOOR_ANGLE:
-			self.physics_state = PhysicsState.FLOOR
-		elif abs(new_surface_angle) <= SLOPE_ANGLE:
-			self.physics_state = PhysicsState.SLOPE
-		elif abs(new_surface_angle) <= WALL_ANGLE:
-			self.physics_state = PhysicsState.WALL
-		else:
-			self.physics_state = PhysicsState.AIR
 	else:
 		self.physics_state = PhysicsState.AIR
-	_position_process(delta_remainder, n - 1)
+	collision_info.merge(_position_process(delta_remainder, n - 1))
+	return collision_info
+
+func _handle_collision_physics_state_transition(new_surface_normal : Vector2) -> CollisionInfo:
+	var collision_info := CollisionInfo.new()
+	var new_surface_angle := new_surface_normal.angle_to(Vector2.UP)
+	if abs(new_surface_angle) <= FLOOR_ANGLE:
+		self.physics_state = PhysicsState.FLOOR
+		collision_info.floor_collision = true
+	elif abs(new_surface_angle) <= SLOPE_ANGLE:
+		self.physics_state = PhysicsState.SLOPE
+		collision_info.slope_collision = true
+	elif abs(new_surface_angle) <= WALL_ANGLE:
+		self.physics_state = PhysicsState.WALL
+		collision_info.wall_collision = true
+	else:
+		self.physics_state = PhysicsState.AIR
+		collision_info.ceiling_collision = true
+	return collision_info
 
 # Handle transitions into and away from different states.
 func _handle_state_transition(old_state : int) -> bool:
@@ -920,7 +954,7 @@ func _state_transition_physics(intent : Intent) -> bool:
 	
 	return _handle_state_transition(old_state)
 
-func _state_transition(delta : float, intent : Intent) -> bool:
+func _state_transition(delta : float, intent : Intent, collision_info : CollisionInfo) -> bool:
 	var old_state := self.state
 	var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
 	var can_act := !_is_stun_state(self.state)
@@ -1025,8 +1059,11 @@ func _state_transition(delta : float, intent : Intent) -> bool:
 		if self.previous_velocity.length_squared() != 0.0:
 			fractional_impulse = impulse / self.previous_velocity.length()
 		
-		if impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
-			self.state = State.WIPEOUT
+		if _on_surface(self.physics_state) && self.physics_state != PhysicsState.WALL && (collision_info.wall_collision || collision_info.ceiling_collision):
+			if impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
+				self.state = State.WIPEOUT
+			else:
+				self.state = _get_default_normal_state(intent)
 		elif can_act && intent.dive && self.has_dive:
 			self.state = State.DIVE_CHARGE
 		elif can_act && (intent.jump_low || intent.jump_high) && _is_surface_state(self.state):
