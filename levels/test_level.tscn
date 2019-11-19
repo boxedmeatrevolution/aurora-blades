@@ -16,6 +16,7 @@
 speech_generators = [ ExtResource( 2 ) ]
 
 [node name="Player" parent="." instance=ExtResource( 3 )]
+editor/display_folded = true
 
 [node name="PixelCamera" parent="Player" instance=ExtResource( 4 )]
 
