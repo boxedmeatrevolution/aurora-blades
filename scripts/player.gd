@@ -8,6 +8,8 @@ extends KinematicBody2D
 #   * Dashing into walls
 #   * Jumping into walls and bonk head
 #   * Etc.
+# * Bug: In a rare case, the player can wipeout by going into a slope too hard
+#   from the air (I think??).
 # * Redirect reservoir: After every velocity redirect, there is a reservoir
 #   that slowly empties. When empty, velocity redirects are no longer as
 #   efficient. The reservoir refills with time. Purpose: to keep a super-fast
@@ -576,7 +578,10 @@ func _facing_direction_process(move_direction : Vector2) -> void:
 	if self.state == State.STAND || self.state == State.WALK || self.state == State.FALL:
 		next_facing_direction = int(sign(move_direction.x))
 	elif self.state == State.SLIDE:
-		next_facing_direction = int(sign(self.velocity.x))
+		if abs(self.surface_normal.angle_to(Vector2.UP)) <= WALK_MAX_ANGLE:
+			next_facing_direction = int(sign(self.velocity.x))
+		else:
+			next_facing_direction = int(sign(self.surface_normal.x))
 	elif self.state == State.WALL_SLIDE:
 		if _is_wall_physics_state(self.physics_state):
 			next_facing_direction = int(sign(self.surface_normal.x))
