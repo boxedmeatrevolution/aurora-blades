@@ -1,7 +1,6 @@
 extends KinematicBody2D
 
 # Things that need to be done:
-# * Get rid of the skate gliding state.
 # * Fix up dashing to feel good.
 # * Fix issues with jumping (downhill, etc...)
 # * Use the new wall_collision variable to clean up some code, such as:
