@@ -1,12 +1,11 @@
-[gd_scene load_steps=43 format=2]
+[gd_scene load_steps=41 format=2]
 
 [ext_resource path="res://scripts/player.gd" type="Script" id=1]
 [ext_resource path="res://sprites/player.png" type="Texture" id=2]
 [ext_resource path="res://sprites/effects/player_boost.png" type="Texture" id=3]
-[ext_resource path="res://sprites/effects/player_drag.png" type="Texture" id=4]
-[ext_resource path="res://sprites/effects/circle.png" type="Texture" id=5]
-[ext_resource path="res://entities/effects/ice_spray.tscn" type="PackedScene" id=6]
-[ext_resource path="res://entities/effects/skate_glow.tscn" type="PackedScene" id=7]
+[ext_resource path="res://sprites/effects/circle.png" type="Texture" id=4]
+[ext_resource path="res://entities/effects/ice_spray.tscn" type="PackedScene" id=5]
+[ext_resource path="res://entities/effects/skate_glow.tscn" type="PackedScene" id=6]
 
 [sub_resource type="Animation" id=1]
 resource_name = "BallisticFallLeft"
@@ -1193,22 +1192,6 @@ tracks/0/keys = {
 "values": [ 0, 1, 2 ]
 }
 
-[sub_resource type="Animation" id=35]
-length = 0.4
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0, 0.1, 0.2, 0.3 ),
-"transitions": PoolRealArray( 1, 1, 1, 1 ),
-"update": 1,
-"values": [ 0, 1, 2, 3 ]
-}
-
 [node name="Player" type="KinematicBody2D"]
 collision_mask = 2
 script = ExtResource( 1 )
@@ -1271,18 +1254,6 @@ frame = 2
 autoplay = "BallisticEffect"
 anims/BallisticEffect = SubResource( 34 )
 
-[node name="DragEffectSprite" type="Sprite" parent="."]
-editor/display_folded = true
-visible = false
-texture = ExtResource( 4 )
-offset = Vector2( 4, -4 )
-hframes = 4
-frame = 1
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="DragEffectSprite"]
-autoplay = "DragEffect"
-anims/DragEffect = SubResource( 35 )
-
 [node name="SkateA" type="Node2D" parent="."]
 position = Vector2( 14, 15 )
 __meta__ = {
@@ -1292,12 +1263,12 @@ __meta__ = {
 [node name="Sprite" type="Sprite" parent="SkateA"]
 visible = false
 scale = Vector2( 0.5, 0.5 )
-texture = ExtResource( 5 )
+texture = ExtResource( 4 )
 
-[node name="IceSpray" parent="SkateA" instance=ExtResource( 6 )]
+[node name="IceSpray" parent="SkateA" instance=ExtResource( 5 )]
 z_index = 1
 
-[node name="SkateGlow" parent="SkateA" instance=ExtResource( 7 )]
+[node name="SkateGlow" parent="SkateA" instance=ExtResource( 6 )]
 z_index = 1
 
 [node name="SkateB" type="Node2D" parent="."]
@@ -1309,10 +1280,10 @@ __meta__ = {
 [node name="Sprite" type="Sprite" parent="SkateB"]
 visible = false
 scale = Vector2( 0.5, 0.5 )
-texture = ExtResource( 5 )
+texture = ExtResource( 4 )
 
-[node name="IceSpray" parent="SkateB" instance=ExtResource( 6 )]
+[node name="IceSpray" parent="SkateB" instance=ExtResource( 5 )]
 z_index = -1
 
-[node name="SkateGlow" parent="SkateB" instance=ExtResource( 7 )]
+[node name="SkateGlow" parent="SkateB" instance=ExtResource( 6 )]
 z_index = -1

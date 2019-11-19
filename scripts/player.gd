@@ -1,6 +1,9 @@
 extends KinematicBody2D
 
 # Things that need to be done:
+# * Get rid of the skate gliding state.
+# * Fix up dashing to feel good.
+# * Fix issues with jumping (downhill, etc...)
 # * Use the new wall_collision variable to clean up some code, such as:
 #   * Wipeout collisions
 #   * Dashing into walls
@@ -13,9 +16,6 @@ extends KinematicBody2D
 #   weird, like the player should be slowed down signficantly).
 # * Possibility: A gradual v^2 friction force that is an obstacle to getting
 #   very large amounts of velocity.
-# * Bugs:
-#   * If boosting while the animation is still going, just schedule another
-#     boost for right after the current one is finished.
 # * Downhill walljumps can feel unintuitive because of the huge gain in
 #   velocity after just barely turning around at the top.
 # * It's very easy to accidentally dash into the ground, especially when
@@ -39,7 +39,6 @@ enum State {
 	SKATE_PIVOT_START,
 	SKATE,
 	SKATE_BOOST,
-	SKATE_GLIDE,
 	SKATE_BRAKE,
 	WIPEOUT,
 	JUMP_START,
@@ -66,7 +65,6 @@ const STATE_NAME := {
 	State.SKATE_PIVOT_START: "SkatePivotStart",
 	State.SKATE: "Skate",
 	State.SKATE_BOOST: "SkateBoost",
-	State.SKATE_GLIDE: "SkateGlide",
 	State.SKATE_BRAKE: "SkateBrake",
 	State.WIPEOUT: "Wipeout",
 	State.JUMP_START: "JumpStart",
@@ -107,7 +105,6 @@ class Intent:
 	var dive := false
 	var skate_start := false
 	var skate_boost := false
-	var skate_glide := false
 	var skate_brake := false
 
 # Stores information about types of collisions encountered during a physics
@@ -167,39 +164,41 @@ const WALL_RELEASE_START_SPEED := 50.0
 # The time that the player remains paused, briefly, at the end of a brake.
 const PIVOT_TIME := 0.2
 
-# Speed needed to launch the player into the skating state.
-const SKATE_START_MIN_SPEED := 40.0
-# Initial speed when entering the skate state.
-const SKATE_START_SPEED := 150.0
-const SKATE_PIVOT_START_SPEED_FRACTION := 0.8
-# The speed gained when making a boost.
-const SKATE_BOOST_MAX_SPEED := 110.0
-const SKATE_BOOST_MIN_SPEED := 20.0
-const SKATE_BOOST_MIN_TIME := 0.1
-const SKATE_BOOST_MAX_TIME := 0.8
-# The minimum time which the player will feel regular friction at the start
-# of the glide.
-const SKATE_FRICTION_LOW := 30.0
-const SKATE_FRICTION_HIGH := 200.0
-const SKATE_FRICTION_TRANSITION_SPEED := 300.0
-const SKATE_GLIDE_FRICTION_TIME := 0.1
+const SKATE_FRICTION := 30.0
 # Skating friction does not act below this speed. If the player slows down
 # below this speed on level ground, they will experience a slight acceleration
 # bringing them back up to this speed.
 const SKATE_MIN_SPEED := 150.0
 const SKATE_ACCELERATION := 150.0
-
-# Friction when the player tries to slow down.
-const SKATE_BRAKE_FRICTION := 800.0
-# The minimum speed the player can brake to on both slopes and the floor.
-const SKATE_BRAKE_MIN_SPEED := 10.0
-const SKATE_BRAKE_SLOPE_MIN_SPEED := 100.0
+# Speed needed to launch the player into the skating state.
+const SKATE_START_MIN_SPEED := 40.0
+# Initial speed when entering the skate state.
+const SKATE_START_SPEED := 150.0
+const SKATE_PIVOT_START_SPEED_FRACTION := 0.8
 
 const SKATE_STICK_ANGLE := 30.0 * PI / 180.0
 const SKATE_GRAVITY := 400.0
 const SKATE_MIN_REDIRECT_ANGLE := 30.0 * PI / 180.0
 const SKATE_MAX_REDIRECT_ANGLE := 40.0 * PI / 180.0
 const SKATE_MAX_REDIRECT_FRACTION := 1.0
+
+# The speed gained when making a boost.
+const SKATE_BOOST_MAX_SPEED := 110.0
+const SKATE_BOOST_MIN_SPEED := 20.0
+const SKATE_BOOST_MIN_TIME := 0.1
+const SKATE_BOOST_MAX_TIME := 0.8
+# The period of time over which the player will feel increased friction when
+# boosting.
+const SKATE_BOOST_FRICTION_TIME := 0.1
+const SKATE_BOOST_FRICTION_LOW := 30.0
+const SKATE_BOOST_FRICTION_HIGH := 200.0
+const SKATE_BOOST_FRICTION_TRANSITION_SPEED := 300.0
+
+# Friction when the player tries to slow down.
+const SKATE_BRAKE_FRICTION := 800.0
+# The minimum speed the player can brake to on both slopes and the floor.
+const SKATE_BRAKE_MIN_SPEED := 10.0
+const SKATE_BRAKE_SLOPE_MIN_SPEED := 100.0
 
 # The "minimum fractional impulse" needed to wipeout, meaning what percentage
 # of the player's speed must be lost in an instant.
@@ -263,9 +262,6 @@ const DIVE_SPEED := 400.0
 const DIVE_GRAVITY := 8.0
 const DIVE_FRICTION := 50.0
 
-const EFFECT_DRAG_MIN_TIME := 0.3
-const EFFECT_DRAG_MIN_PERSIST_TIME := 0.4
-
 var state : int = State.FALL
 var physics_state : int = PhysicsState.AIR
 # The normal to the surface the player is on (only valid if `_on_surface`
@@ -280,7 +276,6 @@ var slide_timer := 0.0
 var skate_timer := 0.0
 # Time between boosts.
 var skate_boost_timer := 0.0
-var skate_glide_timer := 0.0
 var wipeout_timer := 0.0
 var air_timer := 0.0
 # The amount of velocity stored when making a pivot.
@@ -302,12 +297,8 @@ var previous_physics_state := self.physics_state
 var previous_position := self.position
 var previous_velocity := self.velocity
 
-var effect_drag_time := 0.0
-var effect_drag_persist_time := 0.0
-
 onready var animation_player := $Sprite/AnimationPlayer
 onready var ballistic_effect_sprite := $BallisticEffectSprite
-onready var drag_effect_sprite := $DragEffectSprite
 
 onready var skate_brake_effect_a = $SkateA/IceSpray
 onready var skate_brake_effect_b = $SkateB/IceSpray
@@ -336,7 +327,6 @@ func _is_surface_state(state : int) -> bool:
 			|| state == State.SKATE_PIVOT_START \
 			|| state == State.SKATE \
 			|| state == State.SKATE_BOOST \
-			|| state == State.SKATE_GLIDE \
 			|| state == State.SKATE_BRAKE \
 			|| state == State.JUMP_START \
 			|| state == State.JUMP_WALL_START \
@@ -385,7 +375,6 @@ func _is_skate_state(state : int) -> bool:
 			|| state == State.SKATE_PIVOT_START \
 			|| state == State.SKATE \
 			|| state == State.SKATE_BOOST \
-			|| state == State.SKATE_GLIDE \
 			|| state == State.SKATE_BRAKE \
 			|| state == State.JUMP_BALLISTIC_LOW_START \
 			|| state == State.JUMP_BALLISTIC_HIGH_START \
@@ -463,7 +452,6 @@ func _apply_drag(drag : float, delta : float) -> void:
 
 func _ready() -> void:
 	self.ballistic_effect_sprite.visible = false
-	self.drag_effect_sprite.visible = false
 
 func _physics_process(delta : float) -> void:
 	var move_direction := _read_move_direction()
@@ -547,8 +535,6 @@ func _read_intent(move_direction : Vector2) -> Intent:
 					intent.skate_brake = false
 			if !intent.skate_brake && Input.is_action_just_pressed("skate"):
 				intent.skate_boost = true
-		if !intent.skate_brake && Input.is_action_pressed("skate"):
-			intent.skate_glide = true
 	if Input.is_action_just_pressed("dive"):
 		intent.dive = true
 	return intent
@@ -614,12 +600,13 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 	elif self.state == State.SKATE_PIVOT_START:
 		var skate_speed := SKATE_START_SPEED + SKATE_PIVOT_START_SPEED_FRACTION * max(abs(self.pivot_stored_velocity) - SKATE_START_SPEED, 0.0)
 		self.velocity = self.skate_direction * surface_tangent * skate_speed
-	elif self.state == State.SKATE || self.state == State.SKATE_GLIDE:
-		var friction := SKATE_FRICTION_LOW
-		if self.velocity.length() > SKATE_FRICTION_TRANSITION_SPEED:
-			friction = SKATE_FRICTION_HIGH
-		if self.state == State.SKATE_GLIDE && self.skate_glide_timer > SKATE_GLIDE_FRICTION_TIME:
-			friction = SKATE_FRICTION_LOW
+	elif self.state == State.SKATE:
+		var friction := SKATE_FRICTION
+		if self.skate_boost_timer <= SKATE_BOOST_FRICTION_TIME:
+			if self.velocity.length() < SKATE_BOOST_FRICTION_TRANSITION_SPEED:
+				friction = SKATE_BOOST_FRICTION_LOW
+			else:
+				friction = SKATE_BOOST_FRICTION_HIGH
 		if self.physics_state == PhysicsState.FLOOR:
 			if self.velocity.dot(self.skate_direction * surface_tangent) > SKATE_MIN_SPEED:
 				_apply_drag(friction, delta)
@@ -888,6 +875,8 @@ func _handle_state_transition(old_state : int) -> bool:
 			if self.skate_direction == 0:
 				self.skate_direction = self.facing_direction
 		
+		# The boost timer is zeroed here because it is needed for calculating
+		# the amount of boost while we are still in the boost state.
 		if old_state == State.SKATE_BOOST:
 			self.skate_boost_timer = 0.0
 		
@@ -901,8 +890,6 @@ func _handle_state_transition(old_state : int) -> bool:
 				self.skate_direction = self.facing_direction
 		elif self.state == State.SKATE_BOOST:
 			self.skate_stride = !self.skate_stride
-		elif self.state == State.SKATE_GLIDE:
-			self.skate_glide_timer = 0.0
 		elif self.state == State.SKATE_BRAKE:
 			self.pivot_stored_velocity = 0.0
 		elif self.state == State.DIVE_CHARGE:
@@ -1091,16 +1078,8 @@ func _state_transition(delta : float, intent : Intent, collision_info : Collisio
 			self.state = State.SKATE
 		elif intent.skate_boost && _is_surface_state(self.state) && self.state != State.SKATE_BOOST:
 			self.state = State.SKATE_BOOST
-		elif intent.skate_glide && _is_surface_state(self.state) && self.state != State.SKATE_GLIDE:
-			self.state = State.SKATE_GLIDE
-		elif !intent.skate_glide && self.state == State.SKATE_GLIDE:
-			self.state = State.SKATE
 		elif self.state == State.SKATE:
 			pass
-		elif self.state == State.SKATE_GLIDE:
-			self.skate_glide_timer += delta
-			if !intent.skate_glide:
-				self.state = State.SKATE
 		elif self.state == State.SKATE_BOOST:
 			self.state = State.SKATE
 		elif self.state == State.SKATE_BRAKE:
@@ -1155,8 +1134,11 @@ func _get_default_normal_state(intent : Intent, prefer_slide : bool = false) -> 
 func _get_default_skate_state(intent : Intent) -> int:
 	if self.physics_state == PhysicsState.AIR:
 		return State.BALLISTIC
-	elif intent.skate_glide:
-		return State.SKATE_GLIDE
+	# TODO: Make sure that these direct transitions aren't buggy.
+	elif intent.skate_boost:
+		return State.SKATE_BOOST
+	elif intent.skate_brake:
+		return State.SKATE_BRAKE
 	else:
 		return State.SKATE
 
@@ -1184,7 +1166,7 @@ func _animation_process() -> void:
 			next_animation = "WallSlideLeft"
 		else:
 			next_animation = "WallSlideRight"
-	elif self.state == State.SKATE || self.state == State.SKATE_GLIDE:
+	elif self.state == State.SKATE:
 		var playing_stride_a = (current_animation == "SkateBoostLeftA" || current_animation == "SkateBoostRightA")
 		var playing_stride_b = (current_animation == "SkateBoostLeftB" || current_animation == "SkateBoostRightB")
 		if self.skate_stride && (!is_playing || !playing_stride_a):
@@ -1261,20 +1243,6 @@ func _effects_process(delta : float) -> void:
 #		self.ballistic_effect_sprite.rotation = self.velocity.angle()
 #	else:
 #		self.ballistic_effect_sprite.visible = false
-	
-	var drag_condition = self.state == State.SKATE && self.velocity.length() > SKATE_FRICTION_TRANSITION_SPEED
-	self.drag_effect_sprite.rotation = -self.velocity.angle_to(Vector2.RIGHT)
-	if !drag_condition:
-		self.effect_drag_time = 0.0
-	if self.drag_effect_sprite.visible:
-		self.effect_drag_persist_time += delta
-		if !drag_condition && (!_on_surface(self.physics_state) || self.effect_drag_persist_time > EFFECT_DRAG_MIN_PERSIST_TIME):
-			self.drag_effect_sprite.visible = false
-	else:
-		self.effect_drag_time += delta
-		if self.effect_drag_time > EFFECT_DRAG_MIN_TIME:
-			self.drag_effect_sprite.visible = true
-			self.effect_drag_persist_time = 0.0
 	
 	if self.state == State.SKATE_BRAKE:
 		self.skate_brake_effect_a.set_emitting(true, abs(self.velocity.length()))
