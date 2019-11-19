@@ -204,7 +204,7 @@ const SKATE_BRAKE_SLOPE_MIN_SPEED := 100.0
 
 # The "minimum fractional impulse" needed to wipeout, meaning what percentage
 # of the player's speed must be lost in an instant.
-const WIPEOUT_MIN_FRACTIONAL_IMPULSE := 0.8
+const WIPEOUT_MIN_IMPULSE_FRACTION := 0.8
 # The "minimum impulse" needed to wipeout, meaning what absolute amount of
 # speed must be lost in an instant.
 const WIPEOUT_MIN_IMPULSE := 300.0
@@ -263,10 +263,14 @@ const DIVE_TIME := 0.5
 const DIVE_SPEED := 400.0
 const DIVE_GRAVITY := 8.0
 const DIVE_FRICTION := 50.0
+# The minimum impulse needed to leave a dive.
+const DIVE_MIN_IMPULSE_FRACTION := 0.1
+# The distance which is checked to be collision free before starting a dive.
+const DIVE_CHECK_DISTANCE := 10.0
 
 var state : int = State.FALL
 var physics_state : int = PhysicsState.AIR
-# The normal to the surface the player is on (only valid if `_on_surface`
+# The normal to the surface the player is on (only valid if `_is_surface_physics_state`
 # returns true).
 var surface_normal := Vector2.ZERO
 var velocity := Vector2.ZERO
@@ -308,14 +312,21 @@ onready var skate_glow_effect_a = $SkateA/SkateGlow
 onready var skate_glow_effect_b = $SkateB/SkateGlow
 
 # Is the player on a surface, meaning on a floor, slope, or wall?
-func _on_surface(physics_state : int) -> bool:
+func _is_surface_physics_state(physics_state : int) -> bool:
 	return physics_state == PhysicsState.FLOOR \
 			|| physics_state == PhysicsState.SLOPE \
 			|| physics_state == PhysicsState.WALL
 
+func _is_wall_physics_state(physics_state : int) -> bool:
+	return physics_state == PhysicsState.WALL
+
+func _is_ground_physics_state(physics_state : int) -> bool:
+	return physics_state == PhysicsState.FLOOR \
+			|| physics_state == PhysicsState.SLOPE
+
 # "Surface states" are those player states which are meant to be compatible
 # with the player moving on a surface. If the player is in one of these states,
-# then a call to `_on_surface` must return true (but the converse is not
+# then a call to `_is_surface_physics_state` must return true (but the converse is not
 # necessarily true).
 func _is_surface_state(state : int) -> bool:
 	# Jump can be a surface state if we jump next to a wall.
@@ -336,7 +347,6 @@ func _is_surface_state(state : int) -> bool:
 			|| state == State.JUMP_BALLISTIC_HIGH_START \
 			|| state == State.JUMP_BALLISTIC_WALL_LOW_START \
 			|| state == State.JUMP_BALLISTIC_WALL_HIGH_START \
-			|| state == State.JUMP \
 			|| state == State.WIPEOUT \
 			|| state == State.DIVE_CHARGE
 
@@ -351,6 +361,15 @@ func _is_air_state(state : int) -> bool:
 			|| state == State.JUMP \
 			|| state == State.WIPEOUT \
 			|| state == State.DIVE_CHARGE
+
+# Checks whether an air state will "cling" to a wall when next to one.
+func _is_wall_cling_state(air_state : int) -> bool:
+	if !_is_air_state(air_state):
+		printerr("Provided state ", STATE_NAME[air_state], " is not an air state.")
+		return false
+	return state == State.FALL \
+			|| state == State.BALLISTIC \
+			|| state == State.WIPEOUT
 
 # A "normal" state are those related to moving around at slow velocities with
 # normal platforming controls. While in a normal state, the only way to
@@ -410,6 +429,15 @@ func _is_prejump_state(state : int) -> bool:
 			|| state == State.JUMP_BALLISTIC_WALL_LOW_START \
 			|| state == State.JUMP_BALLISTIC_WALL_HIGH_START
 
+# Print an error is physics state and player state are incompatible.
+func _check_state_validity() -> void:
+	if _is_ground_physics_state(self.physics_state) && !_is_surface_state(self.state):
+		printerr("On ground but state ", STATE_NAME[self.state], " is not a surface state.")
+	if _is_wall_physics_state(self.physics_state) && !(_is_surface_state(self.state) || (_is_air_state(self.state) && !_is_wall_cling_state(self.state))):
+		printerr("On wall but state ", STATE_NAME[self.state], " is not a surface state or is an air state with wall cling.")
+	if !_is_surface_physics_state(self.physics_state) && !_is_air_state(self.state):
+		printerr("In air but state ", STATE_NAME[self.state], " is not an air state.")
+
 # Returns what the tangent velocity should be given the tangent and normal
 # components. Both arguments are positive.
 func _redirect_velocity(velocity_tangent : float, velocity_normal : float) -> float:
@@ -420,7 +448,7 @@ func _redirect_velocity(velocity_tangent : float, velocity_normal : float) -> fl
 func _redirect_normal_velocity(angle_difference : float) -> float:
 	angle_difference = abs(angle_difference)
 	if _is_skate_state(self.state):
-		var on_surface = _on_surface(self.physics_state)
+		var on_surface = _is_surface_physics_state(self.physics_state)
 		var min_redirect_angle := SKATE_MIN_REDIRECT_ANGLE if on_surface else BALLISTIC_MIN_REDIRECT_ANGLE
 		var max_redirect_angle := SKATE_MAX_REDIRECT_ANGLE if on_surface else BALLISTIC_MAX_REDIRECT_ANGLE
 		var max_redirect_fraction := SKATE_MAX_REDIRECT_FRACTION if on_surface else BALLISTIC_MAX_REDIRECT_FRACTION
@@ -504,7 +532,7 @@ func _read_intent(move_direction : Vector2) -> Intent:
 	# the player wants to do, not the input that the player actually did, so
 	# parts of it are conditional on the current state.
 	if Input.is_action_just_pressed("jump"):
-		if _on_surface(self.physics_state):
+		if _is_surface_physics_state(self.physics_state):
 			if _is_skate_state(self.state):
 				if move_direction.y < 0 || move_direction.x * self.skate_direction < 0:
 					intent.jump_high = true
@@ -512,7 +540,7 @@ func _read_intent(move_direction : Vector2) -> Intent:
 					intent.jump_low = true
 			elif _is_normal_state(self.state):
 				intent.jump_high = true
-	if _on_surface(self.physics_state):
+	if _is_surface_physics_state(self.physics_state):
 		if _is_normal_state(self.state):
 			if self.state == State.PIVOT:
 				if sign(move_direction.x) == -sign(self.pivot_stored_velocity) && Input.is_action_just_pressed("skate"):
@@ -525,7 +553,7 @@ func _read_intent(move_direction : Vector2) -> Intent:
 				if self.skate_direction == -1 && Input.is_action_pressed("move_right") \
 						|| self.skate_direction == 1 && Input.is_action_pressed("move_left"):
 					intent.skate_brake = true
-				if !_on_surface(self.previous_physics_state) && \
+				if !_is_surface_physics_state(self.previous_physics_state) && \
 						(self.skate_direction == -1 && Input.is_action_pressed("move_right") \
 						|| self.skate_direction == 1 && Input.is_action_pressed("move_left")):
 					intent.skate_brake = true
@@ -550,7 +578,7 @@ func _facing_direction_process(move_direction : Vector2) -> void:
 	elif self.state == State.SLIDE:
 		next_facing_direction = int(sign(self.velocity.x))
 	elif self.state == State.WALL_SLIDE:
-		if self.physics_state == PhysicsState.WALL:
+		if _is_wall_physics_state(self.physics_state):
 			next_facing_direction = int(sign(self.surface_normal.x))
 	elif _is_skate_state(self.state):
 		next_facing_direction = self.skate_direction
@@ -584,14 +612,10 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 		else:
 			self.velocity += sign(self.surface_normal.x) * SLIDE_ACCELERATION * surface_tangent * delta
 	elif self.state == State.WALL_SLIDE:
-		# Similar to regular sliding.
-		if self.physics_state == PhysicsState.FLOOR || self.physics_state == PhysicsState.SLOPE:
+		if self.velocity.length() > WALL_SLIDE_SPEED:
 			_apply_drag(WALL_SLIDE_ACCELERATION, delta)
-		elif self.physics_state == PhysicsState.WALL:
-			if self.velocity.length() > WALL_SLIDE_SPEED:
-				_apply_drag(WALL_SLIDE_ACCELERATION, delta)
-			else:
-				self.velocity += sign(self.surface_normal.x) * WALL_SLIDE_ACCELERATION * surface_tangent * delta
+		else:
+			self.velocity += sign(self.surface_normal.x) * WALL_SLIDE_ACCELERATION * surface_tangent * delta
 	elif self.state == State.WALL_RELEASE:
 		# Similar to a small jump off of the wall.
 		self.velocity += self.surface_normal * WALL_RELEASE_START_SPEED
@@ -729,6 +753,16 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 		if direction.length_squared() == 0.0:
 			direction = Vector2(self.facing_direction, 1.0)
 		direction = direction.normalized()
+		var extreme_angle := PI / 4.0
+		if direction.x >= 0:
+			extreme_angle = -PI / 4.0
+		# Make sure that the direction is collision free.
+		while move_and_collide(DIVE_CHECK_DISTANCE * direction, true, true, true) != null:
+			direction = direction.rotated(extreme_angle)
+			extreme_angle = -sign(extreme_angle) * (abs(extreme_angle) + PI / 4.0)
+			if extreme_angle >= 2.0 * PI:
+				break
+		print(direction)
 		self.velocity = DIVE_SPEED * direction
 	elif self.state == State.DIVE:
 		self.velocity.y += DIVE_GRAVITY
@@ -763,7 +797,7 @@ func _position_process(delta : float, n : int = 4) -> CollisionInfo:
 		delta_remainder = collision.remainder.length() / velocity.length()
 		found_new_surface = true
 		new_surface_normal = collision.normal
-	elif _on_surface(self.physics_state) && collision == null:
+	elif _is_surface_physics_state(self.physics_state) && collision == null:
 		delta_remainder = 0.0
 		# If the player used to be on a surface, then we should try to stick
 		# to whatever surface may still be below them. We do this in two ways:
@@ -819,7 +853,7 @@ func _position_process(delta : float, n : int = 4) -> CollisionInfo:
 	# Before committing to the new surface, make sure that there isn't a
 	# better choice of surface to be on by looking in the direction of the
 	# last surface the player was on.
-	if _on_surface(self.physics_state):
+	if _is_surface_physics_state(self.physics_state):
 		var test_collision := move_and_collide(-self.surface_normal * SURFACE_PADDING, true, true, true)
 		if test_collision != null:
 			var test_normal := test_collision.normal
@@ -909,8 +943,8 @@ func _handle_state_transition(old_state : int) -> bool:
 # basically means air-to-surface and surface-to-air state transitions.
 func _state_transition_physics(intent : Intent) -> bool:
 	var old_state := self.state
-	if _on_surface(self.physics_state):
-		# If `_on_surface` is true, then the player must be in a surface state.
+	if _is_surface_physics_state(self.physics_state) && (!_is_wall_physics_state(self.physics_state) || (_is_air_state(self.state) && _is_wall_cling_state(self.state))):
+		# If `_is_surface_physics_state` is true, then the player must be in a surface state.
 		# In case the player is not, make a transition into one of the surface
 		# states.
 		if !_is_surface_state(self.state):
@@ -938,11 +972,7 @@ func _state_transition_physics(intent : Intent) -> bool:
 			else:
 				self.state = State.WIPEOUT
 	
-	if self._on_surface(self.physics_state) && !_is_surface_state(self.state):
-		printerr("On surface but state ", STATE_NAME[self.state], " is not a surface state.")
-	if !self._on_surface(self.physics_state) && !_is_air_state(self.state):
-		printerr("In air but state ", STATE_NAME[self.state], " is not an air state.")
-	
+	_check_state_validity()
 	return _handle_state_transition(old_state)
 
 func _state_transition(delta : float, intent : Intent, collision_info : CollisionInfo) -> bool:
@@ -960,7 +990,7 @@ func _state_transition(delta : float, intent : Intent, collision_info : Collisio
 	if _is_normal_state(self.state):
 		# Input transitions take priority over all else.
 		if can_act && intent.jump_high && _is_surface_state(self.state) && self.state != State.JUMP:
-			if self.physics_state == PhysicsState.WALL:
+			if _is_wall_physics_state(self.physics_state):
 				self.state = State.JUMP_WALL_START
 			else:
 				self.state = State.JUMP_START
@@ -990,12 +1020,12 @@ func _state_transition(delta : float, intent : Intent, collision_info : Collisio
 			var surface_angle = self.surface_normal.angle_to(Vector2.UP)
 			if self.slide_timer < SLIDE_MIN_TIME:
 				self.slide_timer += delta
-				if self.physics_state == PhysicsState.WALL:
+				if _is_wall_physics_state(self.physics_state):
 					self.state = _get_default_normal_state(intent, true)
-			elif self.physics_state == PhysicsState.WALL || abs(surface_angle) <= WALK_MAX_ANGLE:
+			elif _is_wall_physics_state(self.physics_state) || abs(surface_angle) <= WALK_MAX_ANGLE:
 				self.state = _get_default_normal_state(intent, true)
 		elif self.state == State.WALL_SLIDE:
-			if self.physics_state != PhysicsState.WALL:
+			if _is_ground_physics_state(self.physics_state):
 				self.state = _get_default_normal_state(intent, true)
 			elif sign(intent.move_direction.x) == sign(self.surface_normal.x):
 				self.state = State.WALL_RELEASE
@@ -1020,8 +1050,8 @@ func _state_transition(delta : float, intent : Intent, collision_info : Collisio
 			printerr("Failed to wall jump.")
 			self.state = _get_default_normal_state(intent)
 		elif self.state == State.JUMP:
-			if !_on_surface(self.physics_state):
-				self.state = _get_default_normal_state(intent)
+			#if !_is_surface_physics_state(self.physics_state):
+			#	self.state = _get_default_normal_state(intent)
 			if self.velocity.y >= 0.0:
 				self.state = _get_default_normal_state(intent)
 		elif self.state == State.FALL:
@@ -1033,12 +1063,9 @@ func _state_transition(delta : float, intent : Intent, collision_info : Collisio
 	elif _is_skate_state(self.state):
 		self.skate_timer += delta
 		self.skate_boost_timer += delta
-		if _on_surface(self.physics_state):
+		if _is_surface_physics_state(self.physics_state):
 			if self.velocity.dot(self.skate_direction * surface_tangent) < 0.0:
-				if self.physics_state == PhysicsState.SLOPE || self.physics_state == PhysicsState.WALL:
-					self.skate_direction = -self.skate_direction
-				else:
-					printerr("Flipped skate direction on floor.")
+				self.skate_direction = -self.skate_direction
 		else:
 			var velocity_sign := int(sign(self.velocity.x))
 			if velocity_sign * self.skate_direction == -1:
@@ -1050,15 +1077,15 @@ func _state_transition(delta : float, intent : Intent, collision_info : Collisio
 		if self.previous_velocity.length_squared() != 0.0:
 			fractional_impulse = impulse / self.previous_velocity.length()
 		
-		if _on_surface(self.physics_state) && self.physics_state != PhysicsState.WALL && (collision_info.wall_collision || collision_info.ceiling_collision):
-			if impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
+		if _is_ground_physics_state(self.physics_state) && (collision_info.wall_collision || collision_info.ceiling_collision):
+			if impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_IMPULSE_FRACTION:
 				self.state = State.WIPEOUT
 			else:
 				self.state = _get_default_normal_state(intent)
 		elif can_act && intent.dive && self.has_dive:
 			self.state = State.DIVE_CHARGE
 		elif can_act && (intent.jump_low || intent.jump_high) && _is_surface_state(self.state):
-			if self.physics_state == PhysicsState.WALL:
+			if _is_wall_physics_state(self.physics_state):
 				if intent.jump_high:
 					self.state = State.JUMP_BALLISTIC_WALL_HIGH_START
 				else:
@@ -1089,7 +1116,7 @@ func _state_transition(delta : float, intent : Intent, collision_info : Collisio
 			if abs(self.surface_normal.angle_to(Vector2.UP)) <= WALK_MAX_ANGLE && self.velocity.length() < SKATE_BRAKE_MIN_SPEED:
 				self.state = State.PIVOT
 		elif self.state == State.BALLISTIC:
-			if impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_FRACTIONAL_IMPULSE:
+			if impulse <= -WIPEOUT_MIN_IMPULSE && fractional_impulse <= -WIPEOUT_MIN_IMPULSE_FRACTION:
 				self.state = State.WIPEOUT
 		elif self.state == State.JUMP_BALLISTIC_LOW_START \
 				|| self.state == State.JUMP_BALLISTIC_HIGH_START \
@@ -1101,24 +1128,21 @@ func _state_transition(delta : float, intent : Intent, collision_info : Collisio
 			self.state = State.DIVE
 		elif self.state == State.DIVE:
 			self.dive_timer += delta
-			if self.dive_timer > DIVE_TIME || collision_info.has_collision():
+			var collision := collision_info.has_collision() && fractional_impulse <= -DIVE_MIN_IMPULSE_FRACTION
+			if self.dive_timer > DIVE_TIME || collision:
 				self.state = _get_default_skate_state(intent)
 	
-	if self._on_surface(self.physics_state) && !_is_surface_state(self.state):
-		printerr("On surface but state ", STATE_NAME[self.state], " is not a surface state.")
-	if !self._on_surface(self.physics_state) && !_is_air_state(self.state):
-		printerr("In air but state ", STATE_NAME[self.state], " is not an air state.")
-	
+	_check_state_validity()
 	return _handle_state_transition(old_state)
 
 # Gets an appropriate choice of state based on the physics state of the player.
 # This is used when resetting the player state.
 func _get_default_normal_state(intent : Intent, prefer_slide : bool = false) -> int:
-	if !_on_surface(self.physics_state):
+	if !_is_surface_physics_state(self.physics_state):
 		return State.FALL
 	else:
 		var surface_angle = self.surface_normal.angle_to(Vector2.UP)
-		if self.physics_state == PhysicsState.WALL:
+		if _is_wall_physics_state(self.physics_state):
 			return State.WALL_SLIDE
 		elif abs(surface_angle) <= WALK_MAX_ANGLE:
 			var enter_slide := self.velocity.length() >= SLIDE_MIN_SPEED if prefer_slide \
