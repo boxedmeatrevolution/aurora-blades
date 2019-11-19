@@ -62,6 +62,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 33 ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 11, 8 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 2, 9 ) ]
+}
 
 [sub_resource type="Animation" id=3]
 loop = true
@@ -77,6 +101,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 27 ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 3, 16 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 4, 10 ) ]
+}
 
 [sub_resource type="Animation" id=4]
 loop = true
@@ -91,6 +139,30 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1 ),
 "update": 1,
 "values": [ 32 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -3, 16 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -4, 10 ) ]
 }
 
 [sub_resource type="Animation" id=5]
@@ -167,6 +239,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 3 ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 3, 16 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -2, 17 ) ]
+}
 
 [sub_resource type="Animation" id=10]
 loop = true
@@ -181,6 +277,30 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1 ),
 "update": 1,
 "values": [ 8 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -3, 16 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 2, 17 ) ]
 }
 
 [sub_resource type="Animation" id=11]
@@ -197,6 +317,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 4 ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 5, 16 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 0, 17 ) ]
+}
 
 [sub_resource type="Animation" id=12]
 loop = true
@@ -211,6 +355,30 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1 ),
 "update": 1,
 "values": [ 7 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -5, 16 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 0, 17 ) ]
 }
 
 [sub_resource type="Animation" id=13]
@@ -228,6 +396,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 38, 37, 36 ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 10, 9 ), Vector2( 5, 9 ), Vector2( -5, 18 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( -5, 18 ), Vector2( 0, 18 ), Vector2( 13, 8 ) ]
+}
 
 [sub_resource type="Animation" id=14]
 resource_name = "SkateBoostLeftB"
@@ -243,6 +435,30 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1, 1, 1 ),
 "update": 1,
 "values": [ 41, 40, 39 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( -5, 18 ), Vector2( 0, 18 ), Vector2( 13, 9 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 10, 9 ), Vector2( 4, 8 ), Vector2( -5, 18 ) ]
 }
 
 [sub_resource type="Animation" id=15]
@@ -260,6 +476,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 45, 46, 47 ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( -10, 9 ), Vector2( -5, 9 ), Vector2( 5, 18 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 5, 18 ), Vector2( 0, 18 ), Vector2( -13, 8 ) ]
+}
 
 [sub_resource type="Animation" id=16]
 resource_name = "SkateBoostRightB"
@@ -275,6 +515,30 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1, 1, 1 ),
 "update": 1,
 "values": [ 42, 43, 44 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 5, 18 ), Vector2( 0, 18 ), Vector2( -13, 9 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( -10, 9 ), Vector2( -4, 8 ), Vector2( 5, 18 ) ]
 }
 
 [sub_resource type="Animation" id=17]
@@ -372,6 +636,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 29 ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -5, 18 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 13, 9 ) ]
+}
 
 [sub_resource type="Animation" id=20]
 resource_name = "SkateLeftB"
@@ -387,6 +675,30 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1 ),
 "update": 1,
 "values": [ 28 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 13, 9 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -5, 18 ) ]
 }
 
 [sub_resource type="Animation" id=21]
@@ -404,6 +716,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 30 ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 5, 18 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -13, 9 ) ]
+}
 
 [sub_resource type="Animation" id=22]
 resource_name = "SkateRightB"
@@ -420,6 +756,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 31 ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -13, 9 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 5, 18 ) ]
+}
 
 [sub_resource type="Animation" id=23]
 loop = true
@@ -434,6 +794,30 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1 ),
 "update": 1,
 "values": [ 2 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -14, 15 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -14, 12 ) ]
 }
 
 [sub_resource type="Animation" id=24]
@@ -450,6 +834,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 9 ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 14, 15 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 14, 12 ) ]
+}
 
 [sub_resource type="Animation" id=25]
 loop = true
@@ -465,6 +873,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 5 ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 2, 18 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -4, 18 ) ]
+}
 
 [sub_resource type="Animation" id=26]
 loop = true
@@ -479,6 +911,30 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1 ),
 "update": 1,
 "values": [ 6 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -2, 18 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 4, 18 ) ]
 }
 
 [sub_resource type="Animation" id=27]
@@ -496,6 +952,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 17, 16, 15, 14, 13, 12 ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( -10, 13 ), Vector2( -9, 17 ), Vector2( 0, 18 ), Vector2( 8, 16 ), Vector2( 9, 10 ), Vector2( 6, 6 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 8, 16 ), Vector2( 9, 10 ), Vector2( 6, 7 ), Vector2( -10, 13 ), Vector2( -7, 17 ), Vector2( 0, 18 ) ]
+}
 
 [sub_resource type="Animation" id=28]
 length = 0.6
@@ -512,6 +992,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 18, 19, 20, 21, 22, 23 ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 10, 13 ), Vector2( 9, 17 ), Vector2( 0, 18 ), Vector2( -8, 16 ), Vector2( -9, 10 ), Vector2( -6, 6 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( -8, 16 ), Vector2( -9, 10 ), Vector2( -6, 7 ), Vector2( 10, 13 ), Vector2( 7, 17 ), Vector2( 0, 18 ) ]
+}
 
 [sub_resource type="Animation" id=29]
 loop = true
@@ -527,6 +1031,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 1 ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 3, 16 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 6, 11 ) ]
+}
 
 [sub_resource type="Animation" id=30]
 loop = true
@@ -541,6 +1069,30 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1 ),
 "update": 1,
 "values": [ 10 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -3, 16 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -6, 11 ) ]
 }
 
 [sub_resource type="Animation" id=31]
@@ -611,16 +1163,13 @@ tracks/0/keys = {
 [node name="Player" type="KinematicBody2D"]
 collision_mask = 2
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_group_": true
-}
 
 [node name="Sprite" type="Sprite" parent="."]
 position = Vector2( 0, -14 )
 texture = ExtResource( 2 )
 vframes = 4
 hframes = 12
-frame = 35
+frame = 2
 region_rect = Rect2( 0, 0, 24, 32 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Sprite"]
@@ -686,8 +1235,10 @@ autoplay = "DragEffect"
 anims/DragEffect = SubResource( 35 )
 
 [node name="SkateA" type="Node2D" parent="."]
-editor/display_folded = true
-position = Vector2( 6, 18 )
+position = Vector2( -3, 16 )
+__meta__ = {
+"_edit_group_": true
+}
 
 [node name="Sprite" type="Sprite" parent="SkateA"]
 visible = false
@@ -697,8 +1248,10 @@ texture = ExtResource( 5 )
 [node name="IceSpray" parent="SkateA" instance=ExtResource( 6 )]
 
 [node name="SkateB" type="Node2D" parent="."]
-editor/display_folded = true
-position = Vector2( -3, 18 )
+position = Vector2( -6, 11 )
+__meta__ = {
+"_edit_group_": true
+}
 
 [node name="Sprite" type="Sprite" parent="SkateB"]
 visible = false
