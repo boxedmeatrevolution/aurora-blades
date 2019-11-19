@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=2]
+[gd_scene load_steps=40 format=2]
 
 [ext_resource path="res://scripts/player.gd" type="Script" id=1]
 [ext_resource path="res://sprites/player.png" type="Texture" id=2]
@@ -6,7 +6,7 @@
 [ext_resource path="res://sprites/player_drag_effect.png" type="Texture" id=4]
 
 [sub_resource type="Animation" id=1]
-resource_name = "BallisticLeft"
+resource_name = "BallisticFallLeft"
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -18,11 +18,11 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 1,
-"values": [ 32 ]
+"values": [ 26 ]
 }
 
 [sub_resource type="Animation" id=2]
-resource_name = "BallisticRight"
+resource_name = "BallisticFallRight"
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -38,239 +38,6 @@ tracks/0/keys = {
 }
 
 [sub_resource type="Animation" id=3]
-resource_name = "DiveChargeLeft"
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
-"values": [ 31 ]
-}
-
-[sub_resource type="Animation" id=4]
-resource_name = "DiveChargeRight"
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
-"values": [ 34 ]
-}
-
-[sub_resource type="Animation" id=5]
-resource_name = "DiveLeft"
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
-"values": [ 30 ]
-}
-
-[sub_resource type="Animation" id=6]
-resource_name = "DiveRight"
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
-"values": [ 35 ]
-}
-
-[sub_resource type="Animation" id=7]
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
-"values": [ 13 ]
-}
-
-[sub_resource type="Animation" id=8]
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
-"values": [ 16 ]
-}
-
-[sub_resource type="Animation" id=9]
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
-"values": [ 14 ]
-}
-
-[sub_resource type="Animation" id=10]
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
-"values": [ 15 ]
-}
-
-[sub_resource type="Animation" id=11]
-length = 0.3
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0, 0.1, 0.2 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
-"update": 1,
-"values": [ 20, 19, 18 ]
-}
-
-[sub_resource type="Animation" id=12]
-length = 0.3
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0, 0.1, 0.2 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
-"update": 1,
-"values": [ 21, 22, 23 ]
-}
-
-[sub_resource type="Animation" id=13]
-resource_name = "SkateBrakeLeft"
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
-"values": [ 24 ]
-}
-
-[sub_resource type="Animation" id=14]
-resource_name = "SkateBrakeRight"
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
-"values": [ 29 ]
-}
-
-[sub_resource type="Animation" id=15]
-resource_name = "SkateGlideLeft"
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
-"values": [ 25 ]
-}
-
-[sub_resource type="Animation" id=16]
-resource_name = "SkateGlideRight"
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
-"values": [ 28 ]
-}
-
-[sub_resource type="Animation" id=17]
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
-"values": [ 26 ]
-}
-
-[sub_resource type="Animation" id=18]
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -285,7 +52,7 @@ tracks/0/keys = {
 "values": [ 27 ]
 }
 
-[sub_resource type="Animation" id=19]
+[sub_resource type="Animation" id=4]
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -297,10 +64,10 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 1,
-"values": [ 7 ]
+"values": [ 32 ]
 }
 
-[sub_resource type="Animation" id=20]
+[sub_resource type="Animation" id=5]
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -312,10 +79,70 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 1,
-"values": [ 10 ]
+"values": [ 31 ]
 }
 
-[sub_resource type="Animation" id=21]
+[sub_resource type="Animation" id=6]
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 34 ]
+}
+
+[sub_resource type="Animation" id=7]
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 30 ]
+}
+
+[sub_resource type="Animation" id=8]
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 35 ]
+}
+
+[sub_resource type="Animation" id=9]
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 3 ]
+}
+
+[sub_resource type="Animation" id=10]
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -330,7 +157,212 @@ tracks/0/keys = {
 "values": [ 8 ]
 }
 
+[sub_resource type="Animation" id=11]
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 4 ]
+}
+
+[sub_resource type="Animation" id=12]
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 7 ]
+}
+
+[sub_resource type="Animation" id=14]
+resource_name = "SkateBoostLeftA"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ 38, 37, 36 ]
+}
+
+[sub_resource type="Animation" id=13]
+resource_name = "SkateBoostLeftB"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ 41, 40, 39 ]
+}
+
+[sub_resource type="Animation" id=35]
+resource_name = "SkateBoostRightA"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ 45, 46, 47 ]
+}
+
+[sub_resource type="Animation" id=15]
+resource_name = "SkateBoostRightB"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ 42, 43, 44 ]
+}
+
+[sub_resource type="Animation" id=16]
+length = 0.2
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ 25, 24 ]
+}
+
+[sub_resource type="Animation" id=17]
+length = 0.2
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ 34, 35 ]
+}
+
+[sub_resource type="Animation" id=20]
+resource_name = "SkateLeftA"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 29 ]
+}
+
+[sub_resource type="Animation" id=36]
+resource_name = "SkateLeftB"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 28 ]
+}
+
+[sub_resource type="Animation" id=21]
+resource_name = "SkateRightA"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 30 ]
+}
+
+[sub_resource type="Animation" id=37]
+resource_name = "SkateRightB"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 31 ]
+}
+
 [sub_resource type="Animation" id=22]
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 2 ]
+}
+
+[sub_resource type="Animation" id=23]
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -345,24 +377,7 @@ tracks/0/keys = {
 "values": [ 9 ]
 }
 
-[sub_resource type="Animation" id=23]
-length = 0.8
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0, 0.2, 0.4, 0.6 ),
-"transitions": PoolRealArray( 1, 1, 1, 1 ),
-"update": 1,
-"values": [ 0, 1, 2, 1 ]
-}
-
 [sub_resource type="Animation" id=24]
-length = 0.8
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -371,10 +386,10 @@ tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 0.2, 0.4, 0.6 ),
-"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
 "update": 1,
-"values": [ 3, 4, 5, 4 ]
+"values": [ 5 ]
 }
 
 [sub_resource type="Animation" id=25]
@@ -389,25 +404,11 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 1,
-"values": [ 11 ]
-}
-
-[sub_resource type="Animation" id=26]
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
 "values": [ 6 ]
 }
 
-[sub_resource type="Animation" id=27]
+[sub_resource type="Animation" id=26]
+length = 0.6
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -416,10 +417,26 @@ tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
 "update": 1,
-"values": [ 12 ]
+"values": [ 17, 16, 15, 14, 13, 12 ]
+}
+
+[sub_resource type="Animation" id=27]
+length = 0.6
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 18, 19, 20, 21, 22, 23 ]
 }
 
 [sub_resource type="Animation" id=28]
@@ -434,13 +451,58 @@ tracks/0/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 1,
-"values": [ 17 ]
+"values": [ 1 ]
 }
 
-[sub_resource type="RectangleShape2D" id=29]
-extents = Vector2( 6, 14 )
+[sub_resource type="Animation" id=29]
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 10 ]
+}
 
 [sub_resource type="Animation" id=30]
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 2 ]
+}
+
+[sub_resource type="Animation" id=31]
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 9 ]
+}
+
+[sub_resource type="RectangleShape2D" id=32]
+extents = Vector2( 6, 18 )
+
+[sub_resource type="Animation" id=33]
 length = 0.3
 loop = true
 tracks/0/type = "value"
@@ -456,8 +518,7 @@ tracks/0/keys = {
 "values": [ 0, 1, 2 ]
 }
 
-[sub_resource type="Animation" id=31]
-resource_name = "DragEffect"
+[sub_resource type="Animation" id=34]
 length = 0.4
 loop = true
 tracks/0/type = "value"
@@ -481,48 +542,54 @@ __meta__ = {
 }
 
 [node name="Sprite" type="Sprite" parent="."]
-editor/display_folded = true
-position = Vector2( 0, -2 )
+position = Vector2( 0, -14 )
 texture = ExtResource( 2 )
-vframes = 6
-hframes = 6
+vframes = 4
+hframes = 12
+frame = 6
 region_rect = Rect2( 0, 0, 24, 32 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Sprite"]
-anims/BallisticLeft = SubResource( 1 )
-anims/BallisticRight = SubResource( 2 )
-anims/DiveChargeLeft = SubResource( 3 )
-anims/DiveChargeRight = SubResource( 4 )
-anims/DiveLeft = SubResource( 5 )
-anims/DiveRight = SubResource( 6 )
-anims/FallLeft = SubResource( 7 )
-anims/FallRight = SubResource( 8 )
-anims/JumpLeft = SubResource( 9 )
-anims/JumpRight = SubResource( 10 )
-anims/SkateBoostLeft = SubResource( 11 )
-anims/SkateBoostRight = SubResource( 12 )
-anims/SkateBrakeLeft = SubResource( 13 )
-anims/SkateBrakeRight = SubResource( 14 )
-anims/SkateGlideLeft = SubResource( 15 )
-anims/SkateGlideRight = SubResource( 16 )
-anims/SkateLeft = SubResource( 17 )
-anims/SkateRight = SubResource( 18 )
-anims/SlideLeft = SubResource( 19 )
-anims/SlideRight = SubResource( 20 )
-anims/StandLeft = SubResource( 21 )
-anims/StandRight = SubResource( 22 )
-anims/WalkLeft = SubResource( 23 )
-anims/WalkRight = SubResource( 24 )
-anims/WallSlideLeft = SubResource( 25 )
-anims/WallSlideRight = SubResource( 26 )
-anims/WipeoutLeft = SubResource( 27 )
-anims/WipeoutRight = SubResource( 28 )
+anims/BallisticFallLeft = SubResource( 1 )
+anims/BallisticFallRight = SubResource( 2 )
+anims/BallisticJumpLeft = SubResource( 3 )
+anims/BallisticJumpRight = SubResource( 4 )
+anims/DiveChargeLeft = SubResource( 5 )
+anims/DiveChargeRight = SubResource( 6 )
+anims/DiveLeft = SubResource( 7 )
+anims/DiveRight = SubResource( 8 )
+anims/FallLeft = SubResource( 9 )
+anims/FallRight = SubResource( 10 )
+anims/JumpLeft = SubResource( 11 )
+anims/JumpRight = SubResource( 12 )
+anims/SkateBoostLeftA = SubResource( 14 )
+anims/SkateBoostLeftB = SubResource( 13 )
+anims/SkateBoostRightA = SubResource( 35 )
+anims/SkateBoostRightB = SubResource( 15 )
+anims/SkateBrakeLeft = SubResource( 16 )
+anims/SkateBrakeRight = SubResource( 17 )
+anims/SkateLeftA = SubResource( 20 )
+anims/SkateLeftB = SubResource( 36 )
+anims/SkateRightA = SubResource( 21 )
+anims/SkateRightB = SubResource( 37 )
+anims/SlideLeft = SubResource( 22 )
+anims/SlideRight = SubResource( 23 )
+anims/StandLeft = SubResource( 24 )
+anims/StandRight = SubResource( 25 )
+anims/WalkLeft = SubResource( 26 )
+anims/WalkRight = SubResource( 27 )
+anims/WallSlideLeft = SubResource( 28 )
+anims/WallSlideRight = SubResource( 29 )
+anims/WipeoutLeft = SubResource( 30 )
+anims/WipeoutRight = SubResource( 31 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
-shape = SubResource( 29 )
+shape = SubResource( 32 )
 
 [node name="BallisticEffectSprite" type="Sprite" parent="."]
+editor/display_folded = true
+visible = false
 texture = ExtResource( 3 )
 offset = Vector2( -5, 0 )
 hframes = 3
@@ -530,9 +597,11 @@ frame = 2
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="BallisticEffectSprite"]
 autoplay = "BallisticEffect"
-anims/BallisticEffect = SubResource( 30 )
+anims/BallisticEffect = SubResource( 33 )
 
 [node name="DragEffectSprite" type="Sprite" parent="."]
+editor/display_folded = true
+visible = false
 texture = ExtResource( 4 )
 offset = Vector2( 4, -4 )
 hframes = 4
@@ -540,4 +609,4 @@ frame = 1
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="DragEffectSprite"]
 autoplay = "DragEffect"
-anims/DragEffect = SubResource( 31 )
+anims/DragEffect = SubResource( 34 )

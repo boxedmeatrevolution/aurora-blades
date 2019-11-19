@@ -5,8 +5,6 @@ const Speech := preload("res://scripts/types/speech.gd")
 signal dialogue_start
 signal dialogue_end
 
-onready var viewport := self.get_viewport()
-onready var camera := self.viewport.get_camera()
 onready var box := $Box
 onready var portrait := $Box/PanelContainer/HBoxContainer/MarginContainer/CenterContainer/Portrait
 onready var name_label := $Box/PanelContainer/HBoxContainer/MarginContainer2/VBoxContainer/Name
@@ -65,7 +63,6 @@ func _update_dialogue_box_line() -> bool:
 		self.scroll_speed = 1
 		self.line_finished = false
 		var actor := self.current_line.actor
-		var current_speech := self.current_line.speech
 		self.portrait.texture = actor.portrait
 		self.name_label.text = actor.name
 		self.speech_label.text = ""

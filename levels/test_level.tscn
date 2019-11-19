@@ -104,7 +104,7 @@ position = Vector2( 128, -80 )
 
 [node name="Hazard2" parent="Hazards" instance=ExtResource( 8 )]
 position = Vector2( 224, -64 )
-[connection signal="dialogue_end" from="Dialogue" to="Player" method="_on_dialogue_end"]
 [connection signal="dialogue_end" from="Dialogue" to="Player/PixelCamera" method="_on_dialogue_end"]
-[connection signal="dialogue_start" from="Dialogue" to="Player" method="_on_dialogue_start"]
+[connection signal="dialogue_end" from="Dialogue" to="Player" method="_on_dialogue_end"]
 [connection signal="dialogue_start" from="Dialogue" to="Player/PixelCamera" method="_on_dialogue_start"]
+[connection signal="dialogue_start" from="Dialogue" to="Player" method="_on_dialogue_start"]

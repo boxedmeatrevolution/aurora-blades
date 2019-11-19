@@ -272,6 +272,9 @@ var pivot_timer := 0.0
 var dive_charge_timer := 0.0
 var dive_timer := 0.0
 var has_dive := true
+# For animation purposes, the stride of the skate that the player is currently
+# on.
+var skate_stride := false
 
 var in_dialogue := false
 
@@ -524,7 +527,6 @@ func _read_intent(move_direction : Vector2) -> Intent:
 # direction should not affect the logic, only the animations.
 func _facing_direction_process(move_direction : Vector2) -> void:
 	var next_facing_direction := 0
-	var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
 	if self.state == State.STAND || self.state == State.WALK || self.state == State.FALL:
 		next_facing_direction = int(sign(move_direction.x))
 	elif self.state == State.SLIDE:
@@ -857,6 +859,8 @@ func _handle_state_transition(old_state : int) -> bool:
 			self.skate_direction = -int(sign(self.pivot_stored_velocity))
 			if self.skate_direction == 0:
 				self.skate_direction = self.facing_direction
+		elif self.state == State.SKATE_BOOST:
+			self.skate_stride = !self.skate_stride
 		elif self.state == State.SKATE_GLIDE:
 			self.skate_glide_timer = 0.0
 		elif self.state == State.SKATE_BRAKE:
@@ -1137,23 +1141,30 @@ func _animation_process() -> void:
 			next_animation = "WallSlideLeft"
 		else:
 			next_animation = "WallSlideRight"
-	elif self.state == State.SKATE:
-		if !is_playing || (current_animation != "SkateBoostLeft" && current_animation != "SkateBoostRight"):
+	elif self.state == State.SKATE || self.state == State.SKATE_GLIDE:
+		var playing_stride_a = (current_animation == "SkateBoostLeftA" || current_animation == "SkateBoostRightA")
+		var playing_stride_b = (current_animation == "SkateBoostLeftB" || current_animation == "SkateBoostRightB")
+		if self.skate_stride && (!is_playing || !playing_stride_a):
 			if self.facing_direction == -1:
-				next_animation = "SkateLeft"
+				next_animation = "SkateLeftA"
 			else:
-				next_animation = "SkateRight"
+				next_animation = "SkateRightA"
+		elif !self.skate_stride && (!is_playing || !playing_stride_b):
+			if self.facing_direction == -1:
+				next_animation = "SkateLeftB"
+			else:
+				next_animation = "SkateRightB"
 	elif self.state == State.SKATE_START || self.state == State.SKATE_BOOST || self.state == State.SKATE_PIVOT_START:
-		if self.facing_direction == -1:
-			next_animation = "SkateBoostLeft"
-		else:
-			next_animation = "SkateBoostRight"
-	elif self.state == State.SKATE_GLIDE:
-		if !is_playing || (current_animation != "SkateBoostLeft" && current_animation != "SkateBoostRight"):
+		if self.skate_stride:
 			if self.facing_direction == -1:
-				next_animation = "SkateGlideLeft"
+				next_animation = "SkateBoostLeftA"
 			else:
-				next_animation = "SkateGlideRight"
+				next_animation = "SkateBoostRightA"
+		else:
+			if self.facing_direction == -1:
+				next_animation = "SkateBoostLeftB"
+			else:
+				next_animation = "SkateBoostRightB"
 	elif self.state == State.SKATE_BRAKE || self.state == State.PIVOT:
 		if self.facing_direction == -1:
 			next_animation = "SkateBrakeLeft"
@@ -1164,21 +1175,28 @@ func _animation_process() -> void:
 			next_animation = "WipeoutLeft"
 		else:
 			next_animation = "WipeoutRight"
-	elif _is_prejump_state(self.state) || self.state == State.JUMP:
-		if self.facing_direction == -1:
-			next_animation = "JumpLeft"
+	elif _is_prejump_state(self.state) || self.state == State.JUMP || self.state == State.FALL:
+		if self.velocity.y < 0.0:
+			if self.facing_direction == -1:
+				next_animation = "JumpLeft"
+			else:
+				next_animation = "JumpRight"
 		else:
-			next_animation = "JumpRight"
-	elif self.state == State.FALL:
-		if self.facing_direction == -1:
-			next_animation = "FallLeft"
-		else:
-			next_animation = "FallRight"
+			if self.facing_direction == -1:
+				next_animation = "FallLeft"
+			else:
+				next_animation = "FallRight"
 	elif self.state == State.BALLISTIC:
-		if self.facing_direction == -1:
-			next_animation = "BallisticLeft"
+		if self.velocity.y < 0.0:
+			if self.facing_direction == -1:
+				next_animation = "BallisticJumpLeft"
+			else:
+				next_animation = "BallisticJumpRight"
 		else:
-			next_animation = "BallisticRight"
+			if self.facing_direction == -1:
+				next_animation = "BallisticFallLeft"
+			else:
+				next_animation = "BallisticFallRight"
 	elif self.state == State.DIVE_CHARGE:
 		if self.facing_direction == -1:
 			next_animation = "DiveChargeLeft"
