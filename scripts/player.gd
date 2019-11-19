@@ -246,8 +246,6 @@ const DIVE_FRICTION := 50.0
 
 const EFFECT_DRAG_MIN_TIME := 0.3
 const EFFECT_DRAG_MIN_PERSIST_TIME := 0.4
-var effect_drag_time := 0.0
-var effect_drag_persist_time := 0.0
 
 var state : int = State.FALL
 var physics_state : int = PhysicsState.AIR
@@ -285,9 +283,15 @@ var previous_physics_state := self.physics_state
 var previous_position := self.position
 var previous_velocity := self.velocity
 
+var effect_drag_time := 0.0
+var effect_drag_persist_time := 0.0
+
 onready var animation_player := $Sprite/AnimationPlayer
 onready var ballistic_effect_sprite := $BallisticEffectSprite
 onready var drag_effect_sprite := $DragEffectSprite
+
+onready var skate_brake_effect_a = $SkateA/IceSpray
+onready var skate_brake_effect_b = $SkateB/IceSpray
 
 # Is the player on a surface, meaning on a floor, slope, or wall?
 func _on_surface(physics_state : int) -> bool:
@@ -1232,6 +1236,15 @@ func _effects_process(delta : float) -> void:
 		if self.effect_drag_time > EFFECT_DRAG_MIN_TIME:
 			self.drag_effect_sprite.visible = true
 			self.effect_drag_persist_time = 0.0
+	
+	if self.state == State.SKATE_BRAKE:
+		self.skate_brake_effect_a.set_emitting(true, abs(self.velocity.length()))
+		self.skate_brake_effect_b.set_emitting(true, abs(self.velocity.length()))
+		self.skate_brake_effect_a.scale.x = self.skate_direction
+		self.skate_brake_effect_b.scale.x = self.skate_direction
+	else:
+		self.skate_brake_effect_a.set_emitting(false)
+		self.skate_brake_effect_b.set_emitting(false)
 
 func _on_dialogue_start():
 	self.in_dialogue = true

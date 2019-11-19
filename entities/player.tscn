@@ -1,9 +1,11 @@
-[gd_scene load_steps=40 format=2]
+[gd_scene load_steps=42 format=2]
 
 [ext_resource path="res://scripts/player.gd" type="Script" id=1]
 [ext_resource path="res://sprites/player.png" type="Texture" id=2]
 [ext_resource path="res://sprites/effects/player_boost.png" type="Texture" id=3]
 [ext_resource path="res://sprites/effects/player_drag.png" type="Texture" id=4]
+[ext_resource path="res://sprites/effects/circle.png" type="Texture" id=5]
+[ext_resource path="res://entities/effects/ice_spray.tscn" type="PackedScene" id=6]
 
 [sub_resource type="Animation" id=1]
 resource_name = "BallisticFallLeft"
@@ -19,6 +21,30 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1 ),
 "update": 1,
 "values": [ 26 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -11, 8 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -2, 9 ) ]
 }
 
 [sub_resource type="Animation" id=2]
@@ -266,6 +292,30 @@ tracks/0/keys = {
 "update": 1,
 "values": [ 25, 24 ]
 }
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -6, 18 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 3, 18 ) ]
+}
 
 [sub_resource type="Animation" id=18]
 length = 0.2
@@ -281,6 +331,30 @@ tracks/0/keys = {
 "transitions": PoolRealArray( 1, 1 ),
 "update": 1,
 "values": [ 34, 35 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../SkateA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 6, 18 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../SkateB:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( -3, 18 ) ]
 }
 
 [sub_resource type="Animation" id=19]
@@ -546,7 +620,7 @@ position = Vector2( 0, -14 )
 texture = ExtResource( 2 )
 vframes = 4
 hframes = 12
-frame = 6
+frame = 35
 region_rect = Rect2( 0, 0, 24, 32 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Sprite"]
@@ -610,3 +684,25 @@ frame = 1
 [node name="AnimationPlayer" type="AnimationPlayer" parent="DragEffectSprite"]
 autoplay = "DragEffect"
 anims/DragEffect = SubResource( 35 )
+
+[node name="SkateA" type="Node2D" parent="."]
+editor/display_folded = true
+position = Vector2( 6, 18 )
+
+[node name="Sprite" type="Sprite" parent="SkateA"]
+visible = false
+scale = Vector2( 0.5, 0.5 )
+texture = ExtResource( 5 )
+
+[node name="IceSpray" parent="SkateA" instance=ExtResource( 6 )]
+
+[node name="SkateB" type="Node2D" parent="."]
+editor/display_folded = true
+position = Vector2( -3, 18 )
+
+[node name="Sprite" type="Sprite" parent="SkateB"]
+visible = false
+scale = Vector2( 0.5, 0.5 )
+texture = ExtResource( 5 )
+
+[node name="IceSpray" parent="SkateB" instance=ExtResource( 6 )]
