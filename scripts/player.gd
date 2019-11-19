@@ -767,7 +767,6 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 			extreme_angle = -sign(extreme_angle) * (abs(extreme_angle) + PI / 4.0)
 			if extreme_angle >= 2.0 * PI:
 				break
-		print(direction)
 		self.velocity = DIVE_SPEED * direction
 	elif self.state == State.DIVE:
 		self.velocity.y += DIVE_GRAVITY
@@ -910,9 +909,13 @@ func _handle_state_transition(old_state : int) -> bool:
 			pass
 		if _is_skate_state(self.state) && !_is_skate_state(old_state):
 			self.skate_timer = 0.0
-		if _is_surface_state(self.state) && _is_skate_state(self.state) && (!_is_surface_state(old_state) || !_is_skate_state(old_state)):
-			var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
-			self.skate_direction = int(sign(self.velocity.dot(surface_tangent)))
+		# Decide on the skate direction, if we are entering a skate state.
+		if _is_skate_state(self.state):
+			if _is_surface_state(self.state):
+				var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
+				self.skate_direction = int(sign(self.velocity.dot(surface_tangent)))
+			else:
+				self.skate_direction = int(sign(self.velocity.x))
 			if self.skate_direction == 0:
 				self.skate_direction = self.facing_direction
 		
