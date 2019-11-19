@@ -119,6 +119,9 @@ class CollisionInfo:
 		self.slope_collision = self.slope_collision || other.slope_collision
 		self.wall_collision = self.wall_collision || other.wall_collision
 		self.ceiling_collision = self.ceiling_collision || other.ceiling_collision
+	
+	func has_collision() -> bool:
+		return self.floor_collision || self.slope_collision || self.wall_collision || self.ceiling_collision
 
 const FLOOR_ANGLE := 5.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
@@ -1098,8 +1101,8 @@ func _state_transition(delta : float, intent : Intent, collision_info : Collisio
 			self.state = State.DIVE
 		elif self.state == State.DIVE:
 			self.dive_timer += delta
-			if self.dive_timer > DIVE_TIME:
-				self.state = State.BALLISTIC
+			if self.dive_timer > DIVE_TIME || collision_info.has_collision():
+				self.state = _get_default_skate_state(intent)
 	
 	if self._on_surface(self.physics_state) && !_is_surface_state(self.state):
 		printerr("On surface but state ", STATE_NAME[self.state], " is not a surface state.")
