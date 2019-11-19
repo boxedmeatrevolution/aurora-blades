@@ -189,10 +189,10 @@ const SKATE_BOOST_MIN_TIME := 0.1
 const SKATE_BOOST_MAX_TIME := 0.8
 # The period of time over which the player will feel increased friction when
 # boosting.
-const SKATE_BOOST_FRICTION_TIME := 0.1
+const SKATE_BOOST_FRICTION_TIME := 0.18
 const SKATE_BOOST_FRICTION_LOW := 30.0
-const SKATE_BOOST_FRICTION_HIGH := 200.0
-const SKATE_BOOST_FRICTION_TRANSITION_SPEED := 300.0
+const SKATE_BOOST_FRICTION_HIGH := 180.0
+const SKATE_BOOST_FRICTION_TRANSITION_SPEED := 200.0
 
 # Friction when the player tries to slow down.
 const SKATE_BRAKE_FRICTION := 800.0

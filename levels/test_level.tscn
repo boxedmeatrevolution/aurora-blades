@@ -107,7 +107,7 @@ position = Vector2( 128, -80 )
 position = Vector2( 224, -64 )
 
 [node name="Snow" parent="." instance=ExtResource( 9 )]
-[connection signal="dialogue_end" from="Dialogue" to="Player/PixelCamera" method="_on_dialogue_end"]
 [connection signal="dialogue_end" from="Dialogue" to="Player" method="_on_dialogue_end"]
-[connection signal="dialogue_start" from="Dialogue" to="Player/PixelCamera" method="_on_dialogue_start"]
+[connection signal="dialogue_end" from="Dialogue" to="Player/PixelCamera" method="_on_dialogue_end"]
 [connection signal="dialogue_start" from="Dialogue" to="Player" method="_on_dialogue_start"]
+[connection signal="dialogue_start" from="Dialogue" to="Player/PixelCamera" method="_on_dialogue_start"]
