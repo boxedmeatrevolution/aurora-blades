@@ -144,7 +144,7 @@ const SURFACE_DROP_TIME := 0.3
 # The regular force of gravity. Depending on the state of the player, they may
 # experience a different amount of gravity than this.
 const GRAVITY := 800.0
-const MAX_SPEED := 1000.0
+const MAX_SPEED := 2000.0
 const EXHAUSTED_TIME := 0.5
 
 const WALK_ACCELERATION := 700.0
@@ -261,14 +261,14 @@ const DIVE_CHARGE_TIME := 0.4
 const DIVE_CHARGE_FRICTION := 2000.0
 const DIVE_CHARGE_FRICTION_MIN_SPEED := 100.0
 const DIVE_CHARGE_SPEED := 80.0
-const DIVE_TIME := 0.5
-const DIVE_SPEED := 400.0
-const DIVE_GRAVITY := 8.0
-const DIVE_FRICTION := 50.0
+const DIVE_DISTANCE := 150.0
+const DIVE_SPEED_START := 700.0
+const DIVE_SPEED_END := 200.0
+const DIVE_GRAVITY := 0.0
 # The minimum impulse needed to leave a dive.
 const DIVE_MIN_IMPULSE_FRACTION := 0.1
 # The distance which is checked to be collision free before starting a dive.
-const DIVE_CHECK_DISTANCE := 10.0
+const DIVE_CHECK_DISTANCE := 16.0
 
 var state : int = State.FALL
 var physics_state : int = PhysicsState.AIR
@@ -592,6 +592,10 @@ func _facing_direction_process(move_direction : Vector2) -> void:
 
 # Updates the velocities based on the current state.
 func _state_process(delta : float, move_direction : Vector2) -> void:
+	# Dive is special-cased like this because there isn't a better spot to put
+	# this code.
+	if self.previous_state == State.DIVE && self.state != State.DIVE:
+		self.velocity = self.velocity.clamped(DIVE_SPEED_END)
 	var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
 	if self.state == State.STAND:
 		# When the player is standing, they should slow down to a stop. We use
@@ -767,10 +771,11 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 			extreme_angle = -sign(extreme_angle) * (abs(extreme_angle) + PI / 4.0)
 			if extreme_angle >= 2.0 * PI:
 				break
-		self.velocity = DIVE_SPEED * direction
+		self.velocity = DIVE_SPEED_START * direction
 	elif self.state == State.DIVE:
 		self.velocity.y += DIVE_GRAVITY
-		_apply_drag(DIVE_FRICTION, delta)
+		var friction := (DIVE_SPEED_START * DIVE_SPEED_START - DIVE_SPEED_END * DIVE_SPEED_END) / (2.0 * DIVE_DISTANCE)
+		_apply_drag(friction, delta)
 	
 	# Clamp the velocity by the absolute max speed.
 	self.velocity = self.velocity.clamped(MAX_SPEED)
@@ -1137,7 +1142,8 @@ func _state_transition(delta : float, intent : Intent, collision_info : Collisio
 		elif self.state == State.DIVE:
 			self.dive_timer += delta
 			var collision := collision_info.has_collision() && fractional_impulse <= -DIVE_MIN_IMPULSE_FRACTION
-			if self.dive_timer > DIVE_TIME || collision:
+			var max_dive_time := 2.0 * DIVE_DISTANCE / (DIVE_SPEED_START + DIVE_SPEED_END)
+			if self.dive_timer > max_dive_time || collision:
 				self.state = _get_default_skate_state(intent)
 	
 	_check_state_validity()
