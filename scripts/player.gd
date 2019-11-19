@@ -132,12 +132,12 @@ const WALK_SPEED := 100.0
 # Maximum angle the player can walk up without slipping.
 const WALK_MAX_ANGLE := 30.0 * PI / 180.0
 # Maximum speed before entering a slide.
-const WALK_MAX_SPEED := 150.0
+const WALK_MAX_SPEED := 200.0
 
 const SLIDE_ACCELERATION := 500.0
 const SLIDE_SPEED := 140.0
 # Minimum speed before entering a walk.
-const SLIDE_MIN_SPEED := 100.0
+const SLIDE_MIN_SPEED := 150.0
 # Minimum time to slide for on a flat surface before entering a walk.
 const SLIDE_MIN_TIME := 0.4
 

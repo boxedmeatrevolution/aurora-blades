@@ -1,6 +1,6 @@
 extends Camera2D
 
-onready var viewport := self.get_viewport()
+onready var viewport := get_viewport()
 onready var base_size := self.viewport.size
 
 const DEFAULT_DRAG_MARGINS := 0.2

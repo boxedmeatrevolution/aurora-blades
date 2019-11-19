@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/player_drag_effect.png-16bfc11ca8a7675b1a45c0a63a6ba6f0.stex"
+path="res://.import/snow.png-9024cf701b51c2ce8b50f933e1c88bf2.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/player_drag_effect.png"
-dest_files=[ "res://.import/player_drag_effect.png-16bfc11ca8a7675b1a45c0a63a6ba6f0.stex" ]
+source_file="res://sprites/effects/snow.png"
+dest_files=[ "res://.import/snow.png-9024cf701b51c2ce8b50f933e1c88bf2.stex" ]
 
 [params]
 

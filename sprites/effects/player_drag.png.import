@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/player_boost_effect.png-5329f67ba74c61bd1a9f0c5e759e0317.stex"
+path="res://.import/player_drag.png-1c43c31bdabc7f1e49f144ac1f934475.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/player_boost_effect.png"
-dest_files=[ "res://.import/player_boost_effect.png-5329f67ba74c61bd1a9f0c5e759e0317.stex" ]
+source_file="res://sprites/effects/player_drag.png"
+dest_files=[ "res://.import/player_drag.png-1c43c31bdabc7f1e49f144ac1f934475.stex" ]
 
 [params]
 
