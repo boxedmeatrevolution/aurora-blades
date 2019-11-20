@@ -25,7 +25,7 @@ scale_random = 1.0
 [node name="Snow" type="Particles2D"]
 amount = 100
 lifetime = 10.0
-preprocess = 10.0
+preprocess = 30.0
 randomness = 0.5
 fixed_fps = 30
 visibility_rect = Rect2( -1000, -1000, 2000, 2000 )

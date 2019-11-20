@@ -1,11 +1,8 @@
 extends KinematicBody2D
 
 # Things that need to be done:
-# * Fix issues with downhill jumping.
-# * Thoughts on jumping:
-#   * Have a "neutral jump" when moving slowly.
-#   * After landing, have a period of time where the velocity for the next jump
-#     is calculated using an interpolated surface velocity.
+# * Bug: facing direction needs to be flipped around only once the
+#   jump_surface_velocity_x variable has become positive.
 # * Use the new wall_collision variable to clean up some code, such as:
 #   * Wipeout collisions
 #   * Dashing into walls
