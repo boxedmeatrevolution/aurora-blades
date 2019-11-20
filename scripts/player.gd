@@ -234,13 +234,11 @@ const JUMP_BALLISTIC_HIGH_SPEED_FACTOR := 0.3
 const JUMP_BALLISTIC_HIGH_SLOPE := 2.0
 const JUMP_BALLISTIC_HIGH_SLOPE_MIN := 0.5
 
-const JUMP_BALLISTIC_WALL_LOW_BASE_SPEED := 200.0
-const JUMP_BALLISTIC_WALL_LOW_SPEED_FACTOR := 0.8
-const JUMP_BALLISTIC_WALL_LOW_ANGLE := 30.0 * PI / 180.0
-
-const JUMP_BALLISTIC_WALL_HIGH_BASE_SPEED := 350.0
-const JUMP_BALLISTIC_WALL_HIGH_SPEED_FACTOR := 0.4
-const JUMP_BALLISTIC_WALL_HIGH_ANGLE := 45.0 * PI / 180.0
+const JUMP_BALLISTIC_WALL_BASE_SPEED := 300.0
+const JUMP_BALLISTIC_WALL_SPEED_FACTOR := 0.2
+const JUMP_BALLISTIC_WALL_ANGLE_MIN := 45.0 * PI / 180.0
+const JUMP_BALLISTIC_WALL_ANGLE_MAX := 60.0 * PI / 180.0
+const JUMP_BALLISTIC_WALL_TRANSITION_SPEED := 200.0
 
 # The time before the player gains control when doing a ballistic jump.
 const JUMP_BALLISTIC_CONTROL_TIME := 0.2
@@ -708,11 +706,11 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 				base_speed = JUMP_BALLISTIC_HIGH_BASE_SPEED
 				speed_factor = JUMP_BALLISTIC_HIGH_SPEED_FACTOR
 			State.JUMP_BALLISTIC_WALL_LOW_START:
-				base_speed = JUMP_BALLISTIC_WALL_LOW_BASE_SPEED
-				speed_factor = JUMP_BALLISTIC_WALL_LOW_SPEED_FACTOR
+				base_speed = JUMP_BALLISTIC_WALL_BASE_SPEED
+				speed_factor = JUMP_BALLISTIC_WALL_SPEED_FACTOR
 			State.JUMP_BALLISTIC_WALL_HIGH_START:
-				base_speed = JUMP_BALLISTIC_WALL_HIGH_BASE_SPEED
-				speed_factor = JUMP_BALLISTIC_WALL_HIGH_SPEED_FACTOR
+				base_speed = JUMP_BALLISTIC_WALL_BASE_SPEED
+				speed_factor = JUMP_BALLISTIC_WALL_SPEED_FACTOR
 		# The jump surface speed is the speed of the player on the surface
 		# right before making the jump. A larger surface speed leads to a
 		# lower, faster jump.
@@ -726,19 +724,20 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 			jump_direction = self.skate_direction
 		var jump_angle := 0.0
 		if wall_jump:
-			var angle_increase := JUMP_BALLISTIC_WALL_HIGH_ANGLE if high_jump else JUMP_BALLISTIC_WALL_LOW_ANGLE
-			var surface_angle := (sign(jump_direction) * surface_tangent).angle_to(Vector2.UP)
-			jump_angle = surface_angle - float(jump_direction) * angle_increase
+			var angle_fraction := self.velocity.dot(surface_tangent) * sign(self.surface_normal.x) / JUMP_BALLISTIC_WALL_TRANSITION_SPEED
+			angle_fraction = clamp(angle_fraction, -1.0, 1.0)
+			jump_angle = 0.5 * (1.0 - angle_fraction) * JUMP_BALLISTIC_WALL_ANGLE_MIN + 0.5 * (1.0 + angle_fraction) * JUMP_BALLISTIC_WALL_ANGLE_MAX
+			jump_angle *= sign(self.surface_normal.x)
 		elif surface_tangent.x != 0.0:
 			var slope_increase := JUMP_BALLISTIC_HIGH_SLOPE if high_jump else JUMP_BALLISTIC_LOW_SLOPE
 			var slope_min := JUMP_BALLISTIC_HIGH_SLOPE_MIN if high_jump else JUMP_BALLISTIC_LOW_SLOPE_MIN
 			var surface_slope := float(jump_direction) * surface_tangent.y / surface_tangent.x
 			var jump_slope := min(surface_slope - slope_increase, -slope_min)
 			jump_angle = atan2(float(jump_direction), -jump_slope)
-		# The jump angle gets adjusted in case the player isn't moving very fast.
-		var jump_angle_fraction = abs(jump_surface_speed) / JUMP_BALLISTIC_FULL_ANGLE_SPEED
-		if jump_angle_fraction < 1.0:
-			jump_angle = jump_angle_fraction * jump_angle
+			# The jump angle gets adjusted in case the player isn't moving very fast.
+			var jump_angle_fraction = abs(jump_surface_speed) / JUMP_BALLISTIC_FULL_ANGLE_SPEED
+			if jump_angle_fraction < 1.0:
+				jump_angle = jump_angle_fraction * jump_angle
 		var jump_velocity := jump_speed * Vector2(sin(jump_angle), -cos(jump_angle))
 		self.velocity = jump_velocity
 	elif self.state == State.JUMP || self.state == State.FALL:
