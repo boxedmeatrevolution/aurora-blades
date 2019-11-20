@@ -227,10 +227,12 @@ const JUMP_BALLISTIC_FULL_ANGLE_SPEED := 300.0
 const JUMP_BALLISTIC_LOW_BASE_SPEED := 300.0
 const JUMP_BALLISTIC_LOW_SPEED_FACTOR := 0.5
 const JUMP_BALLISTIC_LOW_SLOPE := 1.2
+const JUMP_BALLISTIC_LOW_SLOPE_MIN := 0.2
 
 const JUMP_BALLISTIC_HIGH_BASE_SPEED := 350.0
 const JUMP_BALLISTIC_HIGH_SPEED_FACTOR := 0.3
 const JUMP_BALLISTIC_HIGH_SLOPE := 2.0
+const JUMP_BALLISTIC_HIGH_SLOPE_MIN := 0.5
 
 const JUMP_BALLISTIC_WALL_LOW_BASE_SPEED := 200.0
 const JUMP_BALLISTIC_WALL_LOW_SPEED_FACTOR := 0.8
@@ -729,8 +731,9 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 			jump_angle = surface_angle - float(jump_direction) * angle_increase
 		elif surface_tangent.x != 0.0:
 			var slope_increase := JUMP_BALLISTIC_HIGH_SLOPE if high_jump else JUMP_BALLISTIC_LOW_SLOPE
+			var slope_min := JUMP_BALLISTIC_HIGH_SLOPE_MIN if high_jump else JUMP_BALLISTIC_LOW_SLOPE_MIN
 			var surface_slope := float(jump_direction) * surface_tangent.y / surface_tangent.x
-			var jump_slope := surface_slope - slope_increase
+			var jump_slope := min(surface_slope - slope_increase, -slope_min)
 			jump_angle = atan2(float(jump_direction), -jump_slope)
 		# The jump angle gets adjusted in case the player isn't moving very fast.
 		var jump_angle_fraction = abs(jump_surface_speed) / JUMP_BALLISTIC_FULL_ANGLE_SPEED
