@@ -1,17 +1,18 @@
 extends KinematicBody2D
 
 # Things that need to be done:
-# * Fix issues with jumping (downhill, etc...)
-# * Idea: When the player is near a turn-around (so the player is moving really
-#   slowly), let the direction of the jump be determined by the arrow keys, not
-#   the skate direction.
-# * Make velocity redirection from air to ground less effective, now that you
-#   don't wipe out at all.
+# * Fix issues with downhill jumping.
+# * Thoughts on jumping:
+#   * Have a "neutral jump" when moving slowly.
+#   * After landing, have a period of time where the velocity for the next jump
+#     is calculated using an interpolated surface velocity.
 # * Use the new wall_collision variable to clean up some code, such as:
 #   * Wipeout collisions
 #   * Dashing into walls
 #   * Jumping into walls and bonk head
 #   * Etc.
+# * Reach a fixed top speed, and then it takes a lot to lose that speed so long
+#   as X is tapped (there is a transition to a super fast state).
 # * Bug: In a rare case, the player can wipeout by going into a slope too hard
 #   from the air (I think??).
 # * Redirect reservoir: After every velocity redirect, there is a reservoir
@@ -179,8 +180,9 @@ const SKATE_START_MIN_SPEED := 40.0
 const SKATE_START_SPEED := 150.0
 const SKATE_PIVOT_START_SPEED_FRACTION := 0.65
 
-# The time which the jump direction lags the skate direction by.
-const JUMP_DIRECTION_LAG_TIME := 0.3
+# The time over which the landing velocity is interpolated to the true
+# velocity.
+const SKATE_LANDING_TIME := 0.3
 
 const SKATE_STICK_ANGLE := 30.0 * PI / 180.0
 const SKATE_GRAVITY := 400.0
@@ -219,6 +221,9 @@ const JUMP_START_SPEED := 300.0
 const JUMP_WALL_START_SPEED := 350.0
 const JUMP_WALL_START_ANGLE := 35.0 * PI / 180.0
 
+# The speed that is required for a ballistic jump to reach its full angle.
+const JUMP_BALLISTIC_FULL_ANGLE_SPEED := 300.0
+
 const JUMP_BALLISTIC_LOW_BASE_SPEED := 300.0
 const JUMP_BALLISTIC_LOW_SPEED_FACTOR := 0.5
 const JUMP_BALLISTIC_LOW_SLOPE := 1.2
@@ -256,8 +261,8 @@ const BALLISTIC_FRICTION_LOW := 30.0
 const BALLISTIC_FRICTION_HIGH := 200.0
 const BALLISTIC_FRICTION_TRANSITION_SPEED := 400.0
 const BALLISTIC_MIN_REDIRECT_ANGLE := 30.0 * PI / 180.0
-const BALLISTIC_MAX_REDIRECT_ANGLE := 80.0 * PI / 180.0
-const BALLISTIC_MAX_REDIRECT_FRACTION := 0.5
+const BALLISTIC_MAX_REDIRECT_ANGLE := 60.0 * PI / 180.0
+const BALLISTIC_MAX_REDIRECT_FRACTION := 0.6
 
 const DIVE_CHARGE_TIME := 0.4
 const DIVE_CHARGE_FRICTION := 2000.0
@@ -281,9 +286,8 @@ var velocity := Vector2.ZERO
 var facing_direction := 1
 
 var skate_direction := 1
-var jump_direction := 1
-# The time since the last turnaround.
-var skate_direction_change_timer := 0.0
+var skate_landing_velocity_x := 0.0
+var skate_landing_timer := 0.0
 var slide_timer := 0.0
 # This timer keeps track of how long the player has been skating for.
 var skate_timer := 0.0
@@ -309,6 +313,7 @@ var previous_physics_state := self.physics_state
 # TODO: Should this be initialized with `onready`?
 var previous_position := self.position
 var previous_velocity := self.velocity
+var previous_skate_direction := self.skate_direction
 
 onready var animation_player := $Sprite/AnimationPlayer
 onready var ballistic_effect_sprite := $BallisticEffectSprite
@@ -510,11 +515,11 @@ func _physics_process(delta : float) -> void:
 	# Print the state for debugging purposes.
 	if self.previous_state != self.state || self.previous_physics_state != self.physics_state:
 		print(PHYSICS_STATE_NAME[self.physics_state], "; ", STATE_NAME[self.state])
-	
 	self.previous_state = self.state
 	self.previous_physics_state = self.physics_state
 	self.previous_position = self.position
 	self.previous_velocity = self.velocity
+	self.previous_skate_direction = self.skate_direction
 
 func _read_move_direction() -> Vector2:
 	if self.in_dialogue:
@@ -541,7 +546,7 @@ func _read_intent(move_direction : Vector2) -> Intent:
 	if Input.is_action_just_pressed("jump"):
 		if _is_surface_physics_state(self.physics_state):
 			if _is_skate_state(self.state):
-				if move_direction.y < 0 || move_direction.x * self.jump_direction < 0:
+				if move_direction.y < 0 || move_direction.x * self.skate_direction < 0:
 					intent.jump_high = true
 				else:
 					intent.jump_low = true
@@ -706,18 +711,32 @@ func _state_process(delta : float, move_direction : Vector2) -> void:
 			State.JUMP_BALLISTIC_WALL_HIGH_START:
 				base_speed = JUMP_BALLISTIC_WALL_HIGH_BASE_SPEED
 				speed_factor = JUMP_BALLISTIC_WALL_HIGH_SPEED_FACTOR
-		var jump_speed := base_speed + self.velocity.length() * speed_factor
-		var jump_angle := -PI / 2.0
+		# The jump surface speed is the speed of the player on the surface
+		# right before making the jump. A larger surface speed leads to a
+		# lower, faster jump.
+		var jump_surface_speed := self.velocity.length()
+		if self.skate_landing_timer <= SKATE_LANDING_TIME: 
+			var skate_landing_fraction := (SKATE_LANDING_TIME - self.skate_landing_timer) / SKATE_LANDING_TIME
+			jump_surface_speed = skate_landing_fraction * self.skate_landing_velocity_x + (1.0 - skate_landing_fraction) * self.velocity.length()
+		var jump_speed := base_speed + abs(jump_surface_speed) * speed_factor
+		var jump_direction := self.skate_direction * int(sign(jump_surface_speed))
+		if jump_direction == 0:
+			jump_direction = self.skate_direction
+		var jump_angle := 0.0
 		if wall_jump:
 			var angle_increase := JUMP_BALLISTIC_WALL_HIGH_ANGLE if high_jump else JUMP_BALLISTIC_WALL_LOW_ANGLE
-			var surface_angle := (-sign(self.jump_direction) * surface_tangent).angle_to(Vector2.RIGHT)
-			jump_angle = surface_angle - float(self.jump_direction) * angle_increase
+			var surface_angle := (sign(jump_direction) * surface_tangent).angle_to(Vector2.UP)
+			jump_angle = surface_angle - float(jump_direction) * angle_increase
 		elif surface_tangent.x != 0.0:
 			var slope_increase := JUMP_BALLISTIC_HIGH_SLOPE if high_jump else JUMP_BALLISTIC_LOW_SLOPE
-			var surface_slope := float(self.jump_direction) * surface_tangent.y / surface_tangent.x
+			var surface_slope := float(jump_direction) * surface_tangent.y / surface_tangent.x
 			var jump_slope := surface_slope - slope_increase
-			jump_angle = atan2(jump_slope, float(self.jump_direction))
-		var jump_velocity := jump_speed * Vector2(cos(jump_angle), sin(jump_angle))
+			jump_angle = atan2(float(jump_direction), -jump_slope)
+		# The jump angle gets adjusted in case the player isn't moving very fast.
+		var jump_angle_fraction = abs(jump_surface_speed) / JUMP_BALLISTIC_FULL_ANGLE_SPEED
+		if jump_angle_fraction < 1.0:
+			jump_angle = jump_angle_fraction * jump_angle
+		var jump_velocity := jump_speed * Vector2(sin(jump_angle), -cos(jump_angle))
 		self.velocity = jump_velocity
 	elif self.state == State.JUMP || self.state == State.FALL:
 		# Apply gravity.
@@ -857,7 +876,7 @@ func _position_process(delta : float, n : int = 4) -> CollisionInfo:
 	if found_new_surface:
 		# First, modify the velocity as the player moves onto the surface.
 		var velocity_tangent := self.velocity.slide(new_surface_normal)
-		var velocity_normal := self.velocity.dot(new_surface_normal) * new_surface_normal
+		var velocity_normal := self.velocity.project(new_surface_normal)
 		if velocity_tangent.length_squared() != 0.0 && self.velocity.length_squared() != 0.0:
 			self.velocity = velocity_tangent.normalized() * _redirect_velocity(velocity_tangent.length(), velocity_normal.length())
 		else:
@@ -914,7 +933,7 @@ func _handle_collision_physics_state_transition(new_surface_normal : Vector2) ->
 # Handle transitions into and away from different states.
 func _handle_state_transition(old_state : int) -> bool:
 	if old_state != self.state:
-		# First handle transitions between skate states and non-skate states.
+		# Handle transitions between skate states and non-skate states.
 		if !_is_skate_state(self.state) && _is_skate_state(old_state):
 			pass
 		if _is_skate_state(self.state) && !_is_skate_state(old_state):
@@ -928,8 +947,11 @@ func _handle_state_transition(old_state : int) -> bool:
 				self.skate_direction = int(sign(self.velocity.x))
 			if self.skate_direction == 0:
 				self.skate_direction = self.facing_direction
-			if !_is_skate_state(old_state):
-				self.jump_direction = self.skate_direction
+		# Set the landing velocity upon hitting the ground.
+		if _is_skate_state(self.state):
+			if _is_surface_state(self.state) && _is_air_state(self.previous_state):
+				self.skate_landing_velocity_x = self.previous_velocity.x * self.skate_direction
+				self.skate_landing_timer = 0.0
 		
 		# The boost timer is zeroed here because it is needed for calculating
 		# the amount of boost while we are still in the boost state.
@@ -1001,6 +1023,8 @@ func _state_transition(delta : float, intent : Intent, collision_info : Collisio
 	var can_act := !_is_stun_state(self.state)
 	
 	self.air_timer += delta
+	if self.skate_landing_timer <= SKATE_LANDING_TIME:
+		self.skate_landing_timer += delta
 	if _is_surface_state(self.state):
 		self.air_timer = 0.0
 		# Dive only gets restocked on the ground, not on walls.
@@ -1090,15 +1114,6 @@ func _state_transition(delta : float, intent : Intent, collision_info : Collisio
 			var velocity_sign := int(sign(self.velocity.x))
 			if velocity_sign * self.skate_direction == -1:
 				self.skate_direction = velocity_sign
-		
-		# Update the jump direction to match the skate direction, but only
-		# after a short amount of time has elapsed.
-		if self.jump_direction == self.skate_direction:
-			self.skate_direction_change_timer = 0.0
-		else:
-			self.skate_direction_change_timer += delta
-			if self.skate_direction_change_timer > JUMP_DIRECTION_LAG_TIME:
-				self.jump_direction = self.skate_direction
 		
 		# Impulse is used to determine if the player has crashed into a wall.
 		var impulse := self.velocity.length() - self.previous_velocity.length()
