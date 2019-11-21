@@ -1,6 +1,7 @@
 extends KinematicBody2D
 
-const Score = preload("res://scripts/score.gd")
+const Score := preload("res://scripts/score.gd")
+const ScorePickup := preload("res://entities/effects/score_pickup.tscn") 
 
 # Things that need to be done:
 # * Bug: facing direction needs to be flipped around only once the
@@ -508,6 +509,10 @@ func _on_score_pickup(area2d : Area2D) -> void:
 	var score := area2d as Score
 	if score != null:
 		self.points += score.points
+		var score_pickup := ScorePickup.instance()
+		score_pickup.transform = score.transform
+		score_pickup.z_index = 1
+		get_tree().get_root().add_child(score_pickup)
 		score.queue_free()
 
 func _physics_process(delta : float) -> void:

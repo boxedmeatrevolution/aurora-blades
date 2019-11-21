@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://scripts/score_pickup.gd" type="Script" id=1]
+[ext_resource path="res://sprites/shapes/diamond_8.png" type="Texture" id=2]
+
+[sub_resource type="Curve" id=2]
+_data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 1, 0.155867 ), 0.0, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=3]
+curve = SubResource( 2 )
+
+[sub_resource type="ParticlesMaterial" id=1]
+flag_disable_z = true
+spread = 180.0
+gravity = Vector3( 0, 100, 0 )
+initial_velocity = 100.0
+initial_velocity_random = 0.2
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+damping = 300.0
+angle = 360.0
+angle_random = 1.0
+scale_curve = SubResource( 3 )
+color = Color( 0.94902, 0.8, 0, 1 )
+hue_variation = 0.05
+hue_variation_random = 1.0
+
+[node name="ScorePickup" type="Node2D"]
+script = ExtResource( 1 )
+
+[node name="Particles2D" type="Particles2D" parent="."]
+emitting = false
+lifetime = 0.4
+one_shot = true
+explosiveness = 1.0
+local_coords = false
+process_material = SubResource( 1 )
+texture = ExtResource( 2 )

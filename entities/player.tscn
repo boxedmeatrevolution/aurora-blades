@@ -2,11 +2,10 @@
 
 [ext_resource path="res://scripts/player.gd" type="Script" id=1]
 [ext_resource path="res://sprites/player.png" type="Texture" id=2]
-[ext_resource path="res://sprites/effects/player_boost.png" type="Texture" id=3]
-[ext_resource path="res://entities/effects/ice_spray.tscn" type="PackedScene" id=4]
-[ext_resource path="res://entities/effects/skate_trail.tscn" type="PackedScene" id=5]
-[ext_resource path="res://entities/effects/dive_trail.tscn" type="PackedScene" id=6]
-[ext_resource path="res://entities/effects/dive_charge.tscn" type="PackedScene" id=7]
+[ext_resource path="res://entities/effects/ice_spray.tscn" type="PackedScene" id=3]
+[ext_resource path="res://entities/effects/skate_trail.tscn" type="PackedScene" id=4]
+[ext_resource path="res://entities/effects/dive_trail.tscn" type="PackedScene" id=5]
+[ext_resource path="res://entities/effects/dive_charge.tscn" type="PackedScene" id=6]
 
 [sub_resource type="RectangleShape2D" id=33]
 extents = Vector2( 6, 18 )
@@ -1180,6 +1179,9 @@ tracks/2/keys = {
 "values": [ Vector2( 14, 12 ) ]
 }
 
+[sub_resource type="StreamTexture" id=38]
+load_path = "res://.import/player_boost.png-f91fef02824343c806e041e2ba75bb47.stex"
+
 [sub_resource type="Animation" id=34]
 length = 0.3
 loop = true
@@ -1279,7 +1281,7 @@ anims/WipeoutRight = SubResource( 32 )
 [node name="BallisticEffectSprite" type="Sprite" parent="."]
 editor/display_folded = true
 visible = false
-texture = ExtResource( 3 )
+texture = SubResource( 38 )
 offset = Vector2( -5, 0 )
 hframes = 3
 frame = 2
@@ -1300,13 +1302,13 @@ visible = false
 scale = Vector2( 0.5, 0.5 )
 texture = SubResource( 35 )
 
-[node name="IceSpray" parent="SkateA" instance=ExtResource( 4 )]
+[node name="IceSpray" parent="SkateA" instance=ExtResource( 3 )]
 z_index = 1
 
-[node name="SkateTrail" parent="SkateA" instance=ExtResource( 5 )]
+[node name="SkateTrail" parent="SkateA" instance=ExtResource( 4 )]
 z_index = 1
 
-[node name="DiveTrail" parent="SkateA" instance=ExtResource( 6 )]
+[node name="DiveTrail" parent="SkateA" instance=ExtResource( 5 )]
 script = SubResource( 36 )
 
 [node name="SkateB" type="Node2D" parent="."]
@@ -1321,15 +1323,15 @@ visible = false
 scale = Vector2( 0.5, 0.5 )
 texture = SubResource( 35 )
 
-[node name="IceSpray" parent="SkateB" instance=ExtResource( 4 )]
+[node name="IceSpray" parent="SkateB" instance=ExtResource( 3 )]
 z_index = -1
 
-[node name="SkateTrail" parent="SkateB" instance=ExtResource( 5 )]
+[node name="SkateTrail" parent="SkateB" instance=ExtResource( 4 )]
 z_index = -1
 
-[node name="DiveTrail" parent="SkateB" instance=ExtResource( 6 )]
+[node name="DiveTrail" parent="SkateB" instance=ExtResource( 5 )]
 script = SubResource( 36 )
 
-[node name="DiveCharge" parent="." instance=ExtResource( 7 )]
+[node name="DiveCharge" parent="." instance=ExtResource( 6 )]
 position = Vector2( 0, -8 )
 z_index = -1

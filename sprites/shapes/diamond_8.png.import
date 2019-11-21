@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/player_boost.png-f91fef02824343c806e041e2ba75bb47.stex"
+path="res://.import/diamond_8.png-4d593f86a55cfc1a8f756bdc32dd97f8.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/effects/player_boost.png"
-dest_files=[ "res://.import/player_boost.png-f91fef02824343c806e041e2ba75bb47.stex" ]
+source_file="res://sprites/shapes/diamond_8.png"
+dest_files=[ "res://.import/diamond_8.png-4d593f86a55cfc1a8f756bdc32dd97f8.stex" ]
 
 [params]
 
