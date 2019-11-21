@@ -10,14 +10,15 @@ _data = [ Vector2( 0, 0.271867 ), 0.0, 0.0, 0, 0, Vector2( 1, 1 ), 0.0, 0.0, 0, 
 curve = SubResource( 1 )
 
 [sub_resource type="ParticlesMaterial" id=3]
+trail_divisor = 8
 emission_shape = 1
 emission_sphere_radius = 48.0
 flag_disable_z = true
 gravity = Vector3( 0, 0, 0 )
 orbit_velocity = 0.0
 orbit_velocity_random = 0.0
-radial_accel = -800.0
-scale = 0.1
+radial_accel = -1200.0
+scale = 0.15
 scale_curve = SubResource( 2 )
 color = Color( 1, 0, 0.823529, 1 )
 hue_variation = 0.04
@@ -30,8 +31,8 @@ __meta__ = {
 }
 
 [node name="Particles2D" type="Particles2D" parent="."]
-amount = 16
-lifetime = 0.2
+amount = 48
+lifetime = 0.3
 local_coords = false
 process_material = SubResource( 3 )
 texture = ExtResource( 2 )
