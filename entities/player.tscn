@@ -7,12 +7,6 @@
 [ext_resource path="res://entities/effects/dive_trail.tscn" type="PackedScene" id=5]
 [ext_resource path="res://entities/effects/dive_charge.tscn" type="PackedScene" id=6]
 
-[sub_resource type="RectangleShape2D" id=33]
-extents = Vector2( 6, 18 )
-
-[sub_resource type="RectangleShape2D" id=37]
-extents = Vector2( 10, 22 )
-
 [sub_resource type="Animation" id=1]
 resource_name = "BallisticFallLeft"
 loop = true
@@ -1179,10 +1173,18 @@ tracks/2/keys = {
 "values": [ Vector2( 14, 12 ) ]
 }
 
-[sub_resource type="StreamTexture" id=38]
-load_path = "res://.import/player_boost.png-f91fef02824343c806e041e2ba75bb47.stex"
+[sub_resource type="RectangleShape2D" id=33]
+extents = Vector2( 6, 18 )
 
-[sub_resource type="Animation" id=34]
+[sub_resource type="RectangleShape2D" id=34]
+extents = Vector2( 10, 22 )
+
+[sub_resource type="RectangleShape2D" id=35]
+extents = Vector2( 5, 16 )
+
+[sub_resource type="StreamTexture" id=36]
+
+[sub_resource type="Animation" id=37]
 length = 0.3
 loop = true
 tracks/0/type = "value"
@@ -1198,52 +1200,11 @@ tracks/0/keys = {
 "values": [ 0, 1, 2 ]
 }
 
-[sub_resource type="StreamTexture" id=35]
-
-[sub_resource type="GDScript" id=36]
-script/source = "extends Node2D
-
-# TODO: Make particle effects change as the player moves faster?
-onready var particle := $Particles2D
-onready var particles_material := self.particle.process_material as ParticlesMaterial
-
-func _ready():
-	self.particle.emitting = false
-
-func set_emitting(emitting : bool) -> void:
-	if emitting && !self.particle.emitting:
-		self.particle.emitting = true
-	if !emitting && self.particle.emitting:
-		self.particle.emitting = false
-"
+[sub_resource type="StreamTexture" id=38]
 
 [node name="Player" type="KinematicBody2D"]
 collision_mask = 2
 script = ExtResource( 1 )
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-visible = false
-shape = SubResource( 33 )
-
-[node name="ScoreArea2D" type="Area2D" parent="."]
-editor/display_folded = true
-collision_layer = 0
-collision_mask = 8
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="ScoreArea2D"]
-visible = false
-position = Vector2( 0, -6 )
-shape = SubResource( 37 )
-
-[node name="CheckpointArea2D" type="Area2D" parent="."]
-editor/display_folded = true
-collision_layer = 0
-collision_mask = 16
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="CheckpointArea2D"]
-visible = false
-position = Vector2( 0, -6 )
-shape = SubResource( 37 )
 
 [node name="Sprite" type="Sprite" parent="."]
 editor/display_folded = true
@@ -1288,20 +1249,53 @@ anims/WallSlideRight = SubResource( 30 )
 anims/WipeoutLeft = SubResource( 31 )
 anims/WipeoutRight = SubResource( 32 )
 
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource( 33 )
+
+[node name="ScoreArea2D" type="Area2D" parent="."]
+editor/display_folded = true
+collision_layer = 0
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ScoreArea2D"]
+visible = false
+position = Vector2( 0, -6 )
+shape = SubResource( 34 )
+
+[node name="CheckpointArea2D" type="Area2D" parent="."]
+editor/display_folded = true
+collision_layer = 0
+collision_mask = 16
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CheckpointArea2D"]
+visible = false
+position = Vector2( 0, -6 )
+shape = SubResource( 34 )
+
+[node name="HazardArea2D" type="Area2D" parent="."]
+editor/display_folded = true
+position = Vector2( 0, -4 )
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HazardArea2D"]
+visible = false
+shape = SubResource( 35 )
+
 [node name="BallisticEffectSprite" type="Sprite" parent="."]
 editor/display_folded = true
 visible = false
-texture = SubResource( 38 )
+texture = SubResource( 36 )
 offset = Vector2( -5, 0 )
 hframes = 3
 frame = 2
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="BallisticEffectSprite"]
 autoplay = "BallisticEffect"
-anims/BallisticEffect = SubResource( 34 )
+anims/BallisticEffect = SubResource( 37 )
 
 [node name="SkateA" type="Node2D" parent="."]
-editor/display_folded = true
 position = Vector2( 14, 15 )
 __meta__ = {
 "_edit_group_": true
@@ -1310,7 +1304,7 @@ __meta__ = {
 [node name="Sprite" type="Sprite" parent="SkateA"]
 visible = false
 scale = Vector2( 0.5, 0.5 )
-texture = SubResource( 35 )
+texture = SubResource( 38 )
 
 [node name="IceSpray" parent="SkateA" instance=ExtResource( 3 )]
 z_index = 1
@@ -1319,10 +1313,8 @@ z_index = 1
 z_index = 1
 
 [node name="DiveTrail" parent="SkateA" instance=ExtResource( 5 )]
-script = SubResource( 36 )
 
 [node name="SkateB" type="Node2D" parent="."]
-editor/display_folded = true
 position = Vector2( 14, 12 )
 __meta__ = {
 "_edit_group_": true
@@ -1331,7 +1323,7 @@ __meta__ = {
 [node name="Sprite" type="Sprite" parent="SkateB"]
 visible = false
 scale = Vector2( 0.5, 0.5 )
-texture = SubResource( 35 )
+texture = SubResource( 38 )
 
 [node name="IceSpray" parent="SkateB" instance=ExtResource( 3 )]
 z_index = -1
@@ -1340,7 +1332,6 @@ z_index = -1
 z_index = -1
 
 [node name="DiveTrail" parent="SkateB" instance=ExtResource( 5 )]
-script = SubResource( 36 )
 
 [node name="DiveCharge" parent="." instance=ExtResource( 6 )]
 position = Vector2( 0, -8 )

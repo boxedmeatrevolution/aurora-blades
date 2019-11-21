@@ -3,7 +3,6 @@
 [ext_resource path="res://sprites/effects/snowflake.png" type="Texture" id=1]
 [ext_resource path="res://scripts/snow.gd" type="Script" id=2]
 
-
 [sub_resource type="ParticlesMaterial" id=1]
 emission_shape = 2
 emission_box_extents = Vector3( 720, 10, 0 )

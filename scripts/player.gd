@@ -1,10 +1,14 @@
 extends KinematicBody2D
 
 const Checkpoint := preload("res://scripts/checkpoint.gd")
+const Hazard := preload("res://scripts/hazard.gd")
 const Score := preload("res://scripts/score.gd")
-const ScorePickup := preload("res://entities/effects/score_pickup.tscn") 
 
 # Things that need to be done:
+# * Button to kill yourself.
+# * Fix camera jitter.
+# * Respawn coins.
+# * Add types to own file.
 # * Bug: facing direction needs to be flipped around only once the
 #   jump_surface_velocity_x variable has become positive.
 # * Use the new wall_collision variable to clean up some code, such as:
@@ -125,6 +129,9 @@ class CollisionInfo:
 	
 	func has_collision() -> bool:
 		return self.floor_collision || self.slope_collision || self.wall_collision || self.ceiling_collision
+
+signal death(player, respawn_player)
+signal spawn(player)
 
 const FLOOR_ANGLE := 5.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
@@ -278,10 +285,14 @@ const DIVE_MIN_IMPULSE_FRACTION := 0.1
 # The distance which is checked to be collision free before starting a dive.
 const DIVE_CHECK_DISTANCE := 16.0
 
+# Variables that are persistent between deaths.
 var points := 0
 var checkpoint : Checkpoint = null
 var respawn_position := self.position
+var in_dialogue := false
 
+var dying := false
+var dead := false
 var state : int = State.FALL
 var physics_state : int = PhysicsState.AIR
 # The normal to the surface the player is on (only valid if `_is_surface_physics_state`
@@ -303,7 +314,7 @@ var pivot_stored_velocity := 0.0
 var pivot_timer := 0.0
 var dive_charge_timer := 0.0
 var dive_timer := 0.0
-var has_dive := true
+var has_dive := false
 # These members keep track of what the effective velocity the player has on the
 # surface is, for the purpose of making the next jump. 
 var skate_landing_velocity_x := 0.0
@@ -312,15 +323,12 @@ var skate_landing_timer := 0.0
 # on.
 var skate_stride := false
 
-var in_dialogue := false
-
 # Store the previous state as well.
-var previous_state := self.state
-var previous_physics_state := self.physics_state
-# TODO: Should this be initialized with `onready`?
-var previous_position := self.position
-var previous_velocity := self.velocity
-var previous_skate_direction := self.skate_direction
+var previous_state : int = State.FALL
+var previous_physics_state : int = PhysicsState.AIR
+var previous_position := Vector2.ZERO
+var previous_velocity := Vector2.ZERO
+var previous_skate_direction := 1
 
 # Stores a list of coins that have been picked up since the last checkpoint
 # that will need to be returned if the player dies.
@@ -330,7 +338,9 @@ onready var score_parent := get_tree().get_root().find_node("Scores", true, fals
 
 onready var score_area2d := $ScoreArea2D
 onready var checkpoint_area2d := $CheckpointArea2D
+onready var hazard_area2d := $HazardArea2D
 
+onready var sprite := $Sprite
 onready var animation_player := $Sprite/AnimationPlayer
 onready var ballistic_effect_sprite := $BallisticEffectSprite
 
@@ -511,16 +521,77 @@ func _apply_drag(drag : float, delta : float) -> void:
 		else:
 			self.velocity += drag_delta
 
+func _reset() -> void:
+	self.dying = false
+	self.dead = false
+	
+	self.state = State.FALL
+	self.physics_state = PhysicsState.AIR
+	self.velocity = Vector2.ZERO
+	self.facing_direction = 1
+	self.skate_direction = 1
+	self.slide_timer = 0.0
+	self.skate_timer = 0.0
+	self.skate_boost_timer = 0.0
+	self.wipeout_timer = 0.0
+	self.air_timer = 0.0
+	self.pivot_stored_velocity = 0.0
+	self.pivot_timer = 0.0
+	self.dive_charge_timer = 0.0
+	self.dive_timer = 0.0
+	self.has_dive = false
+	self.skate_landing_velocity_x = 0.0
+	self.skate_landing_timer = 0.0
+	self.skate_stride = false
+	self.previous_state = self.state
+	self.previous_physics_state = self.physics_state
+	self.previous_position = self.position
+	self.previous_velocity = self.velocity
+	self.previous_skate_direction = self.skate_direction
+	
+	self.sprite.visible = true
+	self.ballistic_effect_sprite.visible = false
+	self.skate_brake_effect_a.set_emitting(false)
+	self.skate_brake_effect_b.set_emitting(false)
+	self.skate_trail_effect_a.set_emitting(false)
+	self.skate_trail_effect_b.set_emitting(false)
+	self.dive_charge_effect.set_emitting(false)
+	self.dive_trail_effect_a.set_emitting(false)
+	self.dive_trail_effect_b.set_emitting(false)
+	
+	_animation_process()
+	_effects_process()
+
+func spawn() -> void:
+	_reset()
+	self.global_position = self.respawn_position
+	emit_signal("spawn", self)
+
+func death() -> void:
+	_reset()
+	self.dying = false
+	self.dead = true
+	self.sprite.visible = false
+	
+	var respawn_player = Scenes.RespawnPlayer.instance()
+	respawn_player.init(self, self.get_parent(), self.respawn_position)
+	respawn_player.global_position = self.global_position
+	self.get_parent().add_child(respawn_player)
+	
+	emit_signal("death", self, respawn_player)
+
 func _ready() -> void:
 	self.ballistic_effect_sprite.visible = false
 	self.score_area2d.connect("area_entered", self, "_on_score_pickup")
 	self.checkpoint_area2d.connect("area_entered", self, "_on_checkpoint_activate")
+	self.hazard_area2d.connect("area_entered", self, "_on_hazard_collision")
+	spawn()
 
 func _on_score_pickup(area2d : Area2D) -> void:
 	var score := area2d as Score
 	if score != null && score.get_parent() == self.score_parent:
 		self.points += score.points
-		var score_pickup := ScorePickup.instance()
+		var score_pickup = Scenes.ScorePickup.instance()
 		score_pickup.global_position = score.global_position
 		self.score_parent.add_child(score_pickup)
 		self.score_parent.remove_child(score)
@@ -535,7 +606,18 @@ func _on_checkpoint_activate(area2d : Area2D) -> void:
 		self.checkpoint = checkpoint
 		self.respawn_position = self.checkpoint.global_position
 
+func _on_hazard_collision(area2d : Area2D) -> void:
+	var hazard := area2d as Hazard
+	if hazard != null:
+		self.dying = true
+
 func _physics_process(delta : float) -> void:
+	# Handle death.
+	if self.dying:
+		death()
+	if self.dead:
+		return
+	
 	var move_direction := _read_move_direction()
 	# Update the velocities based on the current state.
 	_state_process(delta, move_direction)
@@ -550,7 +632,7 @@ func _physics_process(delta : float) -> void:
 	# Update the animation based on the state.
 	_facing_direction_process(move_direction)
 	_animation_process()
-	_effects_process(delta)
+	_effects_process()
 	
 	# Print the state for debugging purposes.
 	if self.previous_state != self.state || self.previous_physics_state != self.physics_state:
@@ -1350,7 +1432,7 @@ func _animation_process() -> void:
 	if self.animation_player.current_animation != next_animation:
 		self.animation_player.play(next_animation)
 
-func _effects_process(delta : float) -> void:
+func _effects_process() -> void:
 #	if self.state == State.BALLISTIC:
 #		self.ballistic_effect_sprite.visible = true
 #		self.ballistic_effect_sprite.rotation = self.velocity.angle()

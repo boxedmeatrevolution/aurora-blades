@@ -6,13 +6,10 @@
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 16, 16 )
 
-[node name="Hazard" type="StaticBody2D"]
-collision_layer = 0
-collision_mask = 6
+[node name="HazardSmall" type="Area2D"]
+collision_layer = 4
+collision_mask = 0
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_group_": true
-}
 
 [node name="Sprite" type="Sprite" parent="."]
 texture = ExtResource( 2 )

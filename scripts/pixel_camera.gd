@@ -1,9 +1,17 @@
-extends Camera2D
+extends Node2D
+
+const DEFAULT_DRAG_MARGINS := 0.2
+
+var target : Node2D = null
+export var scroll_speed := 1000.0
+
+onready var camera := $Camera2D
 
 onready var viewport := get_viewport()
 onready var base_size := self.viewport.size
 
-const DEFAULT_DRAG_MARGINS := 0.2
+func _set_target(target : Node2D) -> void:
+	self.target = target
 
 func _get_viewport_rect_centered() -> Rect2:
 	var viewport_rect := self.viewport.get_visible_rect()
@@ -13,10 +21,10 @@ func _get_viewport_rect_centered() -> Rect2:
 
 func _set_drag_region(rect : Rect2) -> void:
 	var viewport_rect := _get_viewport_rect_centered()
-	self.drag_margin_left = rect.position.x / viewport_rect.position.x
-	self.drag_margin_right = rect.end.x / viewport_rect.end.x
-	self.drag_margin_top = rect.position.y / viewport_rect.position.y
-	self.drag_margin_bottom = rect.end.y / viewport_rect.end.y
+	self.camera.drag_margin_left = rect.position.x / viewport_rect.position.x
+	self.camera.drag_margin_right = rect.end.x / viewport_rect.end.x
+	self.camera.drag_margin_top = rect.position.y / viewport_rect.position.y
+	self.camera.drag_margin_bottom = rect.end.y / viewport_rect.end.y
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -33,6 +41,14 @@ func _process(delta) -> void:
 	# TODO: Note: this is buggy on Wayland (I think).
 	if Input.is_action_just_pressed("ui_fullscreen"):
 		OS.window_fullscreen = !OS.window_fullscreen
+	if is_instance_valid(self.target):
+		var displacement = self.target.global_position - self.global_position
+		if displacement.length() < self.scroll_speed * delta:
+			self.global_position = self.target.global_position
+		else:
+			self.global_position += displacement.normalized() * self.scroll_speed * delta
+	else:
+		self.target = null
 
 func _screen_resized() -> void:
 	var window_size := OS.window_size
@@ -63,3 +79,9 @@ func _on_dialogue_end():
 	drag_region.position *= DEFAULT_DRAG_MARGINS
 	drag_region.size *= DEFAULT_DRAG_MARGINS
 	_set_drag_region(drag_region)
+
+func _on_player_spawn(player):
+	self.target = player
+
+func _on_player_death(player, respawn_player):
+	self.target = respawn_player
