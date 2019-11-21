@@ -321,6 +321,8 @@ onready var skate_brake_effect_a = $SkateA/IceSpray
 onready var skate_brake_effect_b = $SkateB/IceSpray
 onready var skate_trail_effect_a = $SkateA/SkateTrail
 onready var skate_trail_effect_b = $SkateB/SkateTrail
+onready var dive_trail_effect_a = $SkateA/DiveTrail
+onready var dive_trail_effect_b = $SkateB/DiveTrail
 
 # Is the player on a surface, meaning on a floor, slope, or wall?
 func _is_surface_physics_state(physics_state : int) -> bool:
@@ -1325,12 +1327,19 @@ func _effects_process(delta : float) -> void:
 		self.skate_brake_effect_a.set_emitting(false)
 		self.skate_brake_effect_b.set_emitting(false)
 	
+	var skate_trail := false
+	var dive_trail := false
 	if _is_skate_state(self.state):
-		skate_trail_effect_a.set_emitting(true)
-		skate_trail_effect_b.set_emitting(true)
-	else:
-		skate_trail_effect_a.set_emitting(false)
-		skate_trail_effect_b.set_emitting(false)
+		if self.state == State.DIVE || self.state == State.DIVE_START:
+			dive_trail = true
+			skate_trail = false
+		else:
+			dive_trail = false
+			skate_trail = true
+	skate_trail_effect_a.set_emitting(skate_trail)
+	skate_trail_effect_b.set_emitting(skate_trail)
+	dive_trail_effect_a.set_emitting(dive_trail)
+	dive_trail_effect_b.set_emitting(dive_trail)
 
 func _on_dialogue_start():
 	self.in_dialogue = true
