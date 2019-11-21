@@ -105,6 +105,7 @@ position = Vector2( 128, -80 )
 
 [node name="Hazard2" parent="Hazards" instance=ExtResource( 8 )]
 position = Vector2( 224, -64 )
+script = null
 
 [node name="Foreground" type="Node2D" parent="."]
 editor/display_folded = true
@@ -117,7 +118,7 @@ editor/display_folded = true
 z_index = -10
 
 [node name="Snow" parent="Background" instance=ExtResource( 9 )]
-[connection signal="dialogue_end" from="Dialogue" to="Player/PixelCamera" method="_on_dialogue_end"]
 [connection signal="dialogue_end" from="Dialogue" to="Player" method="_on_dialogue_end"]
-[connection signal="dialogue_start" from="Dialogue" to="Player/PixelCamera" method="_on_dialogue_start"]
+[connection signal="dialogue_end" from="Dialogue" to="Player/PixelCamera" method="_on_dialogue_end"]
 [connection signal="dialogue_start" from="Dialogue" to="Player" method="_on_dialogue_start"]
+[connection signal="dialogue_start" from="Dialogue" to="Player/PixelCamera" method="_on_dialogue_start"]

@@ -1,5 +1,7 @@
 extends KinematicBody2D
 
+const Score = preload("res://scripts/score.gd")
+
 # Things that need to be done:
 # * Bug: facing direction needs to be flipped around only once the
 #   jump_surface_velocity_x variable has become positive.
@@ -274,6 +276,8 @@ const DIVE_MIN_IMPULSE_FRACTION := 0.1
 # The distance which is checked to be collision free before starting a dive.
 const DIVE_CHECK_DISTANCE := 16.0
 
+var points := 0
+
 var state : int = State.FALL
 var physics_state : int = PhysicsState.AIR
 # The normal to the surface the player is on (only valid if `_is_surface_physics_state`
@@ -313,6 +317,8 @@ var previous_physics_state := self.physics_state
 var previous_position := self.position
 var previous_velocity := self.velocity
 var previous_skate_direction := self.skate_direction
+
+onready var score_area2d := $ScoreArea2D
 
 onready var animation_player := $Sprite/AnimationPlayer
 onready var ballistic_effect_sprite := $BallisticEffectSprite
@@ -496,6 +502,13 @@ func _apply_drag(drag : float, delta : float) -> void:
 
 func _ready() -> void:
 	self.ballistic_effect_sprite.visible = false
+	self.score_area2d.connect("area_entered", self, "_on_score_pickup")
+
+func _on_score_pickup(area2d : Area2D) -> void:
+	var score := area2d as Score
+	if score != null:
+		self.points += score.points
+		score.queue_free()
 
 func _physics_process(delta : float) -> void:
 	var move_direction := _read_move_direction()

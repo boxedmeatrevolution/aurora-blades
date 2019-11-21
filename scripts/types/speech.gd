@@ -18,4 +18,4 @@ class Line:
 var PLAYER := Actor.new("Player", preload("res://sprites/portrait_player.png"))
 var BADDIE := Actor.new("Baddie", preload("res://sprites/portrait_player.png"))
 
-var lines := []
+export var lines := []
