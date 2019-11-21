@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=2]
 
-[ext_resource path="res://scripts/skate_glow.gd" type="Script" id=1]
+[ext_resource path="res://scripts/skate_trail.gd" type="Script" id=1]
 [ext_resource path="res://sprites/effects/skate_trail.png" type="Texture" id=2]
 
 [sub_resource type="ParticlesMaterial" id=1]

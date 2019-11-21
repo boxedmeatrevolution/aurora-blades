@@ -1,12 +1,12 @@
-[gd_scene load_steps=42 format=2]
+[gd_scene load_steps=44 format=2]
 
 [ext_resource path="res://scripts/player.gd" type="Script" id=1]
 [ext_resource path="res://sprites/player.png" type="Texture" id=2]
 [ext_resource path="res://sprites/effects/player_boost.png" type="Texture" id=3]
-[ext_resource path="res://sprites/effects/circle.png" type="Texture" id=4]
-[ext_resource path="res://entities/effects/ice_spray.tscn" type="PackedScene" id=5]
-[ext_resource path="res://entities/effects/skate_trail.tscn" type="PackedScene" id=6]
-[ext_resource path="res://entities/effects/dive_trail.tscn" type="PackedScene" id=7]
+[ext_resource path="res://entities/effects/ice_spray.tscn" type="PackedScene" id=4]
+[ext_resource path="res://entities/effects/skate_trail.tscn" type="PackedScene" id=5]
+[ext_resource path="res://entities/effects/dive_trail.tscn" type="PackedScene" id=6]
+[ext_resource path="res://entities/effects/dive_charge.tscn" type="PackedScene" id=7]
 
 [sub_resource type="Animation" id=1]
 resource_name = "BallisticFallLeft"
@@ -1193,6 +1193,26 @@ tracks/0/keys = {
 "values": [ 0, 1, 2 ]
 }
 
+[sub_resource type="StreamTexture" id=35]
+load_path = "res://.import/circle.png-876256d26a750e224da656c4dc3e4598.stex"
+
+[sub_resource type="GDScript" id=36]
+script/source = "extends Node2D
+
+# TODO: Make particle effects change as the player moves faster?
+onready var particle := $Particles2D
+onready var particles_material := self.particle.process_material as ParticlesMaterial
+
+func _ready():
+	self.particle.emitting = false
+
+func set_emitting(emitting : bool) -> void:
+	if emitting && !self.particle.emitting:
+		self.particle.emitting = true
+	if !emitting && self.particle.emitting:
+		self.particle.emitting = false
+"
+
 [node name="Player" type="KinematicBody2D"]
 collision_mask = 2
 script = ExtResource( 1 )
@@ -1203,7 +1223,7 @@ position = Vector2( 0, -14 )
 texture = ExtResource( 2 )
 vframes = 5
 hframes = 12
-frame = 9
+frame = 8
 region_rect = Rect2( 0, 0, 24, 32 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Sprite"]
@@ -1257,6 +1277,7 @@ autoplay = "BallisticEffect"
 anims/BallisticEffect = SubResource( 34 )
 
 [node name="SkateA" type="Node2D" parent="."]
+editor/display_folded = true
 position = Vector2( 14, 15 )
 __meta__ = {
 "_edit_group_": true
@@ -1265,17 +1286,19 @@ __meta__ = {
 [node name="Sprite" type="Sprite" parent="SkateA"]
 visible = false
 scale = Vector2( 0.5, 0.5 )
-texture = ExtResource( 4 )
+texture = SubResource( 35 )
 
-[node name="IceSpray" parent="SkateA" instance=ExtResource( 5 )]
+[node name="IceSpray" parent="SkateA" instance=ExtResource( 4 )]
 z_index = 1
 
-[node name="SkateTrail" parent="SkateA" instance=ExtResource( 6 )]
+[node name="SkateTrail" parent="SkateA" instance=ExtResource( 5 )]
 z_index = 1
 
-[node name="DiveTrail" parent="SkateA" instance=ExtResource( 7 )]
+[node name="DiveTrail" parent="SkateA" instance=ExtResource( 6 )]
+script = SubResource( 36 )
 
 [node name="SkateB" type="Node2D" parent="."]
+editor/display_folded = true
 position = Vector2( 14, 12 )
 __meta__ = {
 "_edit_group_": true
@@ -1284,12 +1307,17 @@ __meta__ = {
 [node name="Sprite" type="Sprite" parent="SkateB"]
 visible = false
 scale = Vector2( 0.5, 0.5 )
-texture = ExtResource( 4 )
+texture = SubResource( 35 )
 
-[node name="IceSpray" parent="SkateB" instance=ExtResource( 5 )]
+[node name="IceSpray" parent="SkateB" instance=ExtResource( 4 )]
 z_index = -1
 
-[node name="SkateTrail" parent="SkateB" instance=ExtResource( 6 )]
+[node name="SkateTrail" parent="SkateB" instance=ExtResource( 5 )]
 z_index = -1
 
-[node name="DiveTrail" parent="SkateB" instance=ExtResource( 7 )]
+[node name="DiveTrail" parent="SkateB" instance=ExtResource( 6 )]
+script = SubResource( 36 )
+
+[node name="DiveCharge" parent="." instance=ExtResource( 7 )]
+position = Vector2( 0, -8 )
+z_index = -1
