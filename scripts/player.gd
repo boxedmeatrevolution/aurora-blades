@@ -1,5 +1,6 @@
 extends KinematicBody2D
 
+const Checkpoint := preload("res://scripts/checkpoint.gd")
 const Score := preload("res://scripts/score.gd")
 const ScorePickup := preload("res://entities/effects/score_pickup.tscn") 
 
@@ -278,6 +279,8 @@ const DIVE_MIN_IMPULSE_FRACTION := 0.1
 const DIVE_CHECK_DISTANCE := 16.0
 
 var points := 0
+var checkpoint : Checkpoint = null
+var respawn_position := self.position
 
 var state : int = State.FALL
 var physics_state : int = PhysicsState.AIR
@@ -319,7 +322,14 @@ var previous_position := self.position
 var previous_velocity := self.velocity
 var previous_skate_direction := self.skate_direction
 
+# Stores a list of coins that have been picked up since the last checkpoint
+# that will need to be returned if the player dies.
+var score_list := []
+
+onready var score_parent := get_tree().get_root().find_node("Scores", true, false)
+
 onready var score_area2d := $ScoreArea2D
+onready var checkpoint_area2d := $CheckpointArea2D
 
 onready var animation_player := $Sprite/AnimationPlayer
 onready var ballistic_effect_sprite := $BallisticEffectSprite
@@ -504,16 +514,26 @@ func _apply_drag(drag : float, delta : float) -> void:
 func _ready() -> void:
 	self.ballistic_effect_sprite.visible = false
 	self.score_area2d.connect("area_entered", self, "_on_score_pickup")
+	self.checkpoint_area2d.connect("area_entered", self, "_on_checkpoint_activate")
 
 func _on_score_pickup(area2d : Area2D) -> void:
 	var score := area2d as Score
-	if score != null:
+	if score != null && score.get_parent() == self.score_parent:
 		self.points += score.points
 		var score_pickup := ScorePickup.instance()
-		score_pickup.transform = score.transform
-		score_pickup.z_index = 1
-		get_tree().get_root().add_child(score_pickup)
-		score.queue_free()
+		score_pickup.global_position = score.global_position
+		self.score_parent.add_child(score_pickup)
+		self.score_parent.remove_child(score)
+		self.score_list.append(score)
+
+func _on_checkpoint_activate(area2d : Area2D) -> void:
+	var checkpoint := area2d as Checkpoint
+	if checkpoint != null && checkpoint != self.checkpoint:
+		checkpoint.activate()
+		if self.checkpoint != null:
+			self.checkpoint.deactivate()
+		self.checkpoint = checkpoint
+		self.respawn_position = self.checkpoint.global_position
 
 func _physics_process(delta : float) -> void:
 	var move_direction := _read_move_direction()

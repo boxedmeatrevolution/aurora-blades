@@ -27,6 +27,9 @@ hue_variation_random = 1.0
 
 [node name="ScorePickup" type="Node2D"]
 script = ExtResource( 1 )
+__meta__ = {
+"_edit_group_": true
+}
 
 [node name="Particles2D" type="Particles2D" parent="."]
 emitting = false
