@@ -6,9 +6,9 @@ enum State {
 	TRAVEL
 }
 
-const WAIT_TIME := 1.0
-const ACCELERATION := 500.0
-const MAX_SPEED := 1000.0
+const WAIT_TIME := 0.6
+const ACCELERATION := 800.0
+const MAX_SPEED := 1200.0
 
 var player : Node = null
 var respawn_parent : Node = self.get_parent()
@@ -37,7 +37,7 @@ func _process(delta):
 		if self.speed >= MAX_SPEED:
 			self.state = State.TRAVEL
 			self.speed = MAX_SPEED
-	elif self.state == State.MAX_SPEED:
+	elif self.state == MAX_SPEED:
 		self.speed = MAX_SPEED
 	var displacement = self.respawn_location - self.position
 	if displacement.length() <= 10.0:

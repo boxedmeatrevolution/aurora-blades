@@ -112,6 +112,7 @@ class Intent:
 	var skate_start := false
 	var skate_boost := false
 	var skate_brake := false
+	var restart := false
 
 # Stores information about types of collisions encountered during a physics
 # step.
@@ -612,12 +613,6 @@ func _on_hazard_collision(area2d : Area2D) -> void:
 		self.dying = true
 
 func _physics_process(delta : float) -> void:
-	# Handle death.
-	if self.dying:
-		death()
-	if self.dead:
-		return
-	
 	var move_direction := _read_move_direction()
 	# Update the velocities based on the current state.
 	_state_process(delta, move_direction)
@@ -633,6 +628,12 @@ func _physics_process(delta : float) -> void:
 	_facing_direction_process(move_direction)
 	_animation_process()
 	_effects_process()
+	
+	# Handle death.
+	if self.dying || intent.restart:
+		death()
+	if self.dead:
+		return
 	
 	# Print the state for debugging purposes.
 	if self.previous_state != self.state || self.previous_physics_state != self.physics_state:
@@ -665,6 +666,8 @@ func _read_intent(move_direction : Vector2) -> Intent:
 	# Get input from the user. The intent structure represents the action that
 	# the player wants to do, not the input that the player actually did, so
 	# parts of it are conditional on the current state.
+	if Input.is_action_just_pressed("restart"):
+		intent.restart = true
 	if Input.is_action_just_pressed("jump"):
 		if _is_surface_physics_state(self.physics_state):
 			if _is_skate_state(self.state):
