@@ -283,8 +283,6 @@ var velocity := Vector2.ZERO
 var facing_direction := 1
 
 var skate_direction := 1
-var skate_landing_velocity_x := 0.0
-var skate_landing_timer := 0.0
 var slide_timer := 0.0
 # This timer keeps track of how long the player has been skating for.
 var skate_timer := 0.0
@@ -298,6 +296,10 @@ var pivot_timer := 0.0
 var dive_charge_timer := 0.0
 var dive_timer := 0.0
 var has_dive := true
+# These members keep track of what the effective velocity the player has on the
+# surface is, for the purpose of making the next jump. 
+var skate_landing_velocity_x := 0.0
+var skate_landing_timer := 0.0
 # For animation purposes, the stride of the skate that the player is currently
 # on.
 var skate_stride := false

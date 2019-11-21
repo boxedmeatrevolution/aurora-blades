@@ -18,7 +18,7 @@ radial_accel_random = 0.5
 angle = 360.0
 angle_random = 1.0
 
-[node name="SkateGlow" type="Node2D"]
+[node name="SkateTrail" type="Node2D"]
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_group_": true

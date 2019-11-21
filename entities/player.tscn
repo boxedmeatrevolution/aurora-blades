@@ -5,7 +5,7 @@
 [ext_resource path="res://sprites/effects/player_boost.png" type="Texture" id=3]
 [ext_resource path="res://sprites/effects/circle.png" type="Texture" id=4]
 [ext_resource path="res://entities/effects/ice_spray.tscn" type="PackedScene" id=5]
-[ext_resource path="res://entities/effects/skate_glow.tscn" type="PackedScene" id=6]
+[ext_resource path="res://entities/effects/skate_trail.tscn" type="PackedScene" id=6]
 
 [sub_resource type="Animation" id=1]
 resource_name = "BallisticFallLeft"
@@ -1270,11 +1270,10 @@ texture = ExtResource( 4 )
 [node name="IceSpray" parent="SkateA" instance=ExtResource( 5 )]
 z_index = 1
 
-[node name="SkateGlow" parent="SkateA" instance=ExtResource( 6 )]
+[node name="SkateTrail" parent="SkateA" instance=ExtResource( 6 )]
 z_index = 1
 
 [node name="SkateB" type="Node2D" parent="."]
-editor/display_folded = true
 position = Vector2( 14, 12 )
 __meta__ = {
 "_edit_group_": true
@@ -1288,5 +1287,5 @@ texture = ExtResource( 4 )
 [node name="IceSpray" parent="SkateB" instance=ExtResource( 5 )]
 z_index = -1
 
-[node name="SkateGlow" parent="SkateB" instance=ExtResource( 6 )]
+[node name="SkateTrail" parent="SkateB" instance=ExtResource( 6 )]
 z_index = -1
