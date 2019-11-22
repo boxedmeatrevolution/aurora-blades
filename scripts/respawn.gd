@@ -7,7 +7,7 @@ enum State {
 }
 
 const DAMPING := 1000.0
-const WAIT_TIME := 0.6
+const WAIT_TIME := 0.8
 const ACCELERATION := 800.0
 const MAX_SPEED := 1200.0
 

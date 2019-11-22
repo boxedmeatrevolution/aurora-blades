@@ -6,7 +6,7 @@
 [sub_resource type="CircleShape2D" id=1]
 radius = 16.0
 
-[node name="CoinLarge" index="0" instance=ExtResource( 1 )]
+[node name="CoinLarge" instance=ExtResource( 1 )]
 points = 5
 
 [node name="Sprite" parent="." index="0"]

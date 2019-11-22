@@ -348,6 +348,7 @@ onready var skate_trail_effect_b := $SkateB/SkateTrail
 onready var dive_trail_effect_a := $SkateA/DiveTrail
 onready var dive_trail_effect_b := $SkateB/DiveTrail
 onready var dive_charge_effect := $DiveCharge
+onready var death_burst_effect := $DeathBurst
 
 # Is the player on a surface, meaning on a floor, slope, or wall?
 func _is_surface_physics_state(physics_state : int) -> bool:
@@ -566,6 +567,7 @@ func _reset() -> void:
 func spawn() -> void:
 	_reset()
 	self.global_position = self.respawn_position
+	self.death_burst_effect.burst()
 	emit_signal("spawn", self)
 
 func death() -> void:
@@ -578,6 +580,8 @@ func death() -> void:
 	self.score_area2d.get_child(0).disabled = true
 	self.checkpoint_area2d.get_child(0).disabled = true
 	self.hazard_area2d.get_child(0).disabled = true
+	
+	self.death_burst_effect.burst()
 	
 	var layer_count_max := 16
 	var index := 0
