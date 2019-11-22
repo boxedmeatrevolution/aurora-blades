@@ -4,6 +4,7 @@ const DEFAULT_DRAG_MARGINS := 0.2
 
 var target : Node2D = null
 export var scroll_speed := 1000.0
+export var keep_up_speed := 4000.0
 
 onready var camera := $Camera2D
 
@@ -43,10 +44,9 @@ func _process(delta) -> void:
 		OS.window_fullscreen = !OS.window_fullscreen
 	if is_instance_valid(self.target):
 		var displacement = self.target.global_position - self.global_position
-		if displacement.length() < self.scroll_speed * delta:
+		if displacement.length() < self.keep_up_speed * delta:
 			self.global_position = self.target.global_position
 		else:
-			print("Moving!!")
 			self.global_position += displacement.normalized() * self.scroll_speed * delta
 	else:
 		self.target = null

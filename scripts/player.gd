@@ -137,6 +137,8 @@ const FLOOR_ANGLE := 5.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
 const WALL_ANGLE := 100.0 * PI / 180.0
 
+const CHECKPOINT_SPAWN_HEIGHT := 12.0
+
 # If the player is registered as leaving a surface, but the surface remains
 # within this distance of the player, then don't let the player leave the
 # surface.
@@ -613,7 +615,7 @@ func _on_checkpoint_activate(area2d : Area2D) -> void:
 		if self.checkpoint != null:
 			self.checkpoint.deactivate()
 		self.checkpoint = checkpoint
-		self.respawn_position = self.checkpoint.global_position
+		self.respawn_position = self.checkpoint.global_position + Vector2.UP * CHECKPOINT_SPAWN_HEIGHT
 
 func _on_hazard_collision(area2d : Area2D) -> void:
 	var hazard := area2d as Hazard
