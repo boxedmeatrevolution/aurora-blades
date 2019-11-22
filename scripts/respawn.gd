@@ -19,9 +19,11 @@ var wait_timer := 0.0
 var speed := 0.0
 var initial_velocity := Vector2.ZERO
 
-func init(object : Node, respawn_location : Vector2):
+func init(object : Node, respawn_location : Vector2, with_image := true):
 	self.object = object
 	self.respawn_location = respawn_location
+	if !with_image:
+		$Sprite.visible = false
 
 func _process(delta : float):
 	if self.state == State.WAIT:

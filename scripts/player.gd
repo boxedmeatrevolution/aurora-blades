@@ -5,8 +5,6 @@ const Hazard := preload("res://scripts/hazard.gd")
 const Score := preload("res://scripts/score.gd")
 
 # Things that need to be done:
-# * Respawn coins.
-# * Add types to own file.
 # * Bug: facing direction needs to be flipped around only once the
 #   jump_surface_velocity_x variable has become positive.
 # * Use the new wall_collision variable to clean up some code, such as:
@@ -587,8 +585,9 @@ func death() -> void:
 	for score_obj in self.score_list:
 		var score := score_obj as Score
 		self.points -= score.points
-		var respawn_score = Scenes.RespawnScore.instance()
-		respawn_score.init(score, score.global_position)
+		var respawn_score = Scenes.Respawn.instance()
+		respawn_score.init(score, score.global_position, false)
+		respawn_score.add_child(score.sprite.duplicate())
 		respawn_score.global_position = self.global_position
 		var angle := 0.0
 		var speed := 0.0
@@ -607,7 +606,7 @@ func death() -> void:
 	
 	self.score_list.clear()
 	
-	var respawn_player = Scenes.RespawnPlayer.instance()
+	var respawn_player = Scenes.Respawn.instance()
 	respawn_player.init(self, self.respawn_position)
 	respawn_player.global_position = self.global_position
 	self.get_parent().add_child(respawn_player)

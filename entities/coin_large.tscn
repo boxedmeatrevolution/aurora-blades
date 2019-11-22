@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://entities/coin.tscn" type="PackedScene" id=1]
+[ext_resource path="res://sprites/coin_large.png" type="Texture" id=2]
+
+[node name="CoinLarge" index="0" instance=ExtResource( 1 )]
+points = 5
+
+[node name="Sprite" parent="." index="0"]
+editor/display_folded = true
+texture = ExtResource( 2 )

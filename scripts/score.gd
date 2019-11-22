@@ -1,6 +1,7 @@
 extends Area2D
 
 onready var parent := self.get_parent()
+onready var sprite := $Sprite
 
 export var points := 1
 
