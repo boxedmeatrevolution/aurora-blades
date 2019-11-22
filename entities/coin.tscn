@@ -21,6 +21,7 @@ tracks/0/keys = {
 }
 
 [sub_resource type="CircleShape2D" id=2]
+radius = 8.0
 
 [node name="Coin" type="Area2D"]
 collision_layer = 8
@@ -31,6 +32,7 @@ __meta__ = {
 }
 
 [node name="Sprite" type="Sprite" parent="."]
+editor/display_folded = true
 texture = ExtResource( 2 )
 hframes = 4
 
@@ -39,5 +41,4 @@ autoplay = "Coin"
 anims/Coin = SubResource( 1 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-visible = false
 shape = SubResource( 2 )
