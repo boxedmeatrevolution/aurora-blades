@@ -5,7 +5,6 @@ const Hazard := preload("res://scripts/hazard.gd")
 const Score := preload("res://scripts/score.gd")
 
 # Things that need to be done:
-# * Fix camera jitter.
 # * Respawn coins.
 # * Add types to own file.
 # * Bug: facing direction needs to be flipped around only once the
@@ -336,8 +335,6 @@ var previous_skate_direction := 1
 # that will need to be returned if the player dies.
 var score_list := []
 
-onready var score_parent := get_tree().get_root().find_node("Scores", true, false)
-
 onready var score_area2d := $ScoreArea2D
 onready var checkpoint_area2d := $CheckpointArea2D
 onready var hazard_area2d := $HazardArea2D
@@ -584,8 +581,34 @@ func death() -> void:
 	self.checkpoint_area2d.get_child(0).disabled = true
 	self.hazard_area2d.get_child(0).disabled = true
 	
+	var layer_count_max := 16
+	var index := 0
+	var layer_index := 0
+	for score_obj in self.score_list:
+		var score := score_obj as Score
+		self.points -= score.points
+		var respawn_score = Scenes.RespawnScore.instance()
+		respawn_score.init(score, score.global_position)
+		respawn_score.global_position = self.global_position
+		var angle := 0.0
+		var speed := 0.0
+		if self.score_list.size() <= layer_count_max:
+			angle = 2.0 * PI * index / (self.score_list.size())
+			speed = 300.0
+		else:
+			if index >= layer_count_max:
+				index -= layer_count_max
+				layer_index += 1
+			angle = 2.0 * PI * (index + 0.5 * (layer_index % 2)) / layer_count_max
+			speed = 300.0 + 50.0 * layer_index
+		index += 1
+		respawn_score.initial_velocity = speed * Vector2(sin(angle), -cos(angle))
+		self.get_parent().add_child(respawn_score)
+	
+	self.score_list.clear()
+	
 	var respawn_player = Scenes.RespawnPlayer.instance()
-	respawn_player.init(self, self.get_parent(), self.respawn_position)
+	respawn_player.init(self, self.respawn_position)
 	respawn_player.global_position = self.global_position
 	self.get_parent().add_child(respawn_player)
 	
@@ -600,12 +623,9 @@ func _ready() -> void:
 
 func _on_score_pickup(area2d : Area2D) -> void:
 	var score := area2d as Score
-	if score != null && score.get_parent() == self.score_parent:
+	if score != null:
 		self.points += score.points
-		var score_pickup = Scenes.ScorePickup.instance()
-		score_pickup.global_position = score.global_position
-		self.score_parent.add_child(score_pickup)
-		self.score_parent.remove_child(score)
+		score.death()
 		self.score_list.append(score)
 
 func _on_checkpoint_activate(area2d : Area2D) -> void:
@@ -616,6 +636,9 @@ func _on_checkpoint_activate(area2d : Area2D) -> void:
 			self.checkpoint.deactivate()
 		self.checkpoint = checkpoint
 		self.respawn_position = self.checkpoint.global_position + Vector2.UP * CHECKPOINT_SPAWN_HEIGHT
+		for score in self.score_list:
+			score.queue_free()
+		self.score_list.clear()
 
 func _on_hazard_collision(area2d : Area2D) -> void:
 	var hazard := area2d as Hazard

@@ -93,8 +93,9 @@ position = Vector2( 128, -80 )
 [node name="HazardLarge" parent="Hazards" instance=ExtResource( 7 )]
 position = Vector2( 144, -128 )
 
+[node name="Coin" parent="." instance=ExtResource( 8 )]
+
 [node name="Scores" type="Node2D" parent="."]
-editor/display_folded = true
 z_index = 1
 
 [node name="Coin" parent="Scores" instance=ExtResource( 8 )]
@@ -104,7 +105,103 @@ position = Vector2( 48, -32 )
 position = Vector2( 112, -32 )
 
 [node name="Coin3" parent="Scores" instance=ExtResource( 8 )]
-position = Vector2( -32, -32 )
+position = Vector2( -683.2, -64 )
+
+[node name="Coin4" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -657.262, -37.16 )
+
+[node name="Coin5" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -640.947, -13.4755 )
+
+[node name="Coin6" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -628.324, 13.0316 )
+
+[node name="Coin7" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -612.546, 39.2231 )
+
+[node name="Coin8" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -592.35, 61.9434 )
+
+[node name="Coin9" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -568.683, 80.2459 )
+
+[node name="Coin11" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -514.407, 93.4994 )
+
+[node name="Coin12" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -484.113, 95.7083 )
+
+[node name="Coin13" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -448, 95.7083 )
+
+[node name="Coin14" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -412.657, 97.2861 )
+
+[node name="Coin15" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -379.208, 102.335 )
+
+[node name="Coin16" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -350.807, 119.375 )
+
+[node name="Coin17" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -329.981, 141.78 )
+
+[node name="Coin18" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -311.047, 167.972 )
+
+[node name="Coin19" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -294.638, 194.479 )
+
+[node name="Coin20" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -272.233, 214.359 )
+
+[node name="Coin21" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -243.517, 223.195 )
+
+[node name="Coin22" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -217.01, 223.51 )
+
+[node name="Coin23" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -188.294, 222.248 )
+
+[node name="Coin24" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -159.262, 223.51 )
+
+[node name="Coin25" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -131.178, 224.141 )
+
+[node name="Coin26" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -106.564, 214.043 )
+
+[node name="Coin27" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -82.5813, 201.105 )
+
+[node name="Coin28" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -58.5987, 190.692 )
+
+[node name="Coin29" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -33.0384, 188.483 )
+
+[node name="Coin30" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -8.1091, 188.483 )
+
+[node name="Coin31" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( 19.0291, 190.376 )
+
+[node name="Coin32" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( 47.1139, 190.376 )
+
+[node name="Coin33" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( 75.8299, 190.376 )
+
+[node name="Coin34" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( 107.701, 191.954 )
+
+[node name="Coin35" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( 135.471, 192.27 )
+
+[node name="Coin10" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( -542.176, 91.606 )
 
 [node name="Checkpoints" type="Node" parent="."]
 editor/display_folded = true
