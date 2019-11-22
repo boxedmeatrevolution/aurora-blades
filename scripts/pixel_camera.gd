@@ -46,6 +46,7 @@ func _process(delta) -> void:
 		if displacement.length() < self.scroll_speed * delta:
 			self.global_position = self.target.global_position
 		else:
+			print("Moving!!")
 			self.global_position += displacement.normalized() * self.scroll_speed * delta
 	else:
 		self.target = null

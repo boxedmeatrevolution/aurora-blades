@@ -1296,6 +1296,7 @@ autoplay = "BallisticEffect"
 anims/BallisticEffect = SubResource( 37 )
 
 [node name="SkateA" type="Node2D" parent="."]
+editor/display_folded = true
 position = Vector2( 14, 15 )
 __meta__ = {
 "_edit_group_": true

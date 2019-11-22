@@ -5,7 +5,6 @@ const Hazard := preload("res://scripts/hazard.gd")
 const Score := preload("res://scripts/score.gd")
 
 # Things that need to be done:
-# * Button to kill yourself.
 # * Fix camera jitter.
 # * Respawn coins.
 # * Add types to own file.
@@ -550,6 +549,10 @@ func _reset() -> void:
 	self.previous_velocity = self.velocity
 	self.previous_skate_direction = self.skate_direction
 	
+	self.score_area2d.get_child(0).disabled = false
+	self.checkpoint_area2d.get_child(0).disabled = false
+	self.hazard_area2d.get_child(0).disabled = false
+	
 	self.sprite.visible = true
 	self.ballistic_effect_sprite.visible = false
 	self.skate_brake_effect_a.set_emitting(false)
@@ -570,9 +573,14 @@ func spawn() -> void:
 
 func death() -> void:
 	_reset()
+	
 	self.dying = false
 	self.dead = true
 	self.sprite.visible = false
+	
+	self.score_area2d.get_child(0).disabled = true
+	self.checkpoint_area2d.get_child(0).disabled = true
+	self.hazard_area2d.get_child(0).disabled = true
 	
 	var respawn_player = Scenes.RespawnPlayer.instance()
 	respawn_player.init(self, self.get_parent(), self.respawn_position)
