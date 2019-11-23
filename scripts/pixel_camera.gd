@@ -3,7 +3,7 @@ extends Node2D
 const DEFAULT_DRAG_MARGINS := 0.2
 
 var target : Node2D = null
-export var scroll_speed := 1000.0
+export var scroll_speed := 2000.0
 export var keep_up_speed := 4000.0
 
 onready var camera := $Camera2D
@@ -30,7 +30,6 @@ func _set_drag_region(rect : Rect2) -> void:
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	self.get_tree().connect("screen_resized", self, "_screen_resized")
-	self.get_tree().set_debug_collisions_hint(true)
 	self.viewport.set_attach_to_screen_rect(self.viewport.get_visible_rect())
 	_screen_resized()
 	var drag_region := _get_viewport_rect_centered()
@@ -82,7 +81,7 @@ func _on_dialogue_end():
 	_set_drag_region(drag_region)
 
 func _on_player_spawn(player):
-	self.target = player
+	_set_target(player)
 
 func _on_player_death(player, respawn_player):
-	self.target = respawn_player
+	_set_target(respawn_player)

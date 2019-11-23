@@ -5,6 +5,8 @@ const Hazard := preload("res://scripts/hazard.gd")
 const Score := preload("res://scripts/score.gd")
 
 # Things that need to be done:
+# * Fix snow falling particles.
+# * Fix buggy movement over slopes with player. (Not sticking to slopes)
 # * Bug: facing direction needs to be flipped around only once the
 #   jump_surface_velocity_x variable has become positive.
 # * Use the new wall_collision variable to clean up some code, such as:

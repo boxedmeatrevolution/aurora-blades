@@ -10,3 +10,6 @@ __meta__ = {
 
 [node name="Camera2D" type="Camera2D" parent="."]
 current = true
+process_mode = 0
+smoothing_enabled = true
+smoothing_speed = 20.0
