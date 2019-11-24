@@ -511,7 +511,7 @@ func _surface_stick_max_slope() -> float:
 	if _is_prejump_state(self.state):
 		return 0.0
 	else:
-		return 0.5 * surface_gravity / self.velocity.x * SURFACE_DROP_TIME
+		return 0.5 * surface_gravity / abs(self.velocity.x) * SURFACE_DROP_TIME
 
 func _apply_drag(drag : float, delta : float) -> void:
 	if self.velocity.length_squared() > 0.0:
@@ -1007,8 +1007,8 @@ func _position_process(delta : float, n : int = 4) -> CollisionInfo:
 			var velocity_slope := self.velocity.y / self.velocity.x
 			var max_slope_change := _surface_stick_max_slope()
 			if max_slope_change > 0.0:
-				var extreme_slope := velocity_slope + max_slope_change
-				var test_displacement := tolerance_factor * Vector2.DOWN * velocity.x * delta * max_slope_change
+				var extreme_slope := velocity_slope + sign(self.velocity.x) * max_slope_change
+				var test_displacement := tolerance_factor * Vector2.DOWN * abs(velocity.x) * delta * max_slope_change
 				var test_collision := move_and_collide(test_displacement, true, true, true)
 				if test_collision != null && test_collision.normal.y < 0:
 					# If a surface below the player was found, then check that the
