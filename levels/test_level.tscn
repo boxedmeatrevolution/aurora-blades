@@ -435,9 +435,9 @@ editor/display_folded = true
 z_index = -10
 
 [node name="Snow" parent="Background" instance=ExtResource( 11 )]
-[connection signal="dialogue_end" from="Dialogue" to="Player" method="_on_dialogue_end"]
 [connection signal="dialogue_end" from="Dialogue" to="PixelCamera" method="_on_dialogue_end"]
-[connection signal="dialogue_start" from="Dialogue" to="Player" method="_on_dialogue_start"]
+[connection signal="dialogue_end" from="Dialogue" to="Player" method="_on_dialogue_end"]
 [connection signal="dialogue_start" from="Dialogue" to="PixelCamera" method="_on_dialogue_start"]
+[connection signal="dialogue_start" from="Dialogue" to="Player" method="_on_dialogue_start"]
 [connection signal="death" from="Player" to="PixelCamera" method="_on_player_death"]
 [connection signal="spawn" from="Player" to="PixelCamera" method="_on_player_spawn"]

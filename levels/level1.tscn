@@ -1,0 +1,820 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://entities/ui/pixel_camera.tscn" type="PackedScene" id=1]
+[ext_resource path="res://tilesets/winter.png" type="Texture" id=2]
+[ext_resource path="res://entities/player.tscn" type="PackedScene" id=3]
+[ext_resource path="res://entities/hazard_small.tscn" type="PackedScene" id=4]
+[ext_resource path="res://entities/hazard_large.tscn" type="PackedScene" id=5]
+[ext_resource path="res://entities/checkpoint.tscn" type="PackedScene" id=6]
+[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=7]
+
+[sub_resource type="TileSet" id=1]
+0/name = "winter.png 0"
+0/texture = ExtResource( 2 )
+0/tex_offset = Vector2( 0, 0 )
+0/modulate = Color( 1, 1, 1, 1 )
+0/region = Rect2( 0, 0, 48, 48 )
+0/tile_mode = 2
+0/autotile/icon_coordinate = Vector2( 0, 0 )
+0/autotile/tile_size = Vector2( 16, 16 )
+0/autotile/spacing = 0
+0/autotile/occluder_map = [  ]
+0/autotile/navpoly_map = [  ]
+0/autotile/z_index_map = [  ]
+0/occluder_offset = Vector2( 0, 0 )
+0/navigation_offset = Vector2( 0, 0 )
+0/shapes = [  ]
+0/z_index = 0
+1/name = "winter.png 1"
+1/texture = ExtResource( 2 )
+1/tex_offset = Vector2( 0, 0 )
+1/modulate = Color( 1, 1, 1, 1 )
+1/region = Rect2( 48, 0, 32, 32 )
+1/tile_mode = 2
+1/autotile/icon_coordinate = Vector2( 0, 0 )
+1/autotile/tile_size = Vector2( 16, 16 )
+1/autotile/spacing = 0
+1/autotile/occluder_map = [  ]
+1/autotile/navpoly_map = [  ]
+1/autotile/z_index_map = [  ]
+1/occluder_offset = Vector2( 0, 0 )
+1/navigation_offset = Vector2( 0, 0 )
+1/shapes = [  ]
+1/z_index = 0
+2/name = "winter.png 2"
+2/texture = ExtResource( 2 )
+2/tex_offset = Vector2( 0, 0 )
+2/modulate = Color( 1, 1, 1, 1 )
+2/region = Rect2( 80, 0, 32, 32 )
+2/tile_mode = 2
+2/autotile/icon_coordinate = Vector2( 0, 0 )
+2/autotile/tile_size = Vector2( 16, 16 )
+2/autotile/spacing = 0
+2/autotile/occluder_map = [  ]
+2/autotile/navpoly_map = [  ]
+2/autotile/z_index_map = [  ]
+2/occluder_offset = Vector2( 0, 0 )
+2/navigation_offset = Vector2( 0, 0 )
+2/shapes = [  ]
+2/z_index = 0
+3/name = "winter.png 3"
+3/texture = ExtResource( 2 )
+3/tex_offset = Vector2( 0, 0 )
+3/modulate = Color( 1, 1, 1, 1 )
+3/region = Rect2( 112, 0, 32, 32 )
+3/tile_mode = 2
+3/autotile/icon_coordinate = Vector2( 0, 0 )
+3/autotile/tile_size = Vector2( 16, 16 )
+3/autotile/spacing = 0
+3/autotile/occluder_map = [  ]
+3/autotile/navpoly_map = [  ]
+3/autotile/z_index_map = [  ]
+3/occluder_offset = Vector2( 0, 0 )
+3/navigation_offset = Vector2( 0, 0 )
+3/shapes = [  ]
+3/z_index = 0
+4/name = "winter.png 4"
+4/texture = ExtResource( 2 )
+4/tex_offset = Vector2( 0, 0 )
+4/modulate = Color( 1, 1, 1, 1 )
+4/region = Rect2( 0, 64, 96, 64 )
+4/tile_mode = 2
+4/autotile/icon_coordinate = Vector2( 0, 0 )
+4/autotile/tile_size = Vector2( 16, 32 )
+4/autotile/spacing = 0
+4/autotile/occluder_map = [  ]
+4/autotile/navpoly_map = [  ]
+4/autotile/z_index_map = [  ]
+4/occluder_offset = Vector2( 0, 0 )
+4/navigation_offset = Vector2( 0, 0 )
+4/shapes = [  ]
+4/z_index = 0
+5/name = "winter.png 5"
+5/texture = ExtResource( 2 )
+5/tex_offset = Vector2( 0, 0 )
+5/modulate = Color( 1, 1, 1, 1 )
+5/region = Rect2( 0, 128, 96, 96 )
+5/tile_mode = 2
+5/autotile/icon_coordinate = Vector2( 0, 0 )
+5/autotile/tile_size = Vector2( 16, 48 )
+5/autotile/spacing = 0
+5/autotile/occluder_map = [  ]
+5/autotile/navpoly_map = [  ]
+5/autotile/z_index_map = [  ]
+5/occluder_offset = Vector2( 0, 0 )
+5/navigation_offset = Vector2( 0, 0 )
+5/shapes = [  ]
+5/z_index = 0
+6/name = "winter.png 6"
+6/texture = ExtResource( 2 )
+6/tex_offset = Vector2( 0, 0 )
+6/modulate = Color( 1, 1, 1, 1 )
+6/region = Rect2( 0, 224, 192, 64 )
+6/tile_mode = 2
+6/autotile/icon_coordinate = Vector2( 0, 0 )
+6/autotile/tile_size = Vector2( 32, 32 )
+6/autotile/spacing = 0
+6/autotile/occluder_map = [  ]
+6/autotile/navpoly_map = [  ]
+6/autotile/z_index_map = [  ]
+6/occluder_offset = Vector2( 0, 0 )
+6/navigation_offset = Vector2( 0, 0 )
+6/shapes = [  ]
+6/z_index = 0
+7/name = "winter.png 7"
+7/texture = ExtResource( 2 )
+7/tex_offset = Vector2( 0, 0 )
+7/modulate = Color( 1, 1, 1, 1 )
+7/region = Rect2( 192, 0, 48, 48 )
+7/tile_mode = 2
+7/autotile/icon_coordinate = Vector2( 0, 0 )
+7/autotile/tile_size = Vector2( 16, 16 )
+7/autotile/spacing = 0
+7/autotile/occluder_map = [  ]
+7/autotile/navpoly_map = [  ]
+7/autotile/z_index_map = [  ]
+7/occluder_offset = Vector2( 0, 0 )
+7/navigation_offset = Vector2( 0, 0 )
+7/shapes = [  ]
+7/z_index = 0
+8/name = "winter.png 8"
+8/texture = ExtResource( 2 )
+8/tex_offset = Vector2( 0, 0 )
+8/modulate = Color( 1, 1, 1, 1 )
+8/region = Rect2( 240, 0, 32, 32 )
+8/tile_mode = 2
+8/autotile/icon_coordinate = Vector2( 0, 0 )
+8/autotile/tile_size = Vector2( 16, 16 )
+8/autotile/spacing = 0
+8/autotile/occluder_map = [  ]
+8/autotile/navpoly_map = [  ]
+8/autotile/z_index_map = [  ]
+8/occluder_offset = Vector2( 0, 0 )
+8/navigation_offset = Vector2( 0, 0 )
+8/shapes = [  ]
+8/z_index = 0
+9/name = "winter.png 9"
+9/texture = ExtResource( 2 )
+9/tex_offset = Vector2( 0, 0 )
+9/modulate = Color( 1, 1, 1, 1 )
+9/region = Rect2( 192, 64, 96, 64 )
+9/tile_mode = 2
+9/autotile/icon_coordinate = Vector2( 0, 0 )
+9/autotile/tile_size = Vector2( 16, 32 )
+9/autotile/spacing = 0
+9/autotile/occluder_map = [  ]
+9/autotile/navpoly_map = [  ]
+9/autotile/z_index_map = [  ]
+9/occluder_offset = Vector2( 0, 0 )
+9/navigation_offset = Vector2( 0, 0 )
+9/shapes = [  ]
+9/z_index = 0
+10/name = "winter.png 10"
+10/texture = ExtResource( 2 )
+10/tex_offset = Vector2( 0, 0 )
+10/modulate = Color( 1, 1, 1, 1 )
+10/region = Rect2( 192, 128, 96, 96 )
+10/tile_mode = 2
+10/autotile/icon_coordinate = Vector2( 0, 0 )
+10/autotile/tile_size = Vector2( 16, 48 )
+10/autotile/spacing = 0
+10/autotile/occluder_map = [  ]
+10/autotile/navpoly_map = [  ]
+10/autotile/z_index_map = [  ]
+10/occluder_offset = Vector2( 0, 0 )
+10/navigation_offset = Vector2( 0, 0 )
+10/shapes = [  ]
+10/z_index = 0
+11/name = "winter.png 11"
+11/texture = ExtResource( 2 )
+11/tex_offset = Vector2( 0, 0 )
+11/modulate = Color( 1, 1, 1, 1 )
+11/region = Rect2( 192, 224, 192, 64 )
+11/tile_mode = 2
+11/autotile/icon_coordinate = Vector2( 0, 0 )
+11/autotile/tile_size = Vector2( 32, 32 )
+11/autotile/spacing = 0
+11/autotile/occluder_map = [  ]
+11/autotile/navpoly_map = [  ]
+11/autotile/z_index_map = [  ]
+11/occluder_offset = Vector2( 0, 0 )
+11/navigation_offset = Vector2( 0, 0 )
+11/shapes = [  ]
+11/z_index = 0
+
+[node name="TestLevel" type="Node"]
+
+[node name="PixelCamera" parent="." instance=ExtResource( 1 )]
+
+[node name="TileMap" type="TileMap" parent="."]
+tile_set = SubResource( 1 )
+cell_size = Vector2( 16, 16 )
+format = 1
+
+[node name="Player" parent="." instance=ExtResource( 3 )]
+
+[node name="Blocks" type="StaticBody2D" parent="."]
+editor/display_folded = true
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( -160, 0, 144, 0, 144, -16, 176, -16, 176, 0, 208, 0, 208, -32, 240, -32, 240, 0, 272, 0, 304, -16, 416, -16, 512, 16, 592, 96, 736, 96, 800, 64, 800, -64, 1360, -64, 1424, 0, 1600, 0, 1664, -64, 1872, -64, 1872, 144, 205.22, 144, -160, 144 )
+
+[node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 0, 16 )
+polygon = PoolVector2Array( 544, -32, 608, 32, 720, 32, 752, 0, 752, -80, 720, -96, 576, -96, 544, -80 )
+
+[node name="CollisionPolygon2D3" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 0, -16 )
+polygon = PoolVector2Array( 1424, -80, 1424, -48, 1488, -48, 1488, -80 )
+
+[node name="CollisionPolygon2D4" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 112, -16 )
+polygon = PoolVector2Array( 1424, -80, 1424, -48, 1488, -48, 1488, -80 )
+
+[node name="CollisionPolygon2D5" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 1872, -64, 2272, -64, 2336, -96, 2432, -96, 2560, -32, 3072, -32, 3136, -64, 3200, -128, 3264, -160, 3552, -160, 3552, -128, 3648, -128, 3648, -160, 3936, -160, 3936, -128, 4096, -128, 4096, -160, 4624, -160, 4656, -144, 4704, -96, 4736, -80, 5312, -80, 5312, -144, 5280, -144, 5280, -176, 5472, -176, 5472, 224, 4642.83, 224, 4144, 224, 3792, 224, 3214.04, 224, 2408.84, 224, 1872, 224 )
+
+[node name="CollisionPolygon2D6" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 5472, -176, 5472, 224, 6000, 224, 6474.83, 224, 7520, 224, 7648, 352, 7648, 0, 7440, 0, 7376, -32, 7344, -64, 7344, 192, 6784, 192, 6784, 80, 6752, 112, 6688, 144, 6592, 144, 6528, 112, 6400, -16, 6400, 96, 6112, 96, 6112, -16, 6080, 16, 6048, 32, 6016, 32, 5984, 16, 5952, -16, 5920, -80, 5856, -144, 5792, -176 )
+
+[node name="CollisionPolygon2D7" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 6976, 0, 6976, 48, 7008, 80, 7104, 80, 7136, 48, 7136, -16, 7104, 16, 7072, 32, 7008, 32 )
+
+[node name="CollisionPolygon2D8" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 32, -15 )
+polygon = PoolVector2Array( 8640, 64, 8640, 128, 8688, 176, 8832, 176, 8880, 128, 8880, 64, 8832, 112, 8800, 128, 8720, 128, 8688, 112 )
+
+[node name="CollisionPolygon2D9" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 512, -64 )
+polygon = PoolVector2Array( 8640, 64, 8640, 128, 8688, 176, 8832, 176, 8880, 128, 8880, 64, 8832, 112, 8800, 128, 8720, 128, 8688, 112 )
+
+[node name="CollisionPolygon2D10" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 992, 64 )
+polygon = PoolVector2Array( 8640, 64, 8640, 128, 8688, 176, 8832, 176, 8880, 128, 8880, 64, 8832, 112, 8800, 128, 8720, 128, 8688, 112 )
+
+[node name="CollisionPolygon2D15" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 1440, 64 )
+polygon = PoolVector2Array( 8640, 64, 8640, 128, 8688, 176, 8784, 176, 8784, 160, 8688, 112 )
+
+[node name="CollisionPolygon2D11" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 7648, 0, 7856, 0, 7888, 16, 7920, 48, 7984, 176, 8016, 208, 8048, 224, 8128, 224, 8160, 208, 8272, 96, 8272, 304, 8224, 352, 7648, 352 )
+
+[node name="CollisionPolygon2D12" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 0, 32 )
+polygon = PoolVector2Array( 8384, -48, 8384, 336, 8368, 368, 8336, 400, 8304, 416, 8144, 416, 8080, 448, 8000, 448, 7936, 416, 7792, 416, 7728, 448, 7552, 448, 7488, 416, 7408, 416, 7376, 448, 7376, 480, 7408, 512, 7856, 512, 8176, 512, 8336, 512, 8400, 512, 8528, 384, 8528, -48, 8496, -80, 8416, -80 )
+
+[node name="CollisionPolygon2D13" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 7584, 288, 7344, 288, 7280, 352, 7280, 768, 7408, 768, 7408, 640, 7488, 640, 7488, 816, 7584, 816, 7584, 672, 7664, 672, 7664, 848, 7760, 848, 7760, 704, 7856, 704, 7856, 848, 7952, 848, 7952, 736, 7984, 736, 8048, 704, 8176, 704, 8240, 736, 8336, 736, 8336, 912, 8112, 912, 7909.23, 912, 7696, 912, 7552, 912, 7136, 912, 7136, 224, 7520, 224 )
+
+[node name="CollisionPolygon2D14" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 8336, 736, 8464, 672, 9040, 672, 9072, 656, 9104, 624, 9104, 864, 9280, 864, 9280, 560, 9312, 592, 9344, 608, 9376, 608, 9408, 592, 9440, 560, 9440, 864, 9616, 864, 9616, 496, 9648, 528, 9680, 544, 9856, 544, 10016, 464, 10112, 368, 10240, 304, 10384, 304, 10384, 912, 9808, 912, 9376, 912, 9008, 912, 8336, 912 )
+
+[node name="CollisionPolygon2D16" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 10384, 304, 10640, 304, 10704, 336, 10768, 400, 10832, 528, 10896, 592, 10960, 624, 11104, 624, 11168, 656, 11264, 752, 11328, 784, 11744, 784, 11776, 768, 11808, 736, 11824, 704, 11824, 544, 11840, 528, 11952, 528, 12016, 560, 12128, 672, 12192, 704, 12512, 704, 12512, 832, 13584, 832, 13872, 544, 14192, 544, 14192, 912, 10384, 912 )
+
+[node name="CollisionPolygon2D17" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 32, 32 )
+polygon = PoolVector2Array( 11264, 624, 11296, 656, 11632, 656, 11664, 640, 11696, 608, 11712, 576, 11712, 384, 11696, 368, 11552, 368, 11536, 384, 11536, 512, 11520, 544, 11488, 576, 11456, 592, 11264, 592 )
+
+[node name="CollisionPolygon2D18" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 32, 32 )
+polygon = PoolVector2Array( 11440, 432, 11264, 432, 11264, 464, 11280, 480, 11424, 480, 11440, 464 )
+
+[node name="CollisionPolygon2D19" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( -64, 64 )
+polygon = PoolVector2Array( 11904, 288, 12112, 288, 12112, 320, 12080, 352, 11936, 352, 11904, 320 )
+
+[node name="CollisionPolygon2D20" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 336, 192 )
+polygon = PoolVector2Array( 11904, 288, 12112, 288, 12112, 320, 12080, 352, 11936, 352, 11904, 320 )
+
+[node name="CollisionPolygon2D21" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 752, 352 )
+polygon = PoolVector2Array( 11904, 288, 12112, 288, 12112, 320, 12080, 352, 11936, 352, 11904, 320 )
+
+[node name="CollisionPolygon2D25" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 1712, 272 )
+polygon = PoolVector2Array( 11904, 288, 12144, 288, 12112, 320, 12080, 352, 11936, 352, 11904, 320 )
+
+[node name="CollisionPolygon2D22" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( -16, -32 )
+polygon = PoolVector2Array( 13024, 640, 13024, 672, 13040, 688, 13088, 688, 13104, 672, 13104, 640 )
+
+[node name="CollisionPolygon2D23" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 224, -16 )
+polygon = PoolVector2Array( 13024, 640, 13024, 672, 13040, 688, 13088, 688, 13104, 672, 13104, 640 )
+
+[node name="CollisionPolygon2D24" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 432, -48 )
+polygon = PoolVector2Array( 13024, 640, 13024, 672, 13040, 688, 13088, 688, 13104, 672, 13104, 640 )
+
+[node name="Hazards" type="Node" parent="."]
+editor/display_folded = true
+
+[node name="HazardSmall" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 1136, -80 )
+
+[node name="HazardSmall2" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 1264, -80 )
+
+[node name="HazardSmall3" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 1440, -16 )
+
+[node name="HazardSmall4" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 1584, -16 )
+
+[node name="HazardSmall6" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 3568, -144 )
+
+[node name="HazardSmall7" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 3600, -144 )
+
+[node name="HazardSmall8" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 3632, -144 )
+
+[node name="HazardSmall9" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 3952, -144 )
+
+[node name="HazardSmall10" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 3984, -144 )
+
+[node name="HazardSmall14" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 6192, 80 )
+
+[node name="HazardSmall15" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 6288, 80 )
+
+[node name="HazardSmall16" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 6320, 80 )
+
+[node name="HazardSmall17" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 6864, 176 )
+
+[node name="HazardSmall18" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 6896, 176 )
+
+[node name="HazardSmall19" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7088, 176 )
+
+[node name="HazardSmall76" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7072, 144 )
+
+[node name="HazardSmall77" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7136, 144 )
+
+[node name="HazardSmall20" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7120, 176 )
+
+[node name="HazardSmall21" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7232, 176 )
+
+[node name="HazardSmall23" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 8016, 464 )
+
+[node name="HazardSmall26" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 8064, 448 )
+
+[node name="HazardSmall24" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7568, 464 )
+
+[node name="HazardSmall75" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7600, 448 )
+
+[node name="HazardSmall25" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7712, 464 )
+
+[node name="HazardSmall27" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7296, 720 )
+
+[node name="HazardSmall28" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7328, 736 )
+
+[node name="HazardSmall29" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7360, 704 )
+
+[node name="HazardSmall30" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7392, 752 )
+
+[node name="HazardSmall31" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7504, 736 )
+
+[node name="HazardSmall40" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9456, 736 )
+
+[node name="HazardSmall41" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9488, 768 )
+
+[node name="HazardSmall78" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9584, 704 )
+
+[node name="HazardSmall42" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9600, 672 )
+
+[node name="HazardSmall44" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9504, 288 )
+
+[node name="HazardSmall47" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9536, 320 )
+
+[node name="HazardSmall48" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9632, 304 )
+
+[node name="HazardSmall49" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9664, 320 )
+
+[node name="HazardSmall50" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9696, 288 )
+
+[node name="HazardSmall52" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9824, 304 )
+
+[node name="HazardSmall53" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9856, 288 )
+
+[node name="HazardSmall54" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9888, 256 )
+
+[node name="HazardSmall55" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9984, 208 )
+
+[node name="HazardSmall56" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 10000, 176 )
+
+[node name="HazardSmall80" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12128, 320 )
+
+[node name="HazardSmall83" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12544, 528 )
+
+[node name="HazardSmall90" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12656, 816 )
+
+[node name="HazardSmall91" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12752, 816 )
+
+[node name="HazardSmall92" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12784, 784 )
+
+[node name="HazardSmall93" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12880, 784 )
+
+[node name="HazardSmall94" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12912, 800 )
+
+[node name="HazardSmall95" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12944, 816 )
+
+[node name="HazardSmall96" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12960, 784 )
+
+[node name="HazardSmall97" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13056, 768 )
+
+[node name="HazardSmall110" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12944, 656 )
+
+[node name="HazardSmall111" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13152, 592 )
+
+[node name="HazardSmall113" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13184, 608 )
+
+[node name="HazardSmall112" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13376, 624 )
+
+[node name="HazardSmall114" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13568, 608 )
+
+[node name="HazardSmall115" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13664, 464 )
+
+[node name="HazardSmall98" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13088, 784 )
+
+[node name="HazardSmall99" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13120, 816 )
+
+[node name="HazardSmall100" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13152, 800 )
+
+[node name="HazardSmall101" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13168, 768 )
+
+[node name="HazardSmall102" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13264, 784 )
+
+[node name="HazardSmall103" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13296, 800 )
+
+[node name="HazardSmall104" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13312, 768 )
+
+[node name="HazardSmall105" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13408, 816 )
+
+[node name="HazardSmall106" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13440, 816 )
+
+[node name="HazardSmall107" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13456, 784 )
+
+[node name="HazardSmall108" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13552, 816 )
+
+[node name="HazardSmall109" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13552, 784 )
+
+[node name="HazardSmall88" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12640, 640 )
+
+[node name="HazardSmall84" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12512, 528 )
+
+[node name="HazardSmall85" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12512, 496 )
+
+[node name="HazardSmall89" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12464, 496 )
+
+[node name="HazardSmall86" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12512, 384 )
+
+[node name="HazardSmall87" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12544, 400 )
+
+[node name="HazardSmall81" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12160, 320 )
+
+[node name="HazardSmall82" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12160, 288 )
+
+[node name="HazardSmall51" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9728, 320 )
+
+[node name="HazardSmall45" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9472, 306 )
+
+[node name="HazardSmall46" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9440, 320 )
+
+[node name="HazardSmall57" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9264, 272 )
+
+[node name="HazardSmall58" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9296, 288 )
+
+[node name="HazardSmall59" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9328, 304 )
+
+[node name="HazardSmall60" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9360, 272 )
+
+[node name="HazardSmall61" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9088, 240 )
+
+[node name="HazardSmall62" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9120, 256 )
+
+[node name="HazardSmall63" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9152, 272 )
+
+[node name="HazardSmall64" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9184, 240 )
+
+[node name="HazardSmall65" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 8912, 320 )
+
+[node name="HazardSmall66" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 8944, 336 )
+
+[node name="HazardSmall67" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 8976, 304 )
+
+[node name="HazardSmall68" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 8992, 272 )
+
+[node name="HazardSmall69" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 8816, 288 )
+
+[node name="HazardSmall70" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 8784, 304 )
+
+[node name="HazardSmall71" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 8752, 320 )
+
+[node name="HazardSmall72" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 8720, 304 )
+
+[node name="HazardSmall73" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 8608, 320 )
+
+[node name="HazardSmall74" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 8640, 336 )
+
+[node name="HazardSmall43" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9200, 784 )
+
+[node name="HazardSmall79" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9184, 752 )
+
+[node name="HazardSmall32" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7536, 752 )
+
+[node name="HazardSmall33" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7568, 784 )
+
+[node name="HazardSmall34" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7680, 816 )
+
+[node name="HazardSmall35" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7712, 784 )
+
+[node name="HazardSmall36" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7744, 800 )
+
+[node name="HazardSmall37" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7872, 800 )
+
+[node name="HazardSmall38" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7904, 816 )
+
+[node name="HazardSmall39" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7936, 832 )
+
+[node name="HazardSmall22" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7264, 144 )
+
+[node name="HazardSmall11" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 4016, -144 )
+
+[node name="HazardSmall12" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 4048, -144 )
+
+[node name="HazardSmall13" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 4080, -144 )
+
+[node name="HazardSmall5" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 1536, -16 )
+
+[node name="HazardLarge" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 1488, -32 )
+
+[node name="HazardLarge2" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 5280, -112 )
+
+[node name="HazardLarge3" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 6144, 64 )
+
+[node name="HazardLarge4" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 6240, 64 )
+
+[node name="HazardLarge5" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 6368, 64 )
+
+[node name="HazardLarge6" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 6816, 160 )
+
+[node name="HazardLarge7" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 6944, 160 )
+
+[node name="HazardLarge8" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 7184, 160 )
+
+[node name="HazardLarge10" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 7024, 160 )
+
+[node name="HazardLarge9" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 7312, 160 )
+
+[node name="HazardLarge11" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 7648, 448 )
+
+[node name="HazardLarge12" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 9136, 784 )
+
+[node name="HazardLarge13" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 9248, 832 )
+
+[node name="HazardLarge14" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 9536, 720 )
+
+[node name="HazardLarge15" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 8560, 320 )
+
+[node name="HazardLarge16" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 8688, 352 )
+
+[node name="HazardLarge17" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 8864, 320 )
+
+[node name="HazardLarge18" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 9040, 274 )
+
+[node name="HazardLarge19" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 9216, 288 )
+
+[node name="HazardLarge20" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 9392, 320 )
+
+[node name="HazardLarge21" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 9584, 288 )
+
+[node name="HazardLarge22" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 9776, 320 )
+
+[node name="HazardLarge23" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 9936, 242 )
+
+[node name="HazardLarge25" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 12144, 368 )
+
+[node name="HazardLarge34" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 12608, 800 )
+
+[node name="HazardLarge41" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 12544, 784 )
+
+[node name="HazardLarge35" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 12704, 800 )
+
+[node name="HazardLarge36" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 12832, 800 )
+
+[node name="HazardLarge37" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 13008, 800 )
+
+[node name="HazardLarge38" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 13216, 800 )
+
+[node name="HazardLarge39" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 13360, 800 )
+
+[node name="HazardLarge40" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 13505, 800 )
+
+[node name="HazardLarge27" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 12144, 176 )
+
+[node name="HazardLarge30" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 12528, 336 )
+
+[node name="HazardLarge31" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 12528, 272 )
+
+[node name="HazardLarge32" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 12528, 208 )
+
+[node name="HazardLarge29" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 12144, 112 )
+
+[node name="HazardLarge28" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 12144, 432 )
+
+[node name="HazardLarge24" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 10048, 192 )
+
+[node name="Scores" type="Node2D" parent="."]
+z_index = 1
+
+[node name="Checkpoints" type="Node" parent="."]
+editor/display_folded = true
+
+[node name="Checkpoint" parent="Checkpoints" instance=ExtResource( 6 )]
+position = Vector2( 976, -64 )
+
+[node name="Checkpoint2" parent="Checkpoints" instance=ExtResource( 6 )]
+position = Vector2( 1792, -64 )
+
+[node name="Checkpoint3" parent="Checkpoints" instance=ExtResource( 6 )]
+position = Vector2( 3312, -160 )
+
+[node name="Checkpoint4" parent="Checkpoints" instance=ExtResource( 6 )]
+position = Vector2( 5504, -176 )
+
+[node name="Checkpoint5" parent="Checkpoints" instance=ExtResource( 6 )]
+position = Vector2( 7696, 0 )
+
+[node name="Checkpoint7" parent="Checkpoints" instance=ExtResource( 6 )]
+position = Vector2( 10416, 304 )
+
+[node name="Checkpoint8" parent="Checkpoints" instance=ExtResource( 6 )]
+position = Vector2( 14128, 544 )
+
+[node name="Checkpoint6" parent="Checkpoints" instance=ExtResource( 6 )]
+position = Vector2( 8144, 704 )
+
+[node name="Foreground" type="Node2D" parent="."]
+editor/display_folded = true
+z_index = 10
+
+[node name="Snow" parent="Foreground" instance=ExtResource( 7 )]
+
+[node name="Background" type="Node2D" parent="."]
+editor/display_folded = true
+z_index = -10
+
+[node name="Snow" parent="Background" instance=ExtResource( 7 )]
+[connection signal="death" from="Player" to="PixelCamera" method="_on_player_death"]
+[connection signal="spawn" from="Player" to="PixelCamera" method="_on_player_spawn"]

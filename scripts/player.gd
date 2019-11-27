@@ -5,6 +5,11 @@ const Hazard := preload("res://scripts/hazard.gd")
 const Score := preload("res://scripts/score.gd")
 
 # Things that need to be done:
+# * Jump particles
+# * Make wall jumps feel better when walking (some delay after letting go when
+#   tapping arrows?)
+# * Faster dash with less levitation.
+# * Double tap arrows to enter skate, tap arrows to boost.
 # * Fix snow falling particles.
 # * Fix buggy movement over slopes with player. (Not sticking to slopes)
 # * Bug: facing direction needs to be flipped around only once the
