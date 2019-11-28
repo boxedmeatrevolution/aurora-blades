@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://entities/ui/pixel_camera.tscn" type="PackedScene" id=1]
 [ext_resource path="res://entities/ui/dialogue.tscn" type="PackedScene" id=2]
@@ -11,6 +11,9 @@
 [ext_resource path="res://entities/coin_large.tscn" type="PackedScene" id=9]
 [ext_resource path="res://entities/checkpoint.tscn" type="PackedScene" id=10]
 [ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=11]
+[ext_resource path="res://backgrounds/sky_day.png" type="Texture" id=12]
+[ext_resource path="res://backgrounds/clouds_day.png" type="Texture" id=13]
+[ext_resource path="res://backgrounds/buildings_day.png" type="Texture" id=14]
 
 [sub_resource type="TileSet" id=1]
 0/name = "winter.png 0"
@@ -431,8 +434,34 @@ z_index = 10
 [node name="Snow" parent="Foreground" instance=ExtResource( 11 )]
 
 [node name="Background" type="Node2D" parent="."]
-editor/display_folded = true
 z_index = -10
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="Background"]
+
+[node name="Sky" type="ParallaxLayer" parent="Background/ParallaxBackground"]
+motion_scale = Vector2( 0, 0 )
+
+[node name="Sprite" type="Sprite" parent="Background/ParallaxBackground/Sky"]
+texture = ExtResource( 12 )
+region_rect = Rect2( 0, 0, 960, 540 )
+
+[node name="Clouds" type="ParallaxLayer" parent="Background/ParallaxBackground"]
+motion_scale = Vector2( 0.2, 0 )
+motion_mirroring = Vector2( 1920, 0 )
+
+[node name="Sprite" type="Sprite" parent="Background/ParallaxBackground/Clouds"]
+texture = ExtResource( 13 )
+region_enabled = true
+region_rect = Rect2( 0, 0, 1920, 540 )
+
+[node name="Buildings" type="ParallaxLayer" parent="Background/ParallaxBackground"]
+motion_scale = Vector2( 0.5, 0 )
+motion_mirroring = Vector2( 1920, 0 )
+
+[node name="Sprite" type="Sprite" parent="Background/ParallaxBackground/Buildings"]
+texture = ExtResource( 14 )
+region_enabled = true
+region_rect = Rect2( 0, 0, 1920, 540 )
 
 [node name="Snow" parent="Background" instance=ExtResource( 11 )]
 [connection signal="dialogue_end" from="Dialogue" to="PixelCamera" method="_on_dialogue_end"]

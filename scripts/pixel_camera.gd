@@ -32,7 +32,7 @@ func _ready() -> void:
 	self.get_tree().connect("screen_resized", self, "_screen_resized")
 	self.viewport.set_attach_to_screen_rect(self.viewport.get_visible_rect())
 	_screen_resized()
-	get_tree().set_debug_collisions_hint(true)
+	#get_tree().set_debug_collisions_hint(true)
 	var drag_region := _get_viewport_rect_centered()
 	drag_region.position *= DEFAULT_DRAG_MARGINS
 	drag_region.size *= DEFAULT_DRAG_MARGINS

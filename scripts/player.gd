@@ -5,7 +5,11 @@ const Hazard := preload("res://scripts/hazard.gd")
 const Score := preload("res://scripts/score.gd")
 
 # Things that need to be done:
+# * Allow "late jumps".
 # * Jump particles
+# * Bug when pressing R to respawn while already dead.
+# * Bug when camera follows respawn star (should be configured to update on
+#   normal steps in that case)
 # * Make wall jumps feel better when walking (some delay after letting go when
 #   tapping arrows?)
 # * Faster dash with less levitation.
