@@ -39,7 +39,7 @@ func _ready():
 	self.active = false
 	self.box.visible = false
 
-func _play(index : int) -> void:
+func play(index : int) -> void:
 	var speech_generator := self.speech_generators[index] as GDScript
 	self.current_speech = null
 	if speech_generator != null:
@@ -91,4 +91,4 @@ func _process(delta):
 			self.line_finished = true
 	else:
 		if Input.is_action_just_pressed("ui_focus_next"):
-			_play(0)
+			play(0)

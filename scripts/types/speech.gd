@@ -15,7 +15,7 @@ class Line:
 		self.actor = actor
 		self.speech = speech
 
-var PLAYER := Actor.new("Player", preload("res://sprites/portrait_player.png"))
-var BADDIE := Actor.new("Baddie", preload("res://sprites/portrait_player.png"))
+var PLAYER := Actor.new("Player", preload("res://sprites/ui/portrait_player.png"))
+var BADDIE := Actor.new("Baddie", preload("res://sprites/ui/portrait_player.png"))
 
 export var lines := []

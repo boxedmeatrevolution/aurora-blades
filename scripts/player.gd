@@ -140,6 +140,7 @@ class CollisionInfo:
 	func has_collision() -> bool:
 		return self.floor_collision || self.slope_collision || self.wall_collision || self.ceiling_collision
 
+signal score(score_delta)
 signal death(player, respawn_player)
 signal spawn(player)
 
@@ -298,7 +299,6 @@ const DIVE_MIN_IMPULSE_FRACTION := 0.1
 const DIVE_CHECK_DISTANCE := 16.0
 
 # Variables that are persistent between deaths.
-var points := 0
 var checkpoint : Checkpoint = null
 var respawn_position := self.position
 var in_dialogue := false
@@ -603,7 +603,7 @@ func death() -> void:
 	var layer_index := 0
 	for score_obj in self.score_list:
 		var score := score_obj as Score
-		self.points -= score.points
+		emit_signal("score", -score.points)
 		var respawn_score = Scenes.Respawn.instance()
 		respawn_score.init(score, score.global_position, false)
 		respawn_score.add_child(score.sprite.duplicate())
@@ -642,7 +642,7 @@ func _ready() -> void:
 func _on_score_pickup(area2d : Area2D) -> void:
 	var score := area2d as Score
 	if score != null:
-		self.points += score.points
+		emit_signal("score", score.points)
 		score.death()
 		self.score_list.append(score)
 
