@@ -143,6 +143,7 @@ class CollisionInfo:
 signal score(score_delta)
 signal death(player, respawn_player)
 signal spawn(player)
+signal win()
 
 const FLOOR_ANGLE := 5.0 * PI / 180.0
 const SLOPE_ANGLE := 85.0 * PI / 180.0
@@ -302,6 +303,7 @@ const DIVE_CHECK_DISTANCE := 16.0
 var checkpoint : Checkpoint = null
 var respawn_position := self.position
 var in_dialogue := false
+var win := false
 
 var dying := false
 var dead := false
@@ -348,6 +350,7 @@ var score_list := []
 
 onready var score_area2d := $ScoreArea2D
 onready var checkpoint_area2d := $CheckpointArea2D
+onready var win_area2d := $WinArea2D
 onready var hazard_area2d := $HazardArea2D
 
 onready var sprite := $Sprite
@@ -564,6 +567,7 @@ func _reset() -> void:
 	
 	self.score_area2d.get_child(0).disabled = false
 	self.checkpoint_area2d.get_child(0).disabled = false
+	self.win_area2d.get_child(0).disabled = false
 	self.hazard_area2d.get_child(0).disabled = false
 	
 	self.sprite.visible = true
@@ -594,6 +598,7 @@ func death() -> void:
 	
 	self.score_area2d.get_child(0).disabled = true
 	self.checkpoint_area2d.get_child(0).disabled = true
+	self.win_area2d.get_child(0).disabled = true
 	self.hazard_area2d.get_child(0).disabled = true
 	
 	self.death_burst_effect.burst()
@@ -636,6 +641,7 @@ func _ready() -> void:
 	self.ballistic_effect_sprite.visible = false
 	self.score_area2d.connect("area_entered", self, "_on_score_pickup")
 	self.checkpoint_area2d.connect("area_entered", self, "_on_checkpoint_activate")
+	self.win_area2d.connect("area_entered", self, "_on_win")
 	self.hazard_area2d.connect("area_entered", self, "_on_hazard_collision")
 	spawn()
 
@@ -657,6 +663,17 @@ func _on_checkpoint_activate(area2d : Area2D) -> void:
 		for score in self.score_list:
 			score.queue_free()
 		self.score_list.clear()
+
+func _on_win(win2d : Area2D) -> void:
+	if _is_ground_physics_state(self.physics_state):
+		self.respawn_position = self.global_position
+		for score in self.score_list:
+			score.queue_free()
+		var old_state = self.state
+		self.state = _get_default_normal_state(Intent.new())
+		_handle_state_transition(old_state)
+		self.win = true
+		emit_signal("win")
 
 func _on_hazard_collision(area2d : Area2D) -> void:
 	var hazard := area2d as Hazard
@@ -696,7 +713,7 @@ func _physics_process(delta : float) -> void:
 	self.previous_skate_direction = self.skate_direction
 
 func _read_move_direction() -> Vector2:
-	if self.in_dialogue:
+	if self.in_dialogue || self.win:
 		return Vector2.ZERO
 	var move_direction := Vector2.ZERO
 	if Input.is_action_pressed("move_left"):
@@ -710,7 +727,7 @@ func _read_move_direction() -> Vector2:
 	return move_direction
 
 func _read_intent(move_direction : Vector2) -> Intent:
-	if self.in_dialogue:
+	if self.in_dialogue || self.win:
 		return Intent.new()
 	var intent := Intent.new()
 	intent.move_direction = move_direction

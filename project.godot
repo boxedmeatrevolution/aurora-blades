@@ -120,6 +120,7 @@ restart={
 2d_physics/layer_3="Hazard"
 2d_physics/layer_4="Score"
 2d_physics/layer_5="Checkpoint"
+2d_physics/layer_6="Win"
 
 [rendering]
 
