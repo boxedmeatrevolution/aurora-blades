@@ -1,16 +1,10 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://scripts/ui.gd" type="Script" id=1]
 [ext_resource path="res://styles/ui_back.tres" type="StyleBox" id=2]
 [ext_resource path="res://sprites/ui/score.png" type="Texture" id=3]
-[ext_resource path="res://fonts/press_start_2p.ttf" type="DynamicFontData" id=4]
+[ext_resource path="res://fonts/content.tres" type="DynamicFont" id=4]
 [ext_resource path="res://sprites/ui/time.png" type="Texture" id=5]
-
-[sub_resource type="DynamicFont" id=1]
-font_data = ExtResource( 4 )
-
-[sub_resource type="DynamicFont" id=2]
-font_data = ExtResource( 4 )
 
 [node name="UI" type="CanvasLayer"]
 script = ExtResource( 1 )
@@ -28,60 +22,48 @@ custom_constants/margin_bottom = 16
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer"]
 margin_left = 16.0
 margin_top = 16.0
-margin_right = 146.0
-margin_bottom = 98.0
+margin_right = 138.0
+margin_bottom = 90.0
 size_flags_horizontal = 9
 size_flags_vertical = 9
 custom_styles/panel = ExtResource( 2 )
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/PanelContainer"]
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/PanelContainer"]
 margin_left = 1.0
 margin_top = 1.0
-margin_right = 129.0
-margin_bottom = 81.0
-size_flags_horizontal = 9
-size_flags_vertical = 9
-custom_constants/margin_right = 4
-custom_constants/margin_top = 4
-custom_constants/margin_left = 4
-custom_constants/margin_bottom = 4
-
-[node name="GridContainer" type="GridContainer" parent="MarginContainer/PanelContainer/MarginContainer"]
-margin_left = 4.0
-margin_top = 4.0
-margin_right = 124.0
-margin_bottom = 76.0
+margin_right = 121.0
+margin_bottom = 73.0
 size_flags_horizontal = 9
 size_flags_vertical = 9
 custom_constants/vseparation = 8
 custom_constants/hseparation = 8
 columns = 2
 
-[node name="ScoreSprite" type="TextureRect" parent="MarginContainer/PanelContainer/MarginContainer/GridContainer"]
+[node name="ScoreSprite" type="TextureRect" parent="MarginContainer/PanelContainer/GridContainer"]
 margin_right = 32.0
 margin_bottom = 32.0
 texture = ExtResource( 3 )
 
-[node name="ScoreText" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/GridContainer"]
+[node name="ScoreText" type="Label" parent="MarginContainer/PanelContainer/GridContainer"]
 margin_left = 40.0
 margin_top = 8.0
 margin_right = 120.0
 margin_bottom = 24.0
-custom_fonts/font = SubResource( 1 )
+custom_fonts/font = ExtResource( 4 )
 text = "0"
 
-[node name="TimeSprite" type="TextureRect" parent="MarginContainer/PanelContainer/MarginContainer/GridContainer"]
+[node name="TimeSprite" type="TextureRect" parent="MarginContainer/PanelContainer/GridContainer"]
 margin_top = 40.0
 margin_right = 32.0
 margin_bottom = 72.0
 texture = ExtResource( 5 )
 
-[node name="TimeText" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/GridContainer"]
+[node name="TimeText" type="Label" parent="MarginContainer/PanelContainer/GridContainer"]
 margin_left = 40.0
 margin_top = 48.0
 margin_right = 120.0
 margin_bottom = 64.0
-custom_fonts/font = SubResource( 2 )
+custom_fonts/font = ExtResource( 4 )
 text = "00:00"
 
 [node name="Timer" type="Timer" parent="."]

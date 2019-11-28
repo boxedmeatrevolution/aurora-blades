@@ -5,8 +5,8 @@ var seconds := 0
 var minutes := 0
 var deaths := 0
 
-onready var score_text := $MarginContainer/PanelContainer/MarginContainer/GridContainer/ScoreText
-onready var time_text := $MarginContainer/PanelContainer/MarginContainer/GridContainer/TimeText
+onready var score_text := $MarginContainer/PanelContainer/GridContainer/ScoreText
+onready var time_text := $MarginContainer/PanelContainer/GridContainer/TimeText
 
 func update_score(score_delta : float) -> void:
 	self.score += score_delta

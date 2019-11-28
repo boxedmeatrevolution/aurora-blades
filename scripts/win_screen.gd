@@ -11,10 +11,10 @@ export var power := 2.0
 export var next_scene : PackedScene = null
 
 onready var box := $CenterContainer
-onready var score_text := $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/CenterContainer/GridContainer/ScoreText
-onready var time_text := $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/CenterContainer/GridContainer/TimeText
-onready var death_text := $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/CenterContainer/GridContainer/DeathText
-onready var grade_text := $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/GradeText
+onready var score_text := $CenterContainer/PanelContainer/VBoxContainer/CenterContainer/GridContainer/ScoreText
+onready var time_text := $CenterContainer/PanelContainer/VBoxContainer/CenterContainer/GridContainer/TimeText
+onready var death_text := $CenterContainer/PanelContainer/VBoxContainer/CenterContainer/GridContainer/DeathText
+onready var grade_text := $CenterContainer/PanelContainer/VBoxContainer/GradeText
 
 var continue_timer := 0.0
 
