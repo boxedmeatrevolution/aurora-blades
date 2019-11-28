@@ -17,8 +17,8 @@ radial_accel = 400.0
 radial_accel_random = 0.5
 angle = 360.0
 angle_random = 1.0
-color = Color( 0, 0.623529, 1, 1 )
-hue_variation = 0.05
+color = Color( 0, 0.529412, 1, 1 )
+hue_variation = 0.04
 hue_variation_random = 1.0
 
 [node name="SkateTrail" type="Node2D"]

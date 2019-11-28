@@ -358,6 +358,8 @@ onready var skate_trail_effect_a := $SkateA/SkateTrail
 onready var skate_trail_effect_b := $SkateB/SkateTrail
 onready var dive_trail_effect_a := $SkateA/DiveTrail
 onready var dive_trail_effect_b := $SkateB/DiveTrail
+onready var jump_burst_effect_a := $SkateA/JumpBurst
+onready var jump_burst_effect_b := $SkateB/JumpBurst
 onready var dive_charge_effect := $DiveCharge
 onready var death_burst_effect := $DeathBurst
 
@@ -1497,6 +1499,10 @@ func _effects_process() -> void:
 	else:
 		self.skate_brake_effect_a.set_emitting(false)
 		self.skate_brake_effect_b.set_emitting(false)
+	
+	if _is_prejump_state(self.state) && _is_skate_state(self.state):
+		self.jump_burst_effect_a.burst()
+		self.jump_burst_effect_b.burst()
 	
 	var skate_trail := false
 	var dive_trail := false

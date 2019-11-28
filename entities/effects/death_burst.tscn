@@ -3,26 +3,27 @@
 [ext_resource path="res://scripts/death_burst.gd" type="Script" id=1]
 [ext_resource path="res://sprites/effects/skate_trail.png" type="Texture" id=2]
 
-[sub_resource type="Gradient" id=6]
+[sub_resource type="Gradient" id=1]
 offsets = PoolRealArray( 0, 0.791429, 1 )
-colors = PoolColorArray( 0.00755668, 0.465011, 1, 1, 0.5466, 0.946867, 1, 1, 0, 0.415686, 1, 0 )
+colors = PoolColorArray( 0.00755668, 0.465011, 1, 1, 0.420655, 0.728432, 1, 1, 0, 0.415686, 1, 0 )
 
-[sub_resource type="GradientTexture" id=7]
-gradient = SubResource( 6 )
+[sub_resource type="GradientTexture" id=2]
+gradient = SubResource( 1 )
 
-[sub_resource type="ParticlesMaterial" id=5]
+[sub_resource type="ParticlesMaterial" id=3]
 flag_disable_z = true
 spread = 180.0
 gravity = Vector3( 0, 0, 0 )
 initial_velocity = 800.0
 initial_velocity_random = 0.4
+angular_velocity = 1.4013e-45
 orbit_velocity = 0.0
 orbit_velocity_random = 0.0
 damping = 2000.0
 angle = 360.0
 angle_random = 1.0
 scale = 2.0
-color_ramp = SubResource( 7 )
+color_ramp = SubResource( 2 )
 
 [node name="DeathBurst" type="Node2D"]
 script = ExtResource( 1 )
@@ -37,5 +38,5 @@ lifetime = 0.3
 one_shot = true
 explosiveness = 0.8
 local_coords = false
-process_material = SubResource( 5 )
+process_material = SubResource( 3 )
 texture = ExtResource( 2 )
