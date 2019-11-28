@@ -415,8 +415,9 @@ position = Vector2( -320.006, -149.307 )
 [node name="CoinLarge3" parent="Scores" instance=ExtResource( 9 )]
 position = Vector2( -719.713, -88.2097 )
 
-[node name="Checkpoints" type="Node" parent="."]
+[node name="Checkpoints" type="Node2D" parent="."]
 editor/display_folded = true
+z_index = -1
 
 [node name="Checkpoint" parent="Checkpoints" instance=ExtResource( 10 )]
 position = Vector2( 480, -128 )
@@ -430,13 +431,23 @@ position = Vector2( -800, -80 )
 [node name="Foreground" type="Node2D" parent="."]
 editor/display_folded = true
 z_index = 10
+__meta__ = {
+"_edit_group_": true,
+"_edit_lock_": true
+}
 
 [node name="Snow" parent="Foreground" instance=ExtResource( 11 )]
 
 [node name="Background" type="Node2D" parent="."]
+editor/display_folded = true
 z_index = -10
+__meta__ = {
+"_edit_group_": true,
+"_edit_lock_": true
+}
 
 [node name="ParallaxBackground" type="ParallaxBackground" parent="Background"]
+editor/display_folded = true
 
 [node name="Sky" type="ParallaxLayer" parent="Background/ParallaxBackground"]
 motion_scale = Vector2( 0, 0 )
@@ -455,7 +466,7 @@ region_enabled = true
 region_rect = Rect2( 0, 0, 1920, 540 )
 
 [node name="Buildings" type="ParallaxLayer" parent="Background/ParallaxBackground"]
-motion_scale = Vector2( 0.5, 0 )
+motion_scale = Vector2( 0.4, 0 )
 motion_mirroring = Vector2( 1920, 0 )
 
 [node name="Sprite" type="Sprite" parent="Background/ParallaxBackground/Buildings"]
@@ -464,9 +475,9 @@ region_enabled = true
 region_rect = Rect2( 0, 0, 1920, 540 )
 
 [node name="Snow" parent="Background" instance=ExtResource( 11 )]
-[connection signal="dialogue_end" from="Dialogue" to="Player" method="_on_dialogue_end"]
 [connection signal="dialogue_end" from="Dialogue" to="PixelCamera" method="_on_dialogue_end"]
-[connection signal="dialogue_start" from="Dialogue" to="Player" method="_on_dialogue_start"]
+[connection signal="dialogue_end" from="Dialogue" to="Player" method="_on_dialogue_end"]
 [connection signal="dialogue_start" from="Dialogue" to="PixelCamera" method="_on_dialogue_start"]
+[connection signal="dialogue_start" from="Dialogue" to="Player" method="_on_dialogue_start"]
 [connection signal="death" from="Player" to="PixelCamera" method="_on_player_death"]
 [connection signal="spawn" from="Player" to="PixelCamera" method="_on_player_spawn"]

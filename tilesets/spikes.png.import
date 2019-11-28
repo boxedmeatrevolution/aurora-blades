@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/clouds_night.png-cae23d2b996b27112d7150cf7911be76.stex"
+path="res://.import/spikes.png-f73d4acfe57b959ab754e6ecefa9b4fc.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://backgrounds/clouds_night.png"
-dest_files=[ "res://.import/clouds_night.png-cae23d2b996b27112d7150cf7911be76.stex" ]
+source_file="res://tilesets/spikes.png"
+dest_files=[ "res://.import/spikes.png-f73d4acfe57b959ab754e6ecefa9b4fc.stex" ]
 
 [params]
 
@@ -19,7 +19,7 @@ compress/lossy_quality=0.7
 compress/hdr_mode=0
 compress/bptc_ldr=0
 compress/normal_map=0
-flags/repeat=1
+flags/repeat=0
 flags/filter=false
 flags/mipmaps=false
 flags/anisotropic=false

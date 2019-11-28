@@ -7,6 +7,8 @@ const Score := preload("res://scripts/score.gd")
 # Things that need to be done:
 # * Allow "late jumps".
 # * Jump particles
+# * Bug when player dashes into ground (should get only the final velocity of
+#   the dash, not the instantaneous velocity).
 # * Bug when pressing R to respawn while already dead.
 # * Bug when camera follows respawn star (should be configured to update on
 #   normal steps in that case)

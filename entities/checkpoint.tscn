@@ -4,12 +4,11 @@
 [ext_resource path="res://sprites/checkpoint.png" type="Texture" id=2]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 16, 32 )
+extents = Vector2( 32, 64 )
 
-[sub_resource type="Animation" id=3]
+[sub_resource type="Animation" id=2]
 resource_name = "CheckpointActive"
-length = 0.6
-loop = true
+length = 1.2
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
 tracks/0/interp = 1
@@ -17,14 +16,13 @@ tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 0.2, 0.4 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ),
 "update": 1,
-"values": [ 1, 2, 3 ]
+"values": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ]
 }
 
-[sub_resource type="Animation" id=2]
-resource_name = "CheckpointInactive"
+[sub_resource type="Animation" id=3]
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath(".:frame")
@@ -49,16 +47,15 @@ __meta__ = {
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
-position = Vector2( 0, -32 )
+position = Vector2( 0, -64 )
 shape = SubResource( 1 )
 
 [node name="Sprite" type="Sprite" parent="."]
 editor/display_folded = true
-position = Vector2( 0, -32 )
+position = Vector2( 0, -64 )
 texture = ExtResource( 2 )
-hframes = 4
-frame = 3
+hframes = 12
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Sprite"]
-anims/CheckpointActive = SubResource( 3 )
-anims/CheckpointInactive = SubResource( 2 )
+anims/CheckpointActive = SubResource( 2 )
+anims/CheckpointInactive = SubResource( 3 )
