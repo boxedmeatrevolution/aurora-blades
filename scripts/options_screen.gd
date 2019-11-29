@@ -9,6 +9,10 @@ onready var dive_button := $CenterContainer/PanelContainer/VBoxContainer/GridCon
 var current_action := ""
 
 func _ready() -> void:
+	_update_sound_button()
+	_update_rebind_button("jump")
+	_update_rebind_button("skate")
+	_update_rebind_button("dive")
 	self.box.visible = false
 
 func _process(delta) -> void:
@@ -16,12 +20,23 @@ func _process(delta) -> void:
 		if Input.is_action_just_pressed("ui_options"):
 			self.box.visible = true
 
+func _update_sound_button() -> void:
+	var mute : bool = AudioServer.is_bus_mute(AudioServer.get_bus_index("Master"))
+	self.sound_button.text = "off" if mute else "on"
+
 func _pressed_sound_button() -> void:
 	if self.current_action == "":
 		var mute : bool = AudioServer.is_bus_mute(AudioServer.get_bus_index("Master"))
 		mute = !mute
 		AudioServer.set_bus_mute(AudioServer.get_bus_index("Master"), mute)
-		self.sound_button.text = "off" if mute else "on"
+		_update_sound_button()
+
+func _update_rebind_button(action : String) -> void:
+	for event in InputMap.get_action_list(action):
+		var key_event := event as InputEventKey
+		if key_event != null:
+			_get_button(action).text = OS.get_scancode_string(key_event.scancode)
+			break
 
 func _pressed_rebind_button(action : String) -> void:
 	if self.current_action == "":
@@ -47,8 +62,8 @@ func _input(event : InputEvent) -> void:
 			if old_key_event != null:
 				old_key_event.unicode = key_event.unicode
 				old_key_event.scancode = key_event.scancode
-				_get_button(self.current_action).text = OS.get_scancode_string(key_event.scancode)
 				break
+		_update_rebind_button(self.current_action)
 		self.current_action = ""
 
 func _get_button(action : String) -> Button:
