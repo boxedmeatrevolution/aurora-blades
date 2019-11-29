@@ -6,11 +6,12 @@ const Score := preload("res://scripts/score.gd")
 
 # Things that need to be done:
 
+# * Flip player sprite around when charging a dash for backwards.
+# * Make respawning happen faster.
 # * Allow "late jumps".
 # * Jump particles
 # * Bug when player dashes into ground (should get only the final velocity of
 #   the dash, not the instantaneous velocity).
-# * Bug when pressing R to respawn while already dead.
 # * Make wall jumps feel better when walking (some delay after letting go when
 #   tapping arrows?)
 # * Faster dash with less levitation.

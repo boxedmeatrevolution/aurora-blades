@@ -203,7 +203,7 @@
 11/shapes = [  ]
 11/z_index = 0
 
-[node name="TestLevel" type="Node"]
+[node name="Level1" type="Node"]
 
 [node name="PixelCamera" parent="." instance=ExtResource( 1 )]
 
@@ -312,7 +312,6 @@ position = Vector2( 432, -48 )
 polygon = PoolVector2Array( 13024, 640, 13024, 672, 13040, 688, 13088, 688, 13104, 672, 13104, 640 )
 
 [node name="Hazards" type="Node" parent="."]
-editor/display_folded = true
 
 [node name="HazardSmall" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 1136, -80 )

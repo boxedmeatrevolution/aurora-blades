@@ -203,7 +203,7 @@
 11/shapes = [  ]
 11/z_index = 0
 
-[node name="TestLevel" type="Node"]
+[node name="Level2" type="Node"]
 
 [node name="PixelCamera" parent="." instance=ExtResource( 1 )]
 
