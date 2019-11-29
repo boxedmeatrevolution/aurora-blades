@@ -1,12 +1,13 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://entities/ui/pixel_camera.tscn" type="PackedScene" id=1]
 [ext_resource path="res://tilesets/winter.png" type="Texture" id=2]
 [ext_resource path="res://entities/player.tscn" type="PackedScene" id=3]
 [ext_resource path="res://entities/hazard_small.tscn" type="PackedScene" id=4]
 [ext_resource path="res://entities/hazard_large.tscn" type="PackedScene" id=5]
-[ext_resource path="res://entities/checkpoint.tscn" type="PackedScene" id=6]
-[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=7]
+[ext_resource path="res://entities/hazard.tscn" type="PackedScene" id=6]
+[ext_resource path="res://entities/checkpoint.tscn" type="PackedScene" id=7]
+[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=8]
 
 [sub_resource type="TileSet" id=1]
 0/name = "winter.png 0"
@@ -319,57 +320,6 @@ position = Vector2( 1136, -80 )
 [node name="HazardSmall2" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 1264, -80 )
 
-[node name="HazardSmall3" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 1440, -16 )
-
-[node name="HazardSmall4" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 1584, -16 )
-
-[node name="HazardSmall6" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 3568, -144 )
-
-[node name="HazardSmall7" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 3600, -144 )
-
-[node name="HazardSmall8" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 3632, -144 )
-
-[node name="HazardSmall9" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 3952, -144 )
-
-[node name="HazardSmall10" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 3984, -144 )
-
-[node name="HazardSmall14" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 6192, 80 )
-
-[node name="HazardSmall15" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 6288, 80 )
-
-[node name="HazardSmall16" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 6320, 80 )
-
-[node name="HazardSmall17" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 6864, 176 )
-
-[node name="HazardSmall18" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 6896, 176 )
-
-[node name="HazardSmall19" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7088, 176 )
-
-[node name="HazardSmall76" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7072, 144 )
-
-[node name="HazardSmall77" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7136, 144 )
-
-[node name="HazardSmall20" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7120, 176 )
-
-[node name="HazardSmall21" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7232, 176 )
-
 [node name="HazardSmall23" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 8016, 464 )
 
@@ -384,33 +334,6 @@ position = Vector2( 7600, 448 )
 
 [node name="HazardSmall25" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 7712, 464 )
-
-[node name="HazardSmall27" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7296, 720 )
-
-[node name="HazardSmall28" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7328, 736 )
-
-[node name="HazardSmall29" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7360, 704 )
-
-[node name="HazardSmall30" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7392, 752 )
-
-[node name="HazardSmall31" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7504, 736 )
-
-[node name="HazardSmall40" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 9456, 736 )
-
-[node name="HazardSmall41" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 9488, 768 )
-
-[node name="HazardSmall78" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 9584, 704 )
-
-[node name="HazardSmall42" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 9600, 672 )
 
 [node name="HazardSmall44" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 9504, 288 )
@@ -448,30 +371,6 @@ position = Vector2( 12128, 320 )
 [node name="HazardSmall83" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 12544, 528 )
 
-[node name="HazardSmall90" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 12656, 816 )
-
-[node name="HazardSmall91" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 12752, 816 )
-
-[node name="HazardSmall92" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 12784, 784 )
-
-[node name="HazardSmall93" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 12880, 784 )
-
-[node name="HazardSmall94" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 12912, 800 )
-
-[node name="HazardSmall95" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 12944, 816 )
-
-[node name="HazardSmall96" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 12960, 784 )
-
-[node name="HazardSmall97" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 13056, 768 )
-
 [node name="HazardSmall110" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 12944, 656 )
 
@@ -489,42 +388,6 @@ position = Vector2( 13568, 608 )
 
 [node name="HazardSmall115" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 13664, 464 )
-
-[node name="HazardSmall98" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 13088, 784 )
-
-[node name="HazardSmall99" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 13120, 816 )
-
-[node name="HazardSmall100" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 13152, 800 )
-
-[node name="HazardSmall101" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 13168, 768 )
-
-[node name="HazardSmall102" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 13264, 784 )
-
-[node name="HazardSmall103" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 13296, 800 )
-
-[node name="HazardSmall104" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 13312, 768 )
-
-[node name="HazardSmall105" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 13408, 816 )
-
-[node name="HazardSmall106" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 13440, 816 )
-
-[node name="HazardSmall107" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 13456, 784 )
-
-[node name="HazardSmall108" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 13552, 816 )
-
-[node name="HazardSmall109" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 13552, 784 )
 
 [node name="HazardSmall88" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 12640, 640 )
@@ -613,92 +476,8 @@ position = Vector2( 8608, 320 )
 [node name="HazardSmall74" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 8640, 336 )
 
-[node name="HazardSmall43" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 9200, 784 )
-
-[node name="HazardSmall79" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 9184, 752 )
-
-[node name="HazardSmall32" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7536, 752 )
-
-[node name="HazardSmall33" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7568, 784 )
-
-[node name="HazardSmall34" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7680, 816 )
-
-[node name="HazardSmall35" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7712, 784 )
-
-[node name="HazardSmall36" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7744, 800 )
-
-[node name="HazardSmall37" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7872, 800 )
-
-[node name="HazardSmall38" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7904, 816 )
-
-[node name="HazardSmall39" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7936, 832 )
-
-[node name="HazardSmall22" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 7264, 144 )
-
-[node name="HazardSmall11" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 4016, -144 )
-
-[node name="HazardSmall12" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 4048, -144 )
-
-[node name="HazardSmall13" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 4080, -144 )
-
-[node name="HazardSmall5" parent="Hazards" instance=ExtResource( 4 )]
-position = Vector2( 1536, -16 )
-
-[node name="HazardLarge" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 1488, -32 )
-
-[node name="HazardLarge2" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 5280, -112 )
-
-[node name="HazardLarge3" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 6144, 64 )
-
-[node name="HazardLarge4" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 6240, 64 )
-
-[node name="HazardLarge5" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 6368, 64 )
-
-[node name="HazardLarge6" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 6816, 160 )
-
-[node name="HazardLarge7" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 6944, 160 )
-
-[node name="HazardLarge8" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 7184, 160 )
-
-[node name="HazardLarge10" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 7024, 160 )
-
-[node name="HazardLarge9" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 7312, 160 )
-
 [node name="HazardLarge11" parent="Hazards" instance=ExtResource( 5 )]
 position = Vector2( 7648, 448 )
-
-[node name="HazardLarge12" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 9136, 784 )
-
-[node name="HazardLarge13" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 9248, 832 )
-
-[node name="HazardLarge14" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 9536, 720 )
 
 [node name="HazardLarge15" parent="Hazards" instance=ExtResource( 5 )]
 position = Vector2( 8560, 320 )
@@ -730,30 +509,6 @@ position = Vector2( 9936, 242 )
 [node name="HazardLarge25" parent="Hazards" instance=ExtResource( 5 )]
 position = Vector2( 12144, 368 )
 
-[node name="HazardLarge34" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 12608, 800 )
-
-[node name="HazardLarge41" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 12544, 784 )
-
-[node name="HazardLarge35" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 12704, 800 )
-
-[node name="HazardLarge36" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 12832, 800 )
-
-[node name="HazardLarge37" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 13008, 800 )
-
-[node name="HazardLarge38" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 13216, 800 )
-
-[node name="HazardLarge39" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 13360, 800 )
-
-[node name="HazardLarge40" parent="Hazards" instance=ExtResource( 5 )]
-position = Vector2( 13505, 800 )
-
 [node name="HazardLarge27" parent="Hazards" instance=ExtResource( 5 )]
 position = Vector2( 12144, 176 )
 
@@ -775,46 +530,97 @@ position = Vector2( 12144, 432 )
 [node name="HazardLarge24" parent="Hazards" instance=ExtResource( 5 )]
 position = Vector2( 10048, 192 )
 
+[node name="Hazard" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 1512, -16 )
+scale = Vector2( 11, 2 )
+
+[node name="Hazard2" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 3600, -144 )
+scale = Vector2( 6, 2 )
+
+[node name="Hazard3" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 4016, -144 )
+scale = Vector2( 10, 2 )
+
+[node name="Hazard5" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 6256, 64 )
+scale = Vector2( 18, 4 )
+
+[node name="Hazard6" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 7064, 160 )
+scale = Vector2( 36, 4 )
+
+[node name="Hazard7" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 7344, 736 )
+scale = Vector2( 8, 4 )
+
+[node name="Hazard8" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 7536, 784 )
+scale = Vector2( 6, 4 )
+
+[node name="Hazard9" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 7712, 816 )
+scale = Vector2( 6, 4 )
+
+[node name="Hazard10" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 7904, 816 )
+scale = Vector2( 6, 4 )
+
+[node name="Hazard11" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 9192, 832 )
+scale = Vector2( 11, 4 )
+
+[node name="Hazard12" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 9528, 832 )
+scale = Vector2( 11, 4 )
+
+[node name="HazardLarge" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 5280, -112 )
+
+[node name="Hazard13" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 13048, 800 )
+scale = Vector2( 67, 4 )
+
 [node name="Scores" type="Node2D" parent="."]
 z_index = 1
 
 [node name="Checkpoints" type="Node" parent="."]
 editor/display_folded = true
 
-[node name="Checkpoint" parent="Checkpoints" instance=ExtResource( 6 )]
+[node name="Checkpoint" parent="Checkpoints" instance=ExtResource( 7 )]
 position = Vector2( 976, -64 )
 
-[node name="Checkpoint2" parent="Checkpoints" instance=ExtResource( 6 )]
+[node name="Checkpoint2" parent="Checkpoints" instance=ExtResource( 7 )]
 position = Vector2( 1792, -64 )
 
-[node name="Checkpoint3" parent="Checkpoints" instance=ExtResource( 6 )]
+[node name="Checkpoint3" parent="Checkpoints" instance=ExtResource( 7 )]
 position = Vector2( 3312, -160 )
 
-[node name="Checkpoint4" parent="Checkpoints" instance=ExtResource( 6 )]
+[node name="Checkpoint4" parent="Checkpoints" instance=ExtResource( 7 )]
 position = Vector2( 5504, -176 )
 
-[node name="Checkpoint5" parent="Checkpoints" instance=ExtResource( 6 )]
+[node name="Checkpoint5" parent="Checkpoints" instance=ExtResource( 7 )]
 position = Vector2( 7696, 0 )
 
-[node name="Checkpoint7" parent="Checkpoints" instance=ExtResource( 6 )]
+[node name="Checkpoint7" parent="Checkpoints" instance=ExtResource( 7 )]
 position = Vector2( 10416, 304 )
 
-[node name="Checkpoint8" parent="Checkpoints" instance=ExtResource( 6 )]
+[node name="Checkpoint8" parent="Checkpoints" instance=ExtResource( 7 )]
 position = Vector2( 14128, 544 )
 
-[node name="Checkpoint6" parent="Checkpoints" instance=ExtResource( 6 )]
+[node name="Checkpoint6" parent="Checkpoints" instance=ExtResource( 7 )]
 position = Vector2( 8144, 704 )
 
 [node name="Foreground" type="Node2D" parent="."]
 editor/display_folded = true
 z_index = 10
 
-[node name="Snow" parent="Foreground" instance=ExtResource( 7 )]
+[node name="Snow" parent="Foreground" instance=ExtResource( 8 )]
 
 [node name="Background" type="Node2D" parent="."]
 editor/display_folded = true
 z_index = -10
 
-[node name="Snow" parent="Background" instance=ExtResource( 7 )]
+[node name="Snow" parent="Background" instance=ExtResource( 8 )]
 [connection signal="death" from="Player" to="PixelCamera" method="_on_player_death"]
 [connection signal="spawn" from="Player" to="PixelCamera" method="_on_player_spawn"]

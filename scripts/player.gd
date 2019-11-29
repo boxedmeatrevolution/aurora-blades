@@ -11,8 +11,6 @@ const Score := preload("res://scripts/score.gd")
 # * Bug when player dashes into ground (should get only the final velocity of
 #   the dash, not the instantaneous velocity).
 # * Bug when pressing R to respawn while already dead.
-# * Bug when camera follows respawn star (should be configured to update on
-#   normal steps in that case)
 # * Make wall jumps feel better when walking (some delay after letting go when
 #   tapping arrows?)
 # * Faster dash with less levitation.
@@ -699,7 +697,7 @@ func _physics_process(delta : float) -> void:
 	_effects_process()
 	
 	# Handle death.
-	if self.dying || intent.restart:
+	if !self.dead && (self.dying || intent.restart):
 		death()
 	if self.dead:
 		return

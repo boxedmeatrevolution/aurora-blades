@@ -83,6 +83,8 @@ func _on_dialogue_end():
 
 func _on_player_spawn(player):
 	_set_target(player)
+	self.camera.process_mode = Camera2D.CAMERA2D_PROCESS_PHYSICS
 
 func _on_player_death(player, respawn_player):
 	_set_target(respawn_player)
+	self.camera.process_mode = Camera2D.CAMERA2D_PROCESS_IDLE
