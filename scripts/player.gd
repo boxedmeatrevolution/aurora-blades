@@ -5,6 +5,7 @@ const Hazard := preload("res://scripts/hazard.gd")
 const Score := preload("res://scripts/score.gd")
 
 # Things that need to be done:
+
 # * Allow "late jumps".
 # * Jump particles
 # * Bug when player dashes into ground (should get only the final velocity of

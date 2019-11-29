@@ -16,19 +16,12 @@ onready var time_text := $CenterContainer/PanelContainer/VBoxContainer/CenterCon
 onready var death_text := $CenterContainer/PanelContainer/VBoxContainer/CenterContainer/GridContainer/DeathText
 onready var grade_text := $CenterContainer/PanelContainer/VBoxContainer/GradeText
 
-var continue_timer := 0.0
-
 func _ready() -> void:
 	self.box.visible = false
 
-func _process(delta) -> void:
-	if self.box.visible:
-		if self.continue_timer < 1.0:
-			self.continue_timer += delta
-		else:
-			if Input.is_action_just_pressed("ui_accept") || Input.is_action_just_pressed("ui_select"):
-				if self.next_scene != null:
-					get_tree().change_scene_to(self.next_scene)
+func _continue_pressed() -> void:
+	if self.next_scene != null:
+		get_tree().change_scene_to(self.next_scene)
 
 func activate() -> void:
 	var ui := get_tree().get_root().find_node("UI", true, false) as UI
@@ -47,7 +40,6 @@ func activate() -> void:
 	self.death_text.text = str(deaths)
 	self.grade_text.text = "Grade: %s" % _calculate_grade(score, time, deaths)
 	self.box.visible = true
-	self.continue_timer = 0.0
 
 func _calculate_grade(score : int, time : float, deaths : int) -> String:
 	var score_part := max(log((self.good_score + 1.0) / (score + 1.0)) / log(power), 0.0)
