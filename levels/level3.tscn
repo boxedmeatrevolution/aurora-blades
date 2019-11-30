@@ -252,7 +252,11 @@ polygon = PoolVector2Array( 10288, -752, 10672, -752, 10672, -720, 10640, -688, 
 position = Vector2( 32, 32 )
 polygon = PoolVector2Array( 10512, -512, 10544, -480, 10624, -480, 10656, -512, 10656, -592, 10624, -560, 10592, -544, 10560, -544, 10528, -560, 10512, -576 )
 
+[node name="CollisionPolygon2D11" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 11296, -560, 11520, -560, 11584, -528, 11824, -288, 11888, -256, 12208, -256, 12208, -96, 11296, -96 )
+
 [node name="Hazards" type="Node" parent="."]
+editor/display_folded = true
 
 [node name="HazardLarge" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 3936, -224 )
@@ -453,9 +457,13 @@ position = Vector2( 4416, -240 )
 z_index = 1
 
 [node name="Checkpoints" type="Node" parent="."]
+editor/display_folded = true
 
 [node name="Checkpoint" parent="Checkpoints" instance=ExtResource( 7 )]
 position = Vector2( 6432, -608 )
+
+[node name="Checkpoint2" parent="Checkpoints" instance=ExtResource( 7 )]
+position = Vector2( 11408, -560 )
 
 [node name="Foreground" type="Node2D" parent="."]
 editor/display_folded = true

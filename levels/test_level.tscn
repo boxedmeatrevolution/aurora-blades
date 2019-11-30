@@ -269,6 +269,7 @@ position = Vector2( -320.006, -149.307 )
 position = Vector2( -719.713, -88.2097 )
 
 [node name="Checkpoints" type="Node2D" parent="."]
+editor/display_folded = true
 z_index = -1
 
 [node name="Checkpoint" parent="Checkpoints" instance=ExtResource( 15 )]

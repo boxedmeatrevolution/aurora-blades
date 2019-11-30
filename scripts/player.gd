@@ -6,6 +6,10 @@ const Score := preload("res://scripts/score.gd")
 
 # Things that need to be done:
 
+# * Symbol that pulses at the beat for tutorial.
+# * Ensure player sees dash tip.
+# * Camera behind player.
+# * Remake last part of level 1.
 # * Flip player sprite around when charging a dash for backwards.
 # * Make respawning happen faster.
 # * Allow "late jumps".
