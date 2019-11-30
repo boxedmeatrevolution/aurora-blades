@@ -39,9 +39,6 @@ func _ready() -> void:
 	_set_drag_region(drag_region)
 
 func _process(delta) -> void:
-	# TODO: Note: this is buggy on Wayland (I think).
-	if Input.is_action_just_pressed("ui_fullscreen"):
-		OS.window_fullscreen = !OS.window_fullscreen
 	if is_instance_valid(self.target):
 		var displacement = self.target.global_position - self.global_position
 		if displacement.length() < self.keep_up_speed * delta:

@@ -4,6 +4,7 @@ signal done
 
 onready var box := $CenterContainer
 onready var sound_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/SoundButton
+onready var fullscreen_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/FullscreenButton
 onready var jump_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/JumpButton
 onready var skate_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/SkateButton
 onready var dive_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/DiveButton
@@ -13,6 +14,7 @@ var current_action := ""
 
 func _ready() -> void:
 	_update_sound_button()
+	_update_fullscreen_button()
 	_update_rebind_button("jump")
 	_update_rebind_button("skate")
 	_update_rebind_button("dive")
@@ -22,12 +24,21 @@ func _update_sound_button() -> void:
 	var mute : bool = AudioServer.is_bus_mute(AudioServer.get_bus_index("Master"))
 	self.sound_button.text = "off" if mute else "on"
 
+func _update_fullscreen_button() -> void:
+	var fullscreen := OS.window_fullscreen
+	self.fullscreen_button.text = "off" if !fullscreen else "on"
+
 func _pressed_sound_button() -> void:
 	if self.current_action == "":
 		var mute : bool = AudioServer.is_bus_mute(AudioServer.get_bus_index("Master"))
 		mute = !mute
 		AudioServer.set_bus_mute(AudioServer.get_bus_index("Master"), mute)
 		_update_sound_button()
+
+func _pressed_fullscreen_button() -> void:
+	# TODO: Note: this is buggy on Wayland (I think).
+	OS.window_fullscreen = !OS.window_fullscreen
+	_update_fullscreen_button()
 
 func _update_rebind_button(action : String) -> void:
 	for event in InputMap.get_action_list(action):
