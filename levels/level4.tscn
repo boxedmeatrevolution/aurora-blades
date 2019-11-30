@@ -1,0 +1,480 @@
+[gd_scene load_steps=10 format=2]
+
+[ext_resource path="res://entities/ui/pixel_camera.tscn" type="PackedScene" id=1]
+[ext_resource path="res://tilesets/winter.png" type="Texture" id=2]
+[ext_resource path="res://entities/player.tscn" type="PackedScene" id=3]
+[ext_resource path="res://entities/hazard_large.tscn" type="PackedScene" id=4]
+[ext_resource path="res://entities/hazard.tscn" type="PackedScene" id=5]
+[ext_resource path="res://entities/hazard_small.tscn" type="PackedScene" id=6]
+[ext_resource path="res://entities/checkpoint.tscn" type="PackedScene" id=7]
+[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=8]
+
+[sub_resource type="TileSet" id=1]
+0/name = "winter.png 0"
+0/texture = ExtResource( 2 )
+0/tex_offset = Vector2( 0, 0 )
+0/modulate = Color( 1, 1, 1, 1 )
+0/region = Rect2( 0, 0, 48, 48 )
+0/tile_mode = 2
+0/autotile/icon_coordinate = Vector2( 0, 0 )
+0/autotile/tile_size = Vector2( 16, 16 )
+0/autotile/spacing = 0
+0/autotile/occluder_map = [  ]
+0/autotile/navpoly_map = [  ]
+0/autotile/z_index_map = [  ]
+0/occluder_offset = Vector2( 0, 0 )
+0/navigation_offset = Vector2( 0, 0 )
+0/shapes = [  ]
+0/z_index = 0
+1/name = "winter.png 1"
+1/texture = ExtResource( 2 )
+1/tex_offset = Vector2( 0, 0 )
+1/modulate = Color( 1, 1, 1, 1 )
+1/region = Rect2( 48, 0, 32, 32 )
+1/tile_mode = 2
+1/autotile/icon_coordinate = Vector2( 0, 0 )
+1/autotile/tile_size = Vector2( 16, 16 )
+1/autotile/spacing = 0
+1/autotile/occluder_map = [  ]
+1/autotile/navpoly_map = [  ]
+1/autotile/z_index_map = [  ]
+1/occluder_offset = Vector2( 0, 0 )
+1/navigation_offset = Vector2( 0, 0 )
+1/shapes = [  ]
+1/z_index = 0
+2/name = "winter.png 2"
+2/texture = ExtResource( 2 )
+2/tex_offset = Vector2( 0, 0 )
+2/modulate = Color( 1, 1, 1, 1 )
+2/region = Rect2( 80, 0, 32, 32 )
+2/tile_mode = 2
+2/autotile/icon_coordinate = Vector2( 0, 0 )
+2/autotile/tile_size = Vector2( 16, 16 )
+2/autotile/spacing = 0
+2/autotile/occluder_map = [  ]
+2/autotile/navpoly_map = [  ]
+2/autotile/z_index_map = [  ]
+2/occluder_offset = Vector2( 0, 0 )
+2/navigation_offset = Vector2( 0, 0 )
+2/shapes = [  ]
+2/z_index = 0
+3/name = "winter.png 3"
+3/texture = ExtResource( 2 )
+3/tex_offset = Vector2( 0, 0 )
+3/modulate = Color( 1, 1, 1, 1 )
+3/region = Rect2( 112, 0, 32, 32 )
+3/tile_mode = 2
+3/autotile/icon_coordinate = Vector2( 0, 0 )
+3/autotile/tile_size = Vector2( 16, 16 )
+3/autotile/spacing = 0
+3/autotile/occluder_map = [  ]
+3/autotile/navpoly_map = [  ]
+3/autotile/z_index_map = [  ]
+3/occluder_offset = Vector2( 0, 0 )
+3/navigation_offset = Vector2( 0, 0 )
+3/shapes = [  ]
+3/z_index = 0
+4/name = "winter.png 4"
+4/texture = ExtResource( 2 )
+4/tex_offset = Vector2( 0, 0 )
+4/modulate = Color( 1, 1, 1, 1 )
+4/region = Rect2( 0, 64, 96, 64 )
+4/tile_mode = 2
+4/autotile/icon_coordinate = Vector2( 0, 0 )
+4/autotile/tile_size = Vector2( 16, 32 )
+4/autotile/spacing = 0
+4/autotile/occluder_map = [  ]
+4/autotile/navpoly_map = [  ]
+4/autotile/z_index_map = [  ]
+4/occluder_offset = Vector2( 0, 0 )
+4/navigation_offset = Vector2( 0, 0 )
+4/shapes = [  ]
+4/z_index = 0
+5/name = "winter.png 5"
+5/texture = ExtResource( 2 )
+5/tex_offset = Vector2( 0, 0 )
+5/modulate = Color( 1, 1, 1, 1 )
+5/region = Rect2( 0, 128, 96, 96 )
+5/tile_mode = 2
+5/autotile/icon_coordinate = Vector2( 0, 0 )
+5/autotile/tile_size = Vector2( 16, 48 )
+5/autotile/spacing = 0
+5/autotile/occluder_map = [  ]
+5/autotile/navpoly_map = [  ]
+5/autotile/z_index_map = [  ]
+5/occluder_offset = Vector2( 0, 0 )
+5/navigation_offset = Vector2( 0, 0 )
+5/shapes = [  ]
+5/z_index = 0
+6/name = "winter.png 6"
+6/texture = ExtResource( 2 )
+6/tex_offset = Vector2( 0, 0 )
+6/modulate = Color( 1, 1, 1, 1 )
+6/region = Rect2( 0, 224, 192, 64 )
+6/tile_mode = 2
+6/autotile/icon_coordinate = Vector2( 0, 0 )
+6/autotile/tile_size = Vector2( 32, 32 )
+6/autotile/spacing = 0
+6/autotile/occluder_map = [  ]
+6/autotile/navpoly_map = [  ]
+6/autotile/z_index_map = [  ]
+6/occluder_offset = Vector2( 0, 0 )
+6/navigation_offset = Vector2( 0, 0 )
+6/shapes = [  ]
+6/z_index = 0
+7/name = "winter.png 7"
+7/texture = ExtResource( 2 )
+7/tex_offset = Vector2( 0, 0 )
+7/modulate = Color( 1, 1, 1, 1 )
+7/region = Rect2( 192, 0, 48, 48 )
+7/tile_mode = 2
+7/autotile/icon_coordinate = Vector2( 0, 0 )
+7/autotile/tile_size = Vector2( 16, 16 )
+7/autotile/spacing = 0
+7/autotile/occluder_map = [  ]
+7/autotile/navpoly_map = [  ]
+7/autotile/z_index_map = [  ]
+7/occluder_offset = Vector2( 0, 0 )
+7/navigation_offset = Vector2( 0, 0 )
+7/shapes = [  ]
+7/z_index = 0
+8/name = "winter.png 8"
+8/texture = ExtResource( 2 )
+8/tex_offset = Vector2( 0, 0 )
+8/modulate = Color( 1, 1, 1, 1 )
+8/region = Rect2( 240, 0, 32, 32 )
+8/tile_mode = 2
+8/autotile/icon_coordinate = Vector2( 0, 0 )
+8/autotile/tile_size = Vector2( 16, 16 )
+8/autotile/spacing = 0
+8/autotile/occluder_map = [  ]
+8/autotile/navpoly_map = [  ]
+8/autotile/z_index_map = [  ]
+8/occluder_offset = Vector2( 0, 0 )
+8/navigation_offset = Vector2( 0, 0 )
+8/shapes = [  ]
+8/z_index = 0
+9/name = "winter.png 9"
+9/texture = ExtResource( 2 )
+9/tex_offset = Vector2( 0, 0 )
+9/modulate = Color( 1, 1, 1, 1 )
+9/region = Rect2( 192, 64, 96, 64 )
+9/tile_mode = 2
+9/autotile/icon_coordinate = Vector2( 0, 0 )
+9/autotile/tile_size = Vector2( 16, 32 )
+9/autotile/spacing = 0
+9/autotile/occluder_map = [  ]
+9/autotile/navpoly_map = [  ]
+9/autotile/z_index_map = [  ]
+9/occluder_offset = Vector2( 0, 0 )
+9/navigation_offset = Vector2( 0, 0 )
+9/shapes = [  ]
+9/z_index = 0
+10/name = "winter.png 10"
+10/texture = ExtResource( 2 )
+10/tex_offset = Vector2( 0, 0 )
+10/modulate = Color( 1, 1, 1, 1 )
+10/region = Rect2( 192, 128, 96, 96 )
+10/tile_mode = 2
+10/autotile/icon_coordinate = Vector2( 0, 0 )
+10/autotile/tile_size = Vector2( 16, 48 )
+10/autotile/spacing = 0
+10/autotile/occluder_map = [  ]
+10/autotile/navpoly_map = [  ]
+10/autotile/z_index_map = [  ]
+10/occluder_offset = Vector2( 0, 0 )
+10/navigation_offset = Vector2( 0, 0 )
+10/shapes = [  ]
+10/z_index = 0
+11/name = "winter.png 11"
+11/texture = ExtResource( 2 )
+11/tex_offset = Vector2( 0, 0 )
+11/modulate = Color( 1, 1, 1, 1 )
+11/region = Rect2( 192, 224, 192, 64 )
+11/tile_mode = 2
+11/autotile/icon_coordinate = Vector2( 0, 0 )
+11/autotile/tile_size = Vector2( 32, 32 )
+11/autotile/spacing = 0
+11/autotile/occluder_map = [  ]
+11/autotile/navpoly_map = [  ]
+11/autotile/z_index_map = [  ]
+11/occluder_offset = Vector2( 0, 0 )
+11/navigation_offset = Vector2( 0, 0 )
+11/shapes = [  ]
+11/z_index = 0
+
+[node name="Level4" type="Node"]
+
+[node name="PixelCamera" parent="." instance=ExtResource( 1 )]
+
+[node name="TileMap" type="TileMap" parent="."]
+tile_set = SubResource( 1 )
+cell_size = Vector2( 16, 16 )
+format = 1
+
+[node name="Player" parent="." instance=ExtResource( 3 )]
+
+[node name="Blocks" type="StaticBody2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( -128, 0, 240, 0, 272, 16, 288, 32, 320, 48, 368, 48, 400, 32, 432, 0, 464, -16, 528, -16, 592, 16, 688, 16, 752, -16, 784, -48, 848, -80, 1008, -80, 1072, -48, 1120, 0, 1184, 32, 1328, 32, 1424, -16, 1488, -80, 1584, -128, 1712, -128, 1776, -96, 1840, -32, 1904, 0, 2064, 0, 2128, -32, 2176, -80, 2240, -112, 2416, -112, 2480, -144, 2592, -256, 2672, -416, 2736, -480, 2800, -512, 3040, -512, 3104, -480, 3136, -448, 3152, -416, 3184, -384, 3216, -368, 3264, -368, 3296, -384, 3344, -432, 3376, -448, 3408, -448, 3472, -416, 3520, -368, 3568, -272, 3616, -224, 3680, -192, 4816, -192, 4880, -224, 4928, -272, 4928, -128, 5120, -128, 5120, -368, 5168, -320, 5200, -256, 5248, -208, 5312, -176, 5808, -176, 5872, -208, 5936, -272, 5968, -336, 5968, -448, 6000, -512, 6064, -576, 6128, -608, 6288, -608, 6288, -16, 6096, -16, 5216, -16, 4816, -16, 3488, -16, 3264, -16, 3104, -16, 2608, -16, 2368, 224, 1900.73, 224, 1408.89, 224, 1005.23, 224, 702.67, 224, 430.221, 224, 225.167, 224, -128, 224 )
+
+[node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 3536, -560, 3536, -528, 3568, -496, 4192, -496, 4224, -528, 4224, -640, 4192, -608, 4128, -576, 3952, -576, 3888, -608, 3600, -608, 3568, -592 )
+
+[node name="CollisionPolygon2D3" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 4448, -640, 4448, -528, 4480, -496, 4672, -496, 4704, -480, 4720, -464, 4752, -448, 4896, -448, 4928, -480, 4928, -592, 4912, -560, 4880, -528, 4848, -512, 4800, -512, 4768, -528, 4736, -560, 4704, -576, 4544, -576, 4480, -608 )
+
+[node name="CollisionPolygon2D4" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 5072, -640, 5104, -608, 5392, -608, 5440, -560, 5616, -560, 5648, -592, 5648, -656, 5616, -624, 5584, -608, 5520, -608, 5488, -624, 5456, -656, 5424, -672, 5152, -672, 5120, -688, 5088, -720, 5072, -752 )
+
+[node name="CollisionPolygon2D5" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 112, 0 )
+polygon = PoolVector2Array( 5840, -704, 5920, -704, 5920, -672, 5904, -656, 5856, -656, 5840, -672 )
+
+[node name="CollisionPolygon2D6" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 6288, -608, 6640, -608, 6704, -576, 6768, -512, 6768, -240, 6800, -208, 6864, -208, 7024, -368, 7056, -368, 7136, -288, 7200, -256, 7760, -256, 7760, -304, 7824, -240, 7856, -224, 7904, -224, 8016, -288, 8080, -352, 8112, -416, 8112, -224, 8160, -176, 8224, -176, 8288, -240, 8288, -368, 8224, -368, 8192, -400, 8192, -432, 8224, -464, 8416, -464, 8480, -432, 8512, -400, 8576, -368, 8672, -368, 8736, -336, 8768, -304, 8784, -272, 8784, -160, 8816, -96, 8864, -48, 8928, -16, 9168, -16, 9200, -32, 9232, -64, 9248, -96, 9248, -288, 9248, -320, 9184, -320, 9184, -288, 9008, -288, 8992, -304, 8992, -352, 9008, -368, 9248, -368, 9280, -384, 9312, -416, 9312, -320, 9504, -320, 9504, -416, 9536, -384, 9568, -368, 9744, -368, 9744, -304, 9664, -224, 9664, -96, 10944, -96, 10944, -592, 11008, -592, 11072, -560, 11296, -560, 11296, 96, 9392, 96, 8816, 96, 8704, -16, 8432, -16, 8064, -16, 7856, -16, 7186.31, -16, 6720, -16, 6430.02, -16, 6288, -16 )
+
+[node name="CollisionPolygon2D7" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 16, -144 )
+polygon = PoolVector2Array( 8176, -416, 8176, -400, 8192, -384, 8224, -384, 8240, -400, 8464, -400, 8560, -352, 8752, -352, 8848, -256, 8848, -80, 8928, 0, 9104, 0, 9136, -32, 9136, -48, 8960, -48, 8928, -64, 8896, -96, 8880, -128, 8880, -304, 8976, -400, 9200, -400, 9280, -480, 9408, -480, 9488, -400, 9840, -400, 9872, -432, 9872, -544, 9840, -512, 9776, -480, 9632, -480, 9568, -512, 9488, -592, 9456, -656, 9408, -704, 9344, -736, 9168, -736, 9104, -704, 9008, -608, 8976, -528, 8928, -480, 8864, -448, 8816, -448, 8784, -464, 8736, -512, 8704, -528, 8608, -528, 8576, -512, 8512, -448, 8480, -432, 8416, -432, 8384, -448, 8368, -464, 8336, -480, 8256, -480, 8224, -464 )
+
+[node name="CollisionPolygon2D8" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 176, 1 )
+polygon = PoolVector2Array( 9920, -256, 9968, -208, 10176, -208, 10224, -256, 10224, -416, 10208, -384, 10160, -336, 10096, -304, 10000, -304, 9968, -320, 9920, -368 )
+
+[node name="CollisionPolygon2D10" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 10288, -752, 10672, -752, 10672, -720, 10640, -688, 10320, -688, 10288, -720 )
+
+[node name="CollisionPolygon2D9" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 32, 32 )
+polygon = PoolVector2Array( 10512, -512, 10544, -480, 10624, -480, 10656, -512, 10656, -592, 10624, -560, 10592, -544, 10560, -544, 10528, -560, 10512, -576 )
+
+[node name="CollisionPolygon2D11" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 11296, -560, 11520, -560, 11584, -528, 11824, -288, 11888, -256, 12208, -256, 12208, -96, 11296, -96 )
+
+[node name="Hazards" type="Node" parent="."]
+editor/display_folded = true
+
+[node name="HazardLarge" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 3936, -224 )
+
+[node name="HazardLarge2" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 5104, -496 )
+
+[node name="HazardLarge4" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 5792, -656 )
+
+[node name="HazardLarge5" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 6112, -720 )
+
+[node name="HazardLarge6" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 6848, -256 )
+
+[node name="HazardLarge10" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 6864, -384 )
+
+[node name="HazardLarge12" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 6800, -448 )
+
+[node name="HazardLarge11" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 6912, -304 )
+
+[node name="HazardLarge7" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 6800, -368 )
+
+[node name="HazardLarge8" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 6848, -320 )
+
+[node name="HazardLarge9" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 6944, -352 )
+
+[node name="HazardLarge13" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 8144, -320 )
+
+[node name="HazardLarge16" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9216, -288 )
+
+[node name="HazardLarge17" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 9936, -642 )
+
+[node name="HazardLarge18" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 10064, -672 )
+
+[node name="HazardLarge19" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 10208, -688 )
+
+[node name="HazardLarge20" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 10160, -624 )
+
+[node name="HazardLarge15" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7568, -288 )
+
+[node name="HazardLarge14" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 8192, -352 )
+
+[node name="HazardLarge3" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 5152, -560 )
+
+[node name="Hazard" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 5024, -144 )
+scale = Vector2( 12, 2 )
+
+[node name="Hazard2" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 9408, -336 )
+scale = Vector2( 12, 2 )
+
+[node name="Hazard3" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 10304, -128 )
+scale = Vector2( 80, 4 )
+
+[node name="HazardSmall" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 496, -32 )
+
+[node name="HazardSmall3" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 928, -96 )
+
+[node name="HazardSmall4" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 1632, -144 )
+
+[node name="HazardSmall5" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 3824, -208 )
+
+[node name="HazardSmall10" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 4048, -224 )
+
+[node name="HazardSmall9" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 4160, -208 )
+
+[node name="HazardSmall6" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 4368, -208 )
+
+[node name="HazardSmall11" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 5280, -688 )
+
+[node name="HazardSmall12" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 5680, -640 )
+
+[node name="HazardSmall21" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 7504, -288 )
+
+[node name="HazardSmall22" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 7664, -272 )
+
+[node name="HazardSmall25" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 7744, -288 )
+
+[node name="HazardSmall30" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 8240, -352 )
+
+[node name="HazardSmall33" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 8176, -400 )
+
+[node name="HazardSmall34" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 8672, -688 )
+
+[node name="HazardSmall35" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 9280, -896 )
+
+[node name="HazardSmall36" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 9984, -640 )
+
+[node name="HazardSmall37" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 10032, -624 )
+
+[node name="HazardSmall38" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 10128, -669 )
+
+[node name="HazardSmall39" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 10256, -718 )
+
+[node name="HazardSmall41" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 10400, -768 )
+
+[node name="HazardSmall42" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 10656, -768 )
+
+[node name="HazardSmall40" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 10096, -624 )
+
+[node name="HazardSmall31" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 8192, -304 )
+
+[node name="HazardSmall32" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 8128, -272 )
+
+[node name="HazardSmall23" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 7392, -272 )
+
+[node name="HazardSmall26" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 6800, -304 )
+
+[node name="HazardSmall29" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 6816, -400 )
+
+[node name="HazardSmall27" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 6896, -336 )
+
+[node name="HazardSmall28" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 6800, -240 )
+
+[node name="HazardSmall24" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 7616, -288 )
+
+[node name="HazardSmall13" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 5728, -656 )
+
+[node name="HazardSmall14" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 6032, -720 )
+
+[node name="HazardSmall18" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 5936, -672 )
+
+[node name="HazardSmall15" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 6064, -704 )
+
+[node name="HazardSmall19" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 6160, -704 )
+
+[node name="HazardSmall20" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 6192, -704 )
+
+[node name="HazardSmall17" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 5888, -656 )
+
+[node name="HazardSmall16" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 5840, -672 )
+
+[node name="HazardSmall7" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 4464, -224 )
+
+[node name="HazardSmall8" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 4416, -240 )
+
+[node name="Scores" type="Node2D" parent="."]
+z_index = 1
+
+[node name="Checkpoints" type="Node" parent="."]
+editor/display_folded = true
+
+[node name="Checkpoint" parent="Checkpoints" instance=ExtResource( 7 )]
+position = Vector2( 6432, -608 )
+
+[node name="Checkpoint2" parent="Checkpoints" instance=ExtResource( 7 )]
+position = Vector2( 11408, -560 )
+
+[node name="Foreground" type="Node2D" parent="."]
+editor/display_folded = true
+z_index = 10
+
+[node name="Snow" parent="Foreground" instance=ExtResource( 8 )]
+
+[node name="Background" type="Node2D" parent="."]
+editor/display_folded = true
+z_index = -10
+
+[node name="Snow" parent="Background" instance=ExtResource( 8 )]
+[connection signal="death" from="Player" to="PixelCamera" method="_on_player_death"]
+[connection signal="spawn" from="Player" to="PixelCamera" method="_on_player_spawn"]
