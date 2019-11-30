@@ -10,6 +10,7 @@
 [ext_resource path="res://styles/button.tres" type="StyleBox" id=8]
 
 [node name="WinScreen" type="CanvasLayer"]
+pause_mode = 2
 script = ExtResource( 1 )
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
@@ -43,7 +44,6 @@ margin_right = 384.0
 margin_bottom = 168.0
 
 [node name="GridContainer" type="GridContainer" parent="CenterContainer/PanelContainer/VBoxContainer/CenterContainer"]
-editor/display_folded = true
 margin_left = 128.0
 margin_right = 256.0
 margin_bottom = 128.0

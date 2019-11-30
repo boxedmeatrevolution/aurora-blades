@@ -673,15 +673,14 @@ func _on_checkpoint_activate(area2d : Area2D) -> void:
 		self.score_list.clear()
 
 func _on_win(win2d : Area2D) -> void:
-	if _is_ground_physics_state(self.physics_state):
-		self.respawn_position = self.global_position
-		for score in self.score_list:
-			score.queue_free()
-		var old_state = self.state
-		self.state = _get_default_normal_state(Intent.new())
-		_handle_state_transition(old_state)
-		self.win = true
-		emit_signal("win")
+	self.respawn_position = self.global_position
+	for score in self.score_list:
+		score.queue_free()
+	var old_state = self.state
+	self.state = _get_default_normal_state(Intent.new())
+	_handle_state_transition(old_state)
+	self.win = true
+	emit_signal("win")
 
 func _on_hazard_collision(area2d : Area2D) -> void:
 	var hazard := area2d as Hazard

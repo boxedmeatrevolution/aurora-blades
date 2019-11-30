@@ -1,10 +1,13 @@
 extends CanvasLayer
 
+signal done
+
 onready var box := $CenterContainer
 onready var sound_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/SoundButton
 onready var jump_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/JumpButton
 onready var skate_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/SkateButton
 onready var dive_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/DiveButton
+onready var restart_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/RestartButton
 
 var current_action := ""
 
@@ -13,12 +16,7 @@ func _ready() -> void:
 	_update_rebind_button("jump")
 	_update_rebind_button("skate")
 	_update_rebind_button("dive")
-	self.box.visible = false
-
-func _process(delta) -> void:
-	if !self.box.visible:
-		if Input.is_action_just_pressed("ui_options"):
-			self.box.visible = true
+	_update_rebind_button("restart")
 
 func _update_sound_button() -> void:
 	var mute : bool = AudioServer.is_bus_mute(AudioServer.get_bus_index("Master"))
@@ -46,8 +44,7 @@ func _pressed_rebind_button(action : String) -> void:
 			button.text = "..."
 
 func _pressed_ok_button() -> void:
-	if self.current_action == "":
-		self.box.visible = false
+	emit_signal("done")
 
 func _input(event : InputEvent) -> void:
 	var key_event := event as InputEventKey
@@ -74,5 +71,7 @@ func _get_button(action : String) -> Button:
 			return self.skate_button as Button
 		"dive":
 			return self.dive_button as Button
+		"restart":
+			return self.restart_button as Button
 		_:
 			return null
