@@ -1,13 +1,14 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://entities/ui/pixel_camera.tscn" type="PackedScene" id=1]
 [ext_resource path="res://tilesets/winter.png" type="Texture" id=2]
 [ext_resource path="res://entities/player.tscn" type="PackedScene" id=3]
 [ext_resource path="res://entities/hazard_small.tscn" type="PackedScene" id=4]
 [ext_resource path="res://entities/hazard.tscn" type="PackedScene" id=5]
-[ext_resource path="res://entities/coin_large.tscn" type="PackedScene" id=6]
-[ext_resource path="res://entities/checkpoint.tscn" type="PackedScene" id=7]
-[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=8]
+[ext_resource path="res://entities/hazard_large.tscn" type="PackedScene" id=6]
+[ext_resource path="res://entities/coin_large.tscn" type="PackedScene" id=7]
+[ext_resource path="res://entities/checkpoint.tscn" type="PackedScene" id=8]
+[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=9]
 
 [sub_resource type="TileSet" id=1]
 0/name = "winter.png 0"
@@ -227,14 +228,14 @@ position = Vector2( 520, -1579.2 )
 polygon = PoolVector2Array( 4000, -160, 4000, 128, 4480, 128, 4480, 0, 4208, 0, 4112, -48 )
 
 [node name="CollisionPolygon2D3" type="CollisionPolygon2D" parent="Blocks"]
-polygon = PoolVector2Array( -96, 0, 192, 0, 224, -16, 256, -48, 288, -64, 320, -64, 352, -48, 384, -16, 416, 0, 496, 0, 560, -32, 608, -80, 672, -112, 736, -112, 800, -80, 896, 16, 960, 48, 1040, 48, 1104, 16, 1280, -160, 1344, -192, 1440, -192, 1504, -160, 1616, -48, 1680, -16, 1952, -16, 2016, -48, 2064, -96, 2064, 48, 2432, 48, 2432, -144, 2496, -80, 2560, -48, 2672, -48, 2768, -96, 2864, -192, 2912, -288, 2976, -352, 3040, -384, 3104, -384, 3168, -352, 3216, -304, 3280, -272, 3376, -272, 3440, -304, 3472, -336, 3472, -208, 3824, -208, 3824, -400, 3888, -336, 3952, -304, 4064, -304, 4128, -336, 4176, -384, 4240, -512, 4272, -544, 4304, -560, 4496, -560, 4528, -576, 4544, -592, 4576, -608, 4608, -608, 4640, -592, 4656, -576, 4688, -560, 5008, -560, 5072, -528, 5152, -448, 5216, -416, 5392, -416, 5424, -432, 5456, -464, 5456, -272, 5776, -272, 5776, -464, 5808, -432, 5840, -416, 5936, -416, 6000, -448, 6256, -688, 6320, -720, 6352, -720, 6352, -368, 6096, -112, 5136, -112, 4896, -352, 4560, -352, 4464, -352, 4224, -112, 4003.58, -112, 3152, -112, 2848, 192, 2464, 192, 1971.93, 192, 1376, 192, 692.897, 192, 300.669, 192, -96, 192 )
+polygon = PoolVector2Array( -96, 0, 192, 0, 224, -16, 256, -48, 288, -64, 320, -64, 352, -48, 384, -16, 416, 0, 496, 0, 560, -32, 608, -80, 672, -112, 736, -112, 800, -80, 896, 16, 960, 48, 1040, 48, 1104, 16, 1280, -160, 1344, -192, 1440, -192, 1504, -160, 1616, -48, 1680, -16, 1952, -16, 2016, -48, 2064, -96, 2064, 48, 2432, 48, 2432, -144, 2496, -80, 2560, -48, 2672, -48, 2768, -96, 2864, -192, 2912, -288, 2976, -352, 3040, -384, 3104, -384, 3168, -352, 3216, -304, 3280, -272, 3376, -272, 3440, -304, 3472, -336, 3472, -208, 3824, -208, 3824, -400, 3888, -336, 3952, -304, 4064, -304, 4128, -336, 4176, -384, 4240, -512, 4272, -544, 4304, -560, 4496, -560, 4528, -576, 4544, -592, 4576, -608, 4608, -608, 4640, -592, 4656, -576, 4688, -560, 5008, -560, 5072, -528, 5152, -448, 5216, -416, 5392, -416, 5424, -432, 5456, -464, 5456, -272, 5776, -272, 5776, -464, 5808, -432, 5840, -416, 5936, -416, 6000, -448, 6256, -688, 6320, -720, 6352, -720, 6352, -368, 6096, -112, 5136, -112, 4896, -352, 4560, -352, 4464, -352, 4224, -112, 4003.58, -112, 3152, -112, 2848, 192, 2464, 192, 1971.93, 192, 1376, 192, 692.897, 192, 386.024, 192, 300.669, 192, -96, 192 )
 
 [node name="CollisionPolygon2D4" type="CollisionPolygon2D" parent="Blocks"]
 position = Vector2( -1280, -208 )
 polygon = PoolVector2Array( 6016, -560, 6016, -480, 6048, -448, 6672, -448, 6752, -528, 6928, -528, 6944, -544, 6944, -592, 6928, -608, 6752, -608, 6688, -640, 6656, -672, 6656, -512, 6368, -512, 6368, -624, 6336, -592, 6272, -560 )
 
 [node name="CollisionPolygon2D5" type="CollisionPolygon2D" parent="Blocks"]
-polygon = PoolVector2Array( 6352, -720, 6432, -720, 6672, -720, 6736, -688, 6928, -496, 7024, -448, 7072, -448, 7136, -480, 7184, -528, 7184, -400, 7232, -352, 9280, -352, 9344, -416, 9344, -608, 9456, -608, 9520, -576, 9568, -528, 9616, -432, 9664, -384, 9728, -352, 9888, -352, 9952, -384, 10048, -480, 10112, -512, 10176, -512, 10240, -480, 10400, -320, 10464, -288, 10688, -288, 10752, -320, 10784, -352, 10784, -208, 11360, -208, 11360, -544, 11680, -544, 11776, -496, 11920, -496, 11920, -112, 11248, -112, 10705.3, -112, 10199.4, -112, 9808.76, -112, 9448.41, -112, 7109.01, -112, 6784, -112, 6528, -368, 6352, -368 )
+polygon = PoolVector2Array( 6352, -720, 6432, -720, 6672, -720, 6736, -688, 6928, -496, 7024, -448, 7072, -448, 7136, -480, 7184, -528, 7184, -400, 7232, -352, 9280, -352, 9344, -416, 9344, -608, 9456, -608, 9520, -576, 9568, -528, 9616, -432, 9664, -384, 9728, -352, 9888, -352, 9952, -384, 10048, -480, 10112, -512, 10176, -512, 10240, -480, 10400, -320, 10464, -288, 10688, -288, 10752, -320, 10784, -352, 10784, -208, 11360, -208, 11360, -544, 11920, -544, 11920, -112, 11447.9, -112, 11248, -112, 10705.3, -112, 10199.4, -112, 9808.76, -112, 9448.41, -112, 7109.01, -112, 6784, -112, 6528, -368, 6352, -368 )
 
 [node name="CollisionPolygon2D6" type="CollisionPolygon2D" parent="Blocks"]
 position = Vector2( 48, 32 )
@@ -267,6 +268,24 @@ polygon = PoolVector2Array( 7456, -640, 7456, -576, 7488, -544, 7664, -544, 7696
 [node name="CollisionPolygon2D12" type="CollisionPolygon2D" parent="Blocks"]
 position = Vector2( 3760, -208 )
 polygon = PoolVector2Array( 7456, -640, 7456, -576, 7488, -544, 7664, -544, 7696, -576, 7696, -640, 7648, -592, 7616, -576, 7536, -576, 7504, -592 )
+
+[node name="CollisionPolygon2D14" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 11920, -544, 12320, -544, 12384, -512, 12496, -400, 12560, -368, 13456, -368, 13520, -400, 13552, -432, 13584, -448, 13616, -448, 13648, -432, 13680, -400, 13712, -384, 14272, -384, 14336, -352, 15344, -352, 15344, -192, 17328, -192, 17328, -272, 17680, -272, 17680, -112, 15248, -112, 13599.2, -112, 13455.3, -112, 12372.9, -112, 11920, -112 )
+
+[node name="CollisionPolygon2D15" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 15584, -368, 15584, -336, 15616, -304, 15776, -304, 15808, -336, 15808, -368 )
+
+[node name="CollisionPolygon2D18" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 1024, 0 )
+polygon = PoolVector2Array( 15584, -368, 15584, -336, 15616, -304, 16016, -304, 16048, -336, 16048, -368 )
+
+[node name="CollisionPolygon2D16" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 336, -32 )
+polygon = PoolVector2Array( 15648, -368, 15648, -336, 15680, -304, 15744, -304, 15776, -336, 15776, -368 )
+
+[node name="CollisionPolygon2D17" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 640, -16 )
+polygon = PoolVector2Array( 15648, -368, 15648, -336, 15680, -304, 15744, -304, 15776, -336, 15776, -368 )
 
 [node name="Hazards" type="Node" parent="."]
 
@@ -330,6 +349,42 @@ position = Vector2( 8816, -704 )
 [node name="HazardSmall23" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 9088, -704 )
 
+[node name="HazardSmall25" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12704, -384 )
+
+[node name="HazardSmall26" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12944, -384 )
+
+[node name="HazardSmall27" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 12896, -400 )
+
+[node name="HazardSmall28" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13152, -384 )
+
+[node name="HazardSmall30" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13840, -400 )
+
+[node name="HazardSmall31" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13920, -416 )
+
+[node name="HazardSmall32" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 14064, -400 )
+
+[node name="HazardSmall33" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 14240, -400 )
+
+[node name="HazardSmall34" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 14496, -368 )
+
+[node name="HazardSmall35" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 14736, -384 )
+
+[node name="HazardSmall36" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 16832, -400 )
+
+[node name="HazardSmall29" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 13600, -464 )
+
 [node name="HazardSmall24" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 9328, -592 )
 
@@ -366,21 +421,43 @@ scale = Vector2( 128, 4 )
 position = Vector2( 11072, -240 )
 scale = Vector2( 36, 4 )
 
+[node name="Hazard7" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 16336, -224 )
+scale = Vector2( 124, 4 )
+
+[node name="HazardLarge" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 15056, -384 )
+
+[node name="HazardLarge2" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 15488, -352 )
+
+[node name="HazardLarge3" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 15888, -384 )
+
+[node name="HazardLarge4" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 16208, -384 )
+
+[node name="HazardLarge5" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 16512, -368 )
+
 [node name="Scores" type="Node2D" parent="."]
 editor/display_folded = true
 z_index = 1
 
-[node name="CoinLarge" parent="Scores" instance=ExtResource( 6 )]
+[node name="CoinLarge" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 5600, -848 )
 
 [node name="Checkpoints" type="Node2D" parent="."]
 z_index = -1
 
-[node name="Checkpoint" parent="Checkpoints" instance=ExtResource( 7 )]
+[node name="Checkpoint" parent="Checkpoints" instance=ExtResource( 8 )]
 position = Vector2( 6528, -720 )
 
-[node name="Checkpoint2" parent="Checkpoints" instance=ExtResource( 7 )]
-position = Vector2( 12048, -496 )
+[node name="Checkpoint2" parent="Checkpoints" instance=ExtResource( 8 )]
+position = Vector2( 12048, -544 )
+
+[node name="Checkpoint3" parent="Checkpoints" instance=ExtResource( 8 )]
+position = Vector2( 17792, -272 )
 
 [node name="Tips" type="Node2D" parent="."]
 z_index = 2
@@ -389,11 +466,11 @@ z_index = 2
 editor/display_folded = true
 z_index = 10
 
-[node name="Snow" parent="Foreground" instance=ExtResource( 8 )]
+[node name="Snow" parent="Foreground" instance=ExtResource( 9 )]
 
 [node name="Background" type="Node2D" parent="."]
 z_index = -10
 
-[node name="Snow" parent="Background" instance=ExtResource( 8 )]
+[node name="Snow" parent="Background" instance=ExtResource( 9 )]
 [connection signal="death" from="Player" to="PixelCamera" method="_on_player_death"]
 [connection signal="spawn" from="Player" to="PixelCamera" method="_on_player_spawn"]
