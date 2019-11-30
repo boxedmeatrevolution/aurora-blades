@@ -239,10 +239,54 @@ position = Vector2( -16, 32 )
 polygon = PoolVector2Array( 4592, -112, 4624, -80, 4784, -80, 4816, -112, 4816, -144, 4704, -144, 4640, -176, 4592, -224 )
 
 [node name="CollisionPolygon2D6" type="CollisionPolygon2D" parent="Blocks"]
-polygon = PoolVector2Array( 5904, 48, 6368, 48, 6432, 80, 6480, 128, 6512, 192, 6560, 240, 6624, 272, 6720, 272, 6784, 240, 6816, 208, 6816, 336, 6880, 400, 7168, 400, 7216, 352, 7216, 256, 7280, 320, 7344, 352, 7504, 352, 7568, 320, 7632, 256, 7632, 400, 7680, 448, 8000, 448, 8048, 400, 8048, 240, 8096, 288, 8160, 320, 8592, 320, 8656, 288, 8752, 192, 8816, 160, 8928, 160, 8992, 128, 9088, 32, 9152, 0, 9232, 0, 9296, 32, 9392, 128, 9424, 144, 9456, 144, 9488, 128, 9520, 96, 9552, 80, 9584, 80, 9616, 96, 9680, 160, 9712, 176, 9792, 176, 9824, 192, 9888, 256, 9952, 288, 10032, 288, 10096, 256, 10144, 208, 10208, 176, 10272, 176, 10336, 208, 10384, 256, 10448, 384, 10496, 432, 10560, 464, 10688, 464, 10752, 432, 10800, 384, 10832, 320, 10832, 464, 10880, 512, 10944, 512, 10992, 464, 10992, 160, 11136, 160, 11136, 560, 9984.02, 560, 9720.86, 560, 9440, 560, 9148.13, 560, 8816, 560, 8256, 560, 7552, 560, 7264, 560, 6480, 560, 5904, 560 )
+polygon = PoolVector2Array( 5904, 48, 6368, 48, 6432, 80, 6480, 128, 6512, 192, 6560, 240, 6624, 272, 6720, 272, 6784, 240, 6816, 208, 6816, 336, 6880, 400, 7168, 400, 7216, 352, 7216, 256, 7280, 320, 7344, 352, 7504, 352, 7568, 320, 7632, 256, 7632, 400, 7680, 448, 8000, 448, 8048, 400, 8048, 240, 8096, 288, 8160, 320, 8592, 320, 8656, 288, 8752, 192, 8816, 160, 8928, 160, 8992, 128, 9088, 32, 9152, 0, 9232, 0, 9296, 32, 9392, 128, 9424, 144, 9456, 144, 9488, 128, 9520, 96, 9552, 80, 9584, 80, 9616, 96, 9680, 160, 9712, 176, 9792, 176, 9824, 192, 9888, 256, 9952, 288, 10032, 288, 10096, 256, 10144, 208, 10208, 176, 10272, 176, 10336, 208, 10384, 256, 10448, 384, 10496, 432, 10560, 464, 10688, 464, 10752, 432, 10800, 384, 10832, 320, 10832, 464, 10880, 512, 10944, 512, 10992, 464, 10992, 160, 11136, 160, 11136, 560, 10753.5, 560, 10416, 560, 9984.02, 560, 9720.86, 560, 9440, 560, 9148.13, 560, 8816, 560, 8256, 560, 7552, 560, 7264, 560, 6480, 560, 5904, 560 )
 
 [node name="CollisionPolygon2D7" type="CollisionPolygon2D" parent="Blocks"]
 polygon = PoolVector2Array( 9824, 32, 9856, 64, 9984, 64, 10016, 32, 10016, -48, 9984, -16, 9952, 0, 9824, 0 )
+
+[node name="CollisionPolygon2D8" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 11136, 160, 11376, 160, 11440, 192, 11552, 304, 11616, 336, 11712, 336, 11776, 304, 11808, 272, 11872, 240, 11936, 240, 12000, 272, 12032, 304, 12096, 336, 12160, 336, 12224, 304, 12304, 224, 12352, 128, 12416, 64, 12480, 32, 12624, 32, 12688, 0, 12768, 0, 12832, 32, 13040, 32, 13104, 0, 13136, -32, 13168, -48, 13200, -48, 13232, -32, 13264, 0, 13328, 32, 13472, 32, 13536, 0, 13600, -64, 13648, -160, 13696, -208, 13760, -240, 13840, -240, 13904, -208, 14000, -208, 14064, -240, 14096, -272, 14128, -288, 14160, -288, 14192, -272, 14224, -240, 14288, -208, 14384, -208, 14448, -240, 14512, -304, 14544, -368, 14608, -432, 14672, -464, 14736, -464, 14800, -432, 14848, -384, 14880, -320, 14928, -272, 14992, -240, 15040, -240, 15104, -272, 15152, -320, 15200, -416, 15248, -464, 15280, -480, 15312, -480, 15344, -464, 15392, -416, 15472, -256, 15520, -208, 15584, -176, 15648, -176, 15712, -208, 15824, -320, 15888, -352, 16000, -352, 16096, -304, 16192, -208, 16288, -160, 16640, -160, 16640, -112, 16608, -80, 16608, -32, 16896, 112, 17312, 112, 17312, 64, 17376, 64, 17376, 112, 17728, 112, 17856, 48, 17968, -64, 18032, -96, 18096, -96, 18160, -128, 18224, -192, 18256, -208, 18256, 208, 17921.6, 208, 16576, 208, 16304, -64, 15888, -64, 15536, -64, 15104, -64, 14816, -64, 14416, -64, 14128, 224, 13664, 224, 13167, 224, 12741, 224, 12608, 224, 12288, 544, 11871.5, 544, 11136, 544 )
+
+[node name="CollisionPolygon2D9" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 48, 80 )
+polygon = PoolVector2Array( 16160, -528, 16160, -480, 16192, -448, 16560, -448, 16592, -480, 16592, -528 )
+
+[node name="CollisionPolygon2D10" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 16944, -160, 16944, -112, 16976, -80, 17152, -80, 17184, -112, 17184, -160 )
+
+[node name="CollisionPolygon2D12" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 0, -288 )
+polygon = PoolVector2Array( 16944, -160, 16944, -112, 16976, -80, 17152, -80, 17184, -112, 17184, -160 )
+
+[node name="CollisionPolygon2D11" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 512, 0 )
+polygon = PoolVector2Array( 16944, -160, 16944, -112, 16976, -80, 17152, -80, 17184, -112, 17184, -160 )
+
+[node name="CollisionPolygon2D13" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 512, -288 )
+polygon = PoolVector2Array( 16944, -160, 16944, -112, 16976, -80, 17152, -80, 17184, -112, 17184, -160 )
+
+[node name="CollisionPolygon2D14" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 18256, -208, 18592, -208, 18656, -176, 18800, -32, 18864, 0, 18960, 0, 18992, -16, 19024, -48, 19024, 80, 19088, 144, 19984, 144, 20048, 80, 20048, -64, 20096, -112, 20336, -112, 20400, -144, 20480, -224, 20512, -240, 20544, -240, 20576, -224, 20608, -192, 20656, -96, 20688, -64, 20720, -48, 20784, -48, 20816, -64, 20848, -96, 20848, 16, 20896, 64, 21824, 64, 21952, -64, 21952, -240, 22000, -288, 22224, -288, 22288, -256, 22352, -192, 22384, -128, 22448, -64, 22512, -32, 22672, -32, 22736, -64, 22768, -96, 22832, -128, 22912, -128, 22976, -96, 23136, 64, 23200, 96, 24320, 96, 24320, 208, 22864.5, 208, 22320, 208, 21964.6, 208, 20816, 208, 20640, 208, 20464, 208, 18928, 208, 18256, 208 )
+
+[node name="CollisionPolygon2D15" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 19280, -96, 19280, -32, 19312, 0, 19440, 0, 19472, -32, 19472, -96, 19440, -64, 19408, -48, 19344, -48, 19312, -64 )
+
+[node name="CollisionPolygon2D16" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 384, -32 )
+polygon = PoolVector2Array( 19280, -96, 19280, -32, 19312, 0, 19440, 0, 19472, -32, 19472, -96, 19440, -64, 19408, -48, 19344, -48, 19312, -64 )
+
+[node name="CollisionPolygon2D17" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 1792, -96 )
+polygon = PoolVector2Array( 19280, -96, 19280, -32, 19312, 0, 19440, 0, 19472, -32, 19472, -96, 19440, -64, 19408, -48, 19344, -48, 19312, -64 )
+
+[node name="CollisionPolygon2D18" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 2192, -160 )
+polygon = PoolVector2Array( 19280, -96, 19280, -32, 19312, 0, 19440, 0, 19472, -32, 19472, -96, 19440, -64, 19408, -48, 19344, -48, 19312, -64 )
+
+[node name="CollisionPolygon2D19" type="CollisionPolygon2D" parent="Blocks"]
+position = Vector2( 3856, -144 )
+polygon = PoolVector2Array( 19280, -96, 19280, -32, 19312, 0, 19440, 0, 19472, -32, 19472, -96, 19440, -64, 19408, -48, 19344, -48, 19312, -64 )
 
 [node name="Hazards" type="Node" parent="."]
 
@@ -253,6 +297,14 @@ scale = Vector2( 25, 2 )
 [node name="Hazard2" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 7024, 384 )
 scale = Vector2( 18, 2 )
+
+[node name="Hazard4" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 19536, 112 )
+scale = Vector2( 56, 4 )
+
+[node name="Hazard5" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 21360, 32 )
+scale = Vector2( 58, 4 )
 
 [node name="Hazard3" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 7840, 416 )
@@ -266,6 +318,12 @@ position = Vector2( 7184, 320 )
 
 [node name="HazardLarge3" parent="Hazards" instance=ExtResource( 5 )]
 position = Vector2( 7664, 352 )
+
+[node name="HazardLarge4" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 10864, 416 )
+
+[node name="HazardLarge5" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 10912, 480 )
 
 [node name="HazardSmall" parent="Hazards" instance=ExtResource( 6 )]
 position = Vector2( 6976, 336 )
@@ -293,6 +351,93 @@ position = Vector2( 7952, 352 )
 
 [node name="HazardSmall9" parent="Hazards" instance=ExtResource( 6 )]
 position = Vector2( 7744, 352 )
+
+[node name="HazardSmall11" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 10928, 368 )
+
+[node name="HazardSmall16" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 11904, 224 )
+
+[node name="HazardSmall17" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 12728, -16 )
+
+[node name="HazardSmall18" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 13184, -64 )
+
+[node name="HazardSmall19" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 13792, -256 )
+
+[node name="HazardSmall20" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 14144, -304 )
+
+[node name="HazardSmall21" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 14704, -480 )
+
+[node name="HazardSmall22" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 15296, -496 )
+
+[node name="HazardSmall23" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 15952, -368 )
+
+[node name="HazardSmall24" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 19056, 80 )
+
+[node name="HazardSmall25" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 19184, 48 )
+
+[node name="HazardSmall26" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 19376, 18 )
+
+[node name="HazardSmall27" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 19600, 48 )
+
+[node name="HazardSmall28" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 19840, 64 )
+
+[node name="HazardSmall29" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 20016, 64 )
+
+[node name="HazardSmall30" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 20864, -32 )
+
+[node name="HazardSmall31" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 20880, 0 )
+
+[node name="HazardSmall32" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 21008, -32 )
+
+[node name="HazardSmall33" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 21168, -64 )
+
+[node name="HazardSmall34" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 21376, -32 )
+
+[node name="HazardSmall35" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 21488, -112 )
+
+[node name="HazardSmall36" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 21664, -80 )
+
+[node name="HazardSmall37" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 21840, -16 )
+
+[node name="HazardSmall38" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 21872, -80 )
+
+[node name="HazardSmall39" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 21936, -128 )
+
+[node name="HazardSmall12" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 10912, 400 )
+
+[node name="HazardSmall13" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 10960, 416 )
+
+[node name="HazardSmall14" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 10976, 448 )
+
+[node name="HazardSmall15" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 10928, 432 )
 
 [node name="HazardSmall10" parent="Hazards" instance=ExtResource( 6 )]
 position = Vector2( 7872, 320 )
@@ -435,14 +580,137 @@ position = Vector2( 10240, -176 )
 [node name="Coin70" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 10304, -144 )
 
-[node name="Coin71" parent="Scores" instance=ExtResource( 7 )]
-position = Vector2( 10352, -80 )
-
 [node name="Coin77" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 10864, 160 )
 
 [node name="Coin78" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 10896, 112 )
+
+[node name="Coin81" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 11904, 128 )
+
+[node name="Coin82" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 11856, 160 )
+
+[node name="Coin83" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 11952, 160 )
+
+[node name="Coin84" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 13184, -144 )
+
+[node name="Coin85" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 13792, -352 )
+
+[node name="Coin86" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 14144, -400 )
+
+[node name="Coin87" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 14704, -576 )
+
+[node name="Coin88" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 15296, -592 )
+
+[node name="Coin89" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 16288, -464 )
+
+[node name="Coin90" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 16352, -464 )
+
+[node name="Coin91" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 16416, -464 )
+
+[node name="Coin92" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 16480, -464 )
+
+[node name="Coin93" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 16544, -464 )
+
+[node name="Coin94" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 16992, -176 )
+
+[node name="Coin95" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 17064, -176 )
+
+[node name="Coin96" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 17136, -176 )
+
+[node name="Coin97" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 17504, -176 )
+
+[node name="Coin105" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 19328, -80 )
+
+[node name="Coin106" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 19376, -64 )
+
+[node name="Coin107" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 19424, -80 )
+
+[node name="Coin108" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 19712, -112 )
+
+[node name="Coin109" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 19760, -96 )
+
+[node name="Coin110" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 19808, -112 )
+
+[node name="Coin111" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 20480, -304 )
+
+[node name="Coin113" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 20576, -304 )
+
+[node name="Coin114" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 21120, -176 )
+
+[node name="Coin115" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 21168, -160 )
+
+[node name="Coin116" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 21216, -176 )
+
+[node name="Coin117" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 21520, -240 )
+
+[node name="Coin118" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 21568, -224 )
+
+[node name="Coin119" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 21616, -240 )
+
+[node name="Coin120" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 23184, -224 )
+
+[node name="Coin121" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 23232, -208 )
+
+[node name="Coin122" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 23280, -224 )
+
+[node name="Coin112" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 20528, -320 )
+
+[node name="Coin98" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 17648, -176 )
+
+[node name="Coin100" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 17504, -464 )
+
+[node name="Coin104" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 17064, -480 )
+
+[node name="Coin101" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 17648, -464 )
+
+[node name="Coin102" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 17136, -464 )
+
+[node name="Coin103" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 16992, -464 )
+
+[node name="Coin99" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 17576, -176 )
 
 [node name="Coin79" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 10944, 82 )
@@ -495,7 +763,17 @@ position = Vector2( 784, -144 )
 [node name="CoinLarge" parent="Scores" instance=ExtResource( 8 )]
 position = Vector2( 4416, -288 )
 
+[node name="CoinLarge2" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( 10351, -78 )
+
+[node name="CoinLarge4" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( 23424, -352 )
+
+[node name="CoinLarge3" parent="Scores" instance=ExtResource( 8 )]
+position = Vector2( 17576, -480 )
+
 [node name="Checkpoints" type="Node2D" parent="."]
+editor/display_folded = true
 z_index = -1
 
 [node name="Checkpoint" parent="Checkpoints" instance=ExtResource( 9 )]
@@ -503,6 +781,9 @@ position = Vector2( 5984, 48 )
 
 [node name="Checkpoint2" parent="Checkpoints" instance=ExtResource( 9 )]
 position = Vector2( 11216, 160 )
+
+[node name="Checkpoint3" parent="Checkpoints" instance=ExtResource( 9 )]
+position = Vector2( 18432, -208 )
 
 [node name="Tips" type="Node2D" parent="."]
 z_index = 2
