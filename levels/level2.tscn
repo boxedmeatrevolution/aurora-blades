@@ -1,13 +1,15 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://entities/ui/pixel_camera.tscn" type="PackedScene" id=1]
 [ext_resource path="res://tilesets/winter.png" type="Texture" id=2]
 [ext_resource path="res://entities/player.tscn" type="PackedScene" id=3]
 [ext_resource path="res://entities/hazard.tscn" type="PackedScene" id=4]
-[ext_resource path="res://entities/coin.tscn" type="PackedScene" id=5]
-[ext_resource path="res://entities/coin_large.tscn" type="PackedScene" id=6]
-[ext_resource path="res://entities/checkpoint.tscn" type="PackedScene" id=7]
-[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=8]
+[ext_resource path="res://entities/hazard_large.tscn" type="PackedScene" id=5]
+[ext_resource path="res://entities/hazard_small.tscn" type="PackedScene" id=6]
+[ext_resource path="res://entities/coin.tscn" type="PackedScene" id=7]
+[ext_resource path="res://entities/coin_large.tscn" type="PackedScene" id=8]
+[ext_resource path="res://entities/checkpoint.tscn" type="PackedScene" id=9]
+[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=10]
 
 [sub_resource type="TileSet" id=1]
 0/name = "winter.png 0"
@@ -236,126 +238,271 @@ polygon = PoolVector2Array( 3984, -128, 3984, -48, 4032, 0, 4144, 0, 4400, -256,
 position = Vector2( -16, 32 )
 polygon = PoolVector2Array( 4592, -112, 4624, -80, 4784, -80, 4816, -112, 4816, -144, 4704, -144, 4640, -176, 4592, -224 )
 
+[node name="CollisionPolygon2D6" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 5904, 48, 6368, 48, 6432, 80, 6480, 128, 6512, 192, 6560, 240, 6624, 272, 6720, 272, 6784, 240, 6816, 208, 6816, 336, 6880, 400, 7168, 400, 7216, 352, 7216, 256, 7280, 320, 7344, 352, 7504, 352, 7568, 320, 7632, 256, 7632, 400, 7680, 448, 8000, 448, 8048, 400, 8048, 240, 8096, 288, 8160, 320, 8592, 320, 8656, 288, 8752, 192, 8816, 160, 8928, 160, 8992, 128, 9088, 32, 9152, 0, 9232, 0, 9296, 32, 9392, 128, 9424, 144, 9456, 144, 9488, 128, 9520, 96, 9552, 80, 9584, 80, 9616, 96, 9680, 160, 9712, 176, 9792, 176, 9824, 192, 9888, 256, 9952, 288, 10032, 288, 10096, 256, 10144, 208, 10208, 176, 10272, 176, 10336, 208, 10384, 256, 10448, 384, 10496, 432, 10560, 464, 10688, 464, 10752, 432, 10800, 384, 10832, 320, 10832, 464, 10880, 512, 10944, 512, 10992, 464, 10992, 160, 11136, 160, 11136, 560, 9984.02, 560, 9720.86, 560, 9440, 560, 9148.13, 560, 8816, 560, 8256, 560, 7552, 560, 7264, 560, 6480, 560, 5904, 560 )
+
+[node name="CollisionPolygon2D7" type="CollisionPolygon2D" parent="Blocks"]
+polygon = PoolVector2Array( 9824, 32, 9856, 64, 9984, 64, 10016, 32, 10016, -48, 9984, -16, 9952, 0, 9824, 0 )
+
 [node name="Hazards" type="Node" parent="."]
-editor/display_folded = true
 
 [node name="Hazard" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 1640, 256 )
 scale = Vector2( 25, 2 )
 
+[node name="Hazard2" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7024, 384 )
+scale = Vector2( 18, 2 )
+
+[node name="Hazard3" parent="Hazards" instance=ExtResource( 4 )]
+position = Vector2( 7840, 416 )
+scale = Vector2( 20, 4 )
+
+[node name="HazardLarge" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 6848, 304 )
+
+[node name="HazardLarge2" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 7184, 320 )
+
+[node name="HazardLarge3" parent="Hazards" instance=ExtResource( 5 )]
+position = Vector2( 7664, 352 )
+
+[node name="HazardSmall" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 6976, 336 )
+
+[node name="HazardSmall2" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 6896, 352 )
+
+[node name="HazardSmall4" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 6112, -32 )
+
+[node name="HazardSmall5" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 6208, -64 )
+
+[node name="HazardSmall3" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 7120, 352 )
+
+[node name="HazardSmall6" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 8032, 336 )
+
+[node name="HazardSmall7" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 8016, 368 )
+
+[node name="HazardSmall8" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 7952, 352 )
+
+[node name="HazardSmall9" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 7744, 352 )
+
+[node name="HazardSmall10" parent="Hazards" instance=ExtResource( 6 )]
+position = Vector2( 7872, 320 )
+
 [node name="Scores" type="Node2D" parent="."]
 z_index = 1
 
-[node name="Coin" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 656, -144 )
 
-[node name="Coin4" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin4" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 1536, 48 )
 
-[node name="Coin5" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin5" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 1760, 48 )
 
-[node name="Coin10" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin10" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3056, 144 )
 
-[node name="Coin11" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin11" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3120, 144 )
 
-[node name="Coin12" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin12" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3184, 144 )
 
-[node name="Coin16" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin16" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3648, 64 )
 
-[node name="Coin17" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin17" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3696, 64 )
 
-[node name="Coin23" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin23" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3872, -80 )
 
-[node name="Coin32" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin32" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3232, 400 )
 
-[node name="Coin33" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin33" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3344, 320 )
 
-[node name="Coin34" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin34" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3472, 272 )
 
-[node name="Coin36" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin36" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3760, 272 )
 
-[node name="Coin37" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin37" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3872, 320 )
 
-[node name="Coin40" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin40" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3968, 400 )
 
-[node name="Coin41" parent="Scores" instance=ExtResource( 5 )]
-position = Vector2( 4256, 208 )
+[node name="Coin41" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 4272, 224 )
 
-[node name="Coin42" parent="Scores" instance=ExtResource( 5 )]
-position = Vector2( 4352, 160 )
+[node name="Coin42" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 4352, 192 )
 
-[node name="Coin43" parent="Scores" instance=ExtResource( 5 )]
-position = Vector2( 4432, 208 )
+[node name="Coin43" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 4432, 224 )
 
-[node name="Coin44" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin44" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 4704, -128 )
 
-[node name="Coin45" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin45" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 4784, -128 )
 
-[node name="Coin46" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin46" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 4864, -128 )
 
-[node name="Coin47" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin47" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 5136, 64 )
 
-[node name="Coin48" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin48" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 5232, 1 )
 
-[node name="Coin49" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin49" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 5328, 64 )
 
-[node name="Coin35" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin50" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 6864, 64 )
+
+[node name="Coin51" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 6960, 17 )
+
+[node name="Coin52" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 7040, 1 )
+
+[node name="Coin53" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 7120, 17 )
+
+[node name="Coin54" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 7200, 64 )
+
+[node name="Coin55" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 7712, 96 )
+
+[node name="Coin60" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 7648, 144 )
+
+[node name="Coin61" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 8032, 144 )
+
+[node name="Coin63" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 9680, -46 )
+
+[node name="Coin64" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 9760, -64 )
+
+[node name="Coin65" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 9840, -48 )
+
+[node name="Coin66" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 10016, -128 )
+
+[node name="Coin72" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 9072, -16 )
+
+[node name="Coin73" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 9136, -80 )
+
+[node name="Coin74" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 9200, -96 )
+
+[node name="Coin75" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 9264, -80 )
+
+[node name="Coin76" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 9312, -32 )
+
+[node name="Coin67" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 10080, -176 )
+
+[node name="Coin68" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 10160, -192 )
+
+[node name="Coin69" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 10240, -176 )
+
+[node name="Coin70" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 10304, -144 )
+
+[node name="Coin71" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 10352, -80 )
+
+[node name="Coin77" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 10864, 160 )
+
+[node name="Coin78" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 10896, 112 )
+
+[node name="Coin79" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 10944, 82 )
+
+[node name="Coin80" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 11008, 112 )
+
+[node name="Coin56" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 7792, 64 )
+
+[node name="Coin57" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 7856, 48 )
+
+[node name="Coin58" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 7920, 64 )
+
+[node name="Coin59" parent="Scores" instance=ExtResource( 7 )]
+position = Vector2( 7984, 98 )
+
+[node name="Coin35" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3616, 240 )
 
-[node name="Coin24" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin24" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3904, -144 )
 
-[node name="Coin25" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin25" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3952, -192 )
 
-[node name="Coin26" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin26" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 4000, -176 )
 
-[node name="Coin13" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin13" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3360, -64 )
 
-[node name="Coin15" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin15" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3488, -64 )
 
-[node name="Coin14" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin14" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 3424, -96 )
 
-[node name="Coin6" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin6" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 1648, 18 )
 
-[node name="Coin2" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin2" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 720, -176 )
 
-[node name="Coin3" parent="Scores" instance=ExtResource( 5 )]
+[node name="Coin3" parent="Scores" instance=ExtResource( 7 )]
 position = Vector2( 784, -144 )
 
-[node name="CoinLarge" parent="Scores" instance=ExtResource( 6 )]
+[node name="CoinLarge" parent="Scores" instance=ExtResource( 8 )]
 position = Vector2( 4416, -288 )
 
 [node name="Checkpoints" type="Node2D" parent="."]
 z_index = -1
 
-[node name="Checkpoint" parent="Checkpoints" instance=ExtResource( 7 )]
+[node name="Checkpoint" parent="Checkpoints" instance=ExtResource( 9 )]
 position = Vector2( 5984, 48 )
+
+[node name="Checkpoint2" parent="Checkpoints" instance=ExtResource( 9 )]
+position = Vector2( 11216, 160 )
 
 [node name="Tips" type="Node2D" parent="."]
 z_index = 2
@@ -364,12 +511,12 @@ z_index = 2
 editor/display_folded = true
 z_index = 10
 
-[node name="Snow" parent="Foreground" instance=ExtResource( 8 )]
+[node name="Snow" parent="Foreground" instance=ExtResource( 10 )]
 
 [node name="Background" type="Node2D" parent="."]
 editor/display_folded = true
 z_index = -10
 
-[node name="Snow" parent="Background" instance=ExtResource( 8 )]
+[node name="Snow" parent="Background" instance=ExtResource( 10 )]
 [connection signal="death" from="Player" to="PixelCamera" method="_on_player_death"]
 [connection signal="spawn" from="Player" to="PixelCamera" method="_on_player_spawn"]

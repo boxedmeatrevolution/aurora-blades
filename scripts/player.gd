@@ -6,6 +6,10 @@ const Score := preload("res://scripts/score.gd")
 
 # Things that need to be done:
 
+# * More big coins to reward doing extra challenges.
+# * Make grading show which area you were weakest in.
+# * Add a proper pause menu with the option to restart the level.
+# * Add a keybinding for the player respawn.
 # * Symbol that pulses at the beat for tutorial.
 # * Ensure player sees dash tip.
 # * Camera behind player.
