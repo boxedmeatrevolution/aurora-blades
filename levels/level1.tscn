@@ -271,6 +271,7 @@ polygon = PoolVector2Array( 8864, -208, 9184, -208, 9248, -176, 9344, -80, 9408,
 polygon = PoolVector2Array( 12736, 48, 12928, 48, 12992, 80, 13056, 144, 13104, 240, 13168, 304, 13232, 336, 13328, 336, 13392, 304, 13440, 256, 13440, 400, 13984, 400, 13984, 208, 14048, 272, 14112, 304, 14384, 304, 14448, 272, 14544, 176, 14592, 80, 14640, 32, 14704, 0, 14752, 0, 14816, 32, 14848, 64, 14864, 96, 14928, 160, 14992, 192, 15120, 192, 15120, 464, 14480, 464, 14064, 464, 13264, 464, 13056, 464, 12736, 464 )
 
 [node name="Hazards" type="Node" parent="."]
+editor/display_folded = true
 
 [node name="HazardSmall" parent="Hazards" instance=ExtResource( 4 )]
 position = Vector2( 1136, -80 )
@@ -328,6 +329,7 @@ scale = Vector2( 14, 2 )
 position = Vector2( 5280, -96 )
 
 [node name="Scores" type="Node2D" parent="."]
+editor/display_folded = true
 z_index = 1
 
 [node name="Coin" parent="Scores" instance=ExtResource( 7 )]
@@ -501,8 +503,9 @@ position = Vector2( 8224, -336 )
 [node name="CoinLarge2" parent="Scores" instance=ExtResource( 8 )]
 position = Vector2( 19184, -128 )
 
-[node name="Checkpoints" type="Node" parent="."]
+[node name="Checkpoints" type="Node2D" parent="."]
 editor/display_folded = true
+z_index = -1
 
 [node name="Checkpoint" parent="Checkpoints" instance=ExtResource( 9 )]
 position = Vector2( 1024, -64 )
@@ -527,6 +530,7 @@ position = Vector2( 15264, 192 )
 
 [node name="Tips" type="Node2D" parent="."]
 editor/display_folded = true
+z_index = 2
 
 [node name="Movement" type="Node2D" parent="Tips"]
 position = Vector2( -144, 18 )
