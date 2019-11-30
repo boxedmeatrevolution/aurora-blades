@@ -33,4 +33,5 @@ func _options_screen_done() -> void:
 
 func _main_menu_pressed() -> void:
 	if self.options_screen == null:
+		emit_signal("done")
 		get_tree().change_scene("res://levels/main_menu.tscn")
