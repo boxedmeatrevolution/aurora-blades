@@ -811,7 +811,7 @@ func _read_intent(move_direction : Vector2, double_tap : int) -> Intent:
 					intent.skate_brake = true
 				else:
 					intent.skate_brake = false
-			if !intent.skate_brake && Input.is_action_just_pressed("skate"):
+			if !intent.skate_brake && Input.is_action_just_pressed("skate") || (self.skate_direction == -1 && Input.is_action_just_pressed("move_left")) || (self.skate_direction == 1 && Input.is_action_just_pressed("move_right")):
 				intent.skate_boost = true
 	if Input.is_action_just_pressed("dive"):
 		intent.dive = true
