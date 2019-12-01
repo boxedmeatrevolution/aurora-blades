@@ -321,8 +321,8 @@ region_enabled = true
 region_rect = Rect2( 0, 0, 1920, 540 )
 
 [node name="Snow" parent="Background" instance=ExtResource( 11 )]
-[connection signal="death" from="Player" to="UI" method="update_deaths"]
 [connection signal="death" from="Player" to="PixelCamera" method="_on_player_death"]
+[connection signal="death" from="Player" to="UI" method="update_deaths"]
 [connection signal="score" from="Player" to="UI" method="update_score"]
 [connection signal="spawn" from="Player" to="PixelCamera" method="_on_player_spawn"]
 [connection signal="win" from="Player" to="UI" method="show_win_screen"]

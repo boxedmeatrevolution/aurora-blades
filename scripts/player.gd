@@ -4,6 +4,11 @@ const Checkpoint := preload("res://scripts/checkpoint.gd")
 const Hazard := preload("res://scripts/hazard.gd")
 const Score := preload("res://scripts/score.gd")
 
+const AUDIO_SKATE_BOOST_1 := preload("res://sounds/skate_boost_1.ogg")
+const AUDIO_SKATE_BOOST_2 := preload("res://sounds/skate_boost_2.ogg")
+const AUDIO_SKATE_BOOST_3 := preload("res://sounds/skate_boost_3.ogg")
+const AUDIO_SKATE_BOOST_4 := preload("res://sounds/skate_boost_4.ogg")
+
 # Things that need to be done:
 
 # * More big coins to reward doing extra challenges.
@@ -363,7 +368,18 @@ onready var hazard_area2d := $HazardArea2D
 
 onready var sprite := $Sprite
 onready var animation_player := $Sprite/AnimationPlayer
-onready var ballistic_effect_sprite := $BallisticEffectSprite
+onready var walk_audio := $WalkAudio
+onready var jump_audio := $JumpAudio
+onready var land_audio := $LandAudio
+onready var skate_audio := $SkateAudio
+onready var skate_boost_audio := $SkateBoostAudio
+onready var skate_brake_audio := $SkateBrakeAudio
+onready var skate_brake_continuous_audio := $SkateBrakeContinuousAudio
+onready var skate_jump_audio := $SkateJumpAudio
+onready var skate_land_audio := $SkateLandAudio
+onready var dive_charge_audio := $DiveChargeAudio
+onready var dive_audio := $DiveAudio
+onready var death_audio := $DeathAudio
 
 onready var skate_brake_effect_a := $SkateA/IceSpray
 onready var skate_brake_effect_b := $SkateB/IceSpray
@@ -375,6 +391,9 @@ onready var jump_burst_effect_a := $SkateA/JumpBurst
 onready var jump_burst_effect_b := $SkateB/JumpBurst
 onready var dive_charge_effect := $DiveCharge
 onready var death_burst_effect := $DeathBurst
+
+func _is_air_physics_state(physics_state : int) -> bool:
+	return physics_state == PhysicsState.AIR
 
 # Is the player on a surface, meaning on a floor, slope, or wall?
 func _is_surface_physics_state(physics_state : int) -> bool:
@@ -579,7 +598,6 @@ func _reset() -> void:
 	self.hazard_area2d.get_child(0).disabled = false
 	
 	self.sprite.visible = true
-	self.ballistic_effect_sprite.visible = false
 	self.skate_brake_effect_a.set_emitting(false)
 	self.skate_brake_effect_b.set_emitting(false)
 	self.skate_trail_effect_a.set_emitting(false)
@@ -599,6 +617,8 @@ func spawn() -> void:
 
 func death() -> void:
 	_reset()
+	
+	self.death_audio.play()
 	
 	self.dying = false
 	self.dead = true
@@ -646,7 +666,6 @@ func death() -> void:
 	emit_signal("death", self, respawn_player)
 
 func _ready() -> void:
-	self.ballistic_effect_sprite.visible = false
 	self.score_area2d.connect("area_entered", self, "_on_score_pickup")
 	self.checkpoint_area2d.connect("area_entered", self, "_on_checkpoint_activate")
 	self.win_area2d.connect("area_entered", self, "_on_win")
@@ -688,6 +707,10 @@ func _on_hazard_collision(area2d : Area2D) -> void:
 		self.dying = true
 
 func _physics_process(delta : float) -> void:
+	# Handle death.
+	if self.dead:
+		return
+	
 	var move_direction := _read_move_direction()
 	# Update the velocities based on the current state.
 	_state_process(delta, move_direction)
@@ -703,12 +726,10 @@ func _physics_process(delta : float) -> void:
 	_facing_direction_process(move_direction)
 	_animation_process()
 	_effects_process()
+	_audio_process()
 	
-	# Handle death.
-	if !self.dead && (self.dying || intent.restart):
+	if self.dying || intent.restart:
 		death()
-	if self.dead:
-		return
 	
 	# Print the state for debugging purposes.
 	if self.previous_state != self.state || self.previous_physics_state != self.physics_state:
@@ -1511,12 +1532,6 @@ func _animation_process() -> void:
 		self.animation_player.play(next_animation)
 
 func _effects_process() -> void:
-#	if self.state == State.BALLISTIC:
-#		self.ballistic_effect_sprite.visible = true
-#		self.ballistic_effect_sprite.rotation = self.velocity.angle()
-#	else:
-#		self.ballistic_effect_sprite.visible = false
-	
 	if self.state == State.SKATE_BRAKE:
 		self.skate_brake_effect_a.set_emitting(true, abs(self.velocity.length()))
 		self.skate_brake_effect_b.set_emitting(true, abs(self.velocity.length()))
@@ -1546,6 +1561,54 @@ func _effects_process() -> void:
 	
 	var dive_charge : bool = self.state == State.DIVE_CHARGE
 	self.dive_charge_effect.set_emitting(dive_charge)
+
+func _audio_process() -> void:
+	var previous_in_air := _is_air_state(self.previous_state)
+	var in_air := _is_air_state(self.state)
+	if _is_prejump_state(self.state) && self.state != State.WALL_RELEASE:
+		if _is_skate_state(self.state):
+			if !self.skate_jump_audio.playing:
+				self.skate_jump_audio.play()
+		if !self.jump_audio.playing:
+			self.jump_audio.play()
+	if previous_in_air && !in_air:
+		if _is_skate_state(self.state):
+			if !self.skate_land_audio.playing:
+				self.skate_land_audio.play()
+		else:
+			if !self.land_audio.playing:
+				self.land_audio.play()
+	if _is_skate_state(self.state) && !in_air:
+		if !self.skate_audio.playing:
+			self.skate_audio.play()
+	else:
+		if self.skate_audio.playing:
+			self.skate_audio.stop()
+	if self.state == State.SKATE_BRAKE:
+		if !self.skate_brake_continuous_audio.playing:
+			self.skate_brake_continuous_audio.play()
+	else:
+		if self.skate_brake_continuous_audio.playing:
+			self.skate_brake_continuous_audio.stop()
+	if self.state == State.PIVOT && self.previous_state != State.PIVOT:
+		if !self.skate_brake_audio.playing:
+			self.skate_brake_audio.play()
+	if self.state == State.SKATE_BOOST || self.state == State.SKATE_START || self.state == State.SKATE_PIVOT_START:
+		var idx := randi() % 4
+		match idx:
+			0:
+				self.skate_boost_audio.stream = AUDIO_SKATE_BOOST_1
+			1:
+				self.skate_boost_audio.stream = AUDIO_SKATE_BOOST_2
+			2:
+				self.skate_boost_audio.stream = AUDIO_SKATE_BOOST_3
+			_:
+				self.skate_boost_audio.stream = AUDIO_SKATE_BOOST_4
+		self.skate_boost_audio.play()
+	if self.state == State.DIVE_CHARGE && self.previous_state != State.DIVE_CHARGE:
+		self.dive_charge_audio.play()
+	if self.state == State.DIVE_START && self.previous_state != State.DIVE_START:
+		self.dive_audio.play()
 
 func _on_dialogue_start():
 	self.in_dialogue = true

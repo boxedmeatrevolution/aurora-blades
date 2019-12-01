@@ -1,13 +1,24 @@
-[gd_scene load_steps=47 format=2]
+[gd_scene load_steps=56 format=2]
 
 [ext_resource path="res://scripts/player.gd" type="Script" id=1]
 [ext_resource path="res://sprites/player.png" type="Texture" id=2]
-[ext_resource path="res://entities/effects/ice_spray.tscn" type="PackedScene" id=3]
-[ext_resource path="res://entities/effects/skate_trail.tscn" type="PackedScene" id=4]
-[ext_resource path="res://entities/effects/dive_trail.tscn" type="PackedScene" id=5]
-[ext_resource path="res://entities/effects/jump_burst.tscn" type="PackedScene" id=6]
-[ext_resource path="res://entities/effects/dive_charge.tscn" type="PackedScene" id=7]
-[ext_resource path="res://entities/effects/death_burst.tscn" type="PackedScene" id=8]
+[ext_resource path="res://sounds/footstep_1.ogg" type="AudioStream" id=3]
+[ext_resource path="res://sounds/footstep_2.ogg" type="AudioStream" id=4]
+[ext_resource path="res://entities/effects/ice_spray.tscn" type="PackedScene" id=5]
+[ext_resource path="res://entities/effects/skate_trail.tscn" type="PackedScene" id=6]
+[ext_resource path="res://entities/effects/dive_trail.tscn" type="PackedScene" id=7]
+[ext_resource path="res://entities/effects/jump_burst.tscn" type="PackedScene" id=8]
+[ext_resource path="res://entities/effects/dive_charge.tscn" type="PackedScene" id=9]
+[ext_resource path="res://entities/effects/death_burst.tscn" type="PackedScene" id=10]
+[ext_resource path="res://sounds/jump.ogg" type="AudioStream" id=11]
+[ext_resource path="res://sounds/land.ogg" type="AudioStream" id=12]
+[ext_resource path="res://sounds/skate.ogg" type="AudioStream" id=13]
+[ext_resource path="res://sounds/skate_boost_1.ogg" type="AudioStream" id=14]
+[ext_resource path="res://sounds/skate_brake.ogg" type="AudioStream" id=15]
+[ext_resource path="res://sounds/skate_boost_3.ogg" type="AudioStream" id=16]
+[ext_resource path="res://sounds/dive_charge.ogg" type="AudioStream" id=17]
+[ext_resource path="res://sounds/dive.ogg" type="AudioStream" id=18]
+[ext_resource path="res://sounds/death.ogg" type="AudioStream" id=19]
 
 [sub_resource type="Animation" id=1]
 resource_name = "BallisticFallLeft"
@@ -1074,6 +1085,24 @@ tracks/2/keys = {
 "update": 0,
 "values": [ Vector2( 8, 16 ), Vector2( 9, 10 ), Vector2( 6, 7 ), Vector2( -10, 13 ), Vector2( -7, 17 ), Vector2( 0, 18 ) ]
 }
+tracks/3/type = "audio"
+tracks/3/path = NodePath("../WalkAudio")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"clips": [ {
+"end_offset": 0.0,
+"start_offset": 0.0,
+"stream": ExtResource( 3 )
+}, {
+"end_offset": 0.0,
+"start_offset": 0.0,
+"stream": ExtResource( 4 )
+} ],
+"times": PoolRealArray( 0.2, 0.5 )
+}
 
 [sub_resource type="Animation" id=28]
 length = 0.6
@@ -1113,6 +1142,24 @@ tracks/2/keys = {
 "transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
 "update": 0,
 "values": [ Vector2( -8, 16 ), Vector2( -9, 10 ), Vector2( -6, 7 ), Vector2( 10, 13 ), Vector2( 7, 17 ), Vector2( 0, 18 ) ]
+}
+tracks/3/type = "audio"
+tracks/3/path = NodePath("../WalkAudio")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"clips": [ {
+"end_offset": 0.0,
+"start_offset": 0.0,
+"stream": ExtResource( 3 )
+}, {
+"end_offset": 0.0,
+"start_offset": 0.0,
+"stream": ExtResource( 4 )
+} ],
+"times": PoolRealArray( 0.2, 0.5 )
 }
 
 [sub_resource type="Animation" id=29]
@@ -1282,24 +1329,6 @@ extents = Vector2( 5, 16 )
 
 [sub_resource type="StreamTexture" id=36]
 
-[sub_resource type="Animation" id=37]
-length = 0.3
-loop = true
-tracks/0/type = "value"
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/keys = {
-"times": PoolRealArray( 0, 0.1, 0.2 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
-"update": 1,
-"values": [ 0, 1, 2 ]
-}
-
-[sub_resource type="StreamTexture" id=38]
-
 [node name="Player" type="KinematicBody2D"]
 collision_mask = 2
 script = ExtResource( 1 )
@@ -1310,7 +1339,7 @@ position = Vector2( 0, -14 )
 texture = ExtResource( 2 )
 vframes = 5
 hframes = 12
-frame = 54
+frame = 20
 region_rect = Rect2( 143, 278, 38, 35 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Sprite"]
@@ -1391,21 +1420,9 @@ collision_mask = 4
 visible = false
 shape = SubResource( 35 )
 
-[node name="BallisticEffectSprite" type="Sprite" parent="."]
-editor/display_folded = true
-visible = false
-texture = SubResource( 36 )
-offset = Vector2( -5, 0 )
-hframes = 3
-frame = 2
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="BallisticEffectSprite"]
-autoplay = "BallisticEffect"
-anims/BallisticEffect = SubResource( 37 )
-
 [node name="SkateA" type="Node2D" parent="."]
 editor/display_folded = true
-position = Vector2( -19, 2 )
+position = Vector2( 0, 18 )
 __meta__ = {
 "_edit_group_": true
 }
@@ -1413,21 +1430,21 @@ __meta__ = {
 [node name="Sprite" type="Sprite" parent="SkateA"]
 visible = false
 scale = Vector2( 0.5, 0.5 )
-texture = SubResource( 38 )
+texture = SubResource( 36 )
 
-[node name="IceSpray" parent="SkateA" instance=ExtResource( 3 )]
+[node name="IceSpray" parent="SkateA" instance=ExtResource( 5 )]
 z_index = 1
 
-[node name="SkateTrail" parent="SkateA" instance=ExtResource( 4 )]
+[node name="SkateTrail" parent="SkateA" instance=ExtResource( 6 )]
 z_index = 1
 
-[node name="DiveTrail" parent="SkateA" instance=ExtResource( 5 )]
+[node name="DiveTrail" parent="SkateA" instance=ExtResource( 7 )]
 
-[node name="JumpBurst" parent="SkateA" instance=ExtResource( 6 )]
+[node name="JumpBurst" parent="SkateA" instance=ExtResource( 8 )]
 
 [node name="SkateB" type="Node2D" parent="."]
 editor/display_folded = true
-position = Vector2( -1, 9 )
+position = Vector2( -6, 7 )
 __meta__ = {
 "_edit_group_": true
 }
@@ -1435,20 +1452,59 @@ __meta__ = {
 [node name="Sprite" type="Sprite" parent="SkateB"]
 visible = false
 scale = Vector2( 0.5, 0.5 )
-texture = SubResource( 38 )
+texture = SubResource( 36 )
 
-[node name="IceSpray" parent="SkateB" instance=ExtResource( 3 )]
+[node name="IceSpray" parent="SkateB" instance=ExtResource( 5 )]
 z_index = -1
 
-[node name="SkateTrail" parent="SkateB" instance=ExtResource( 4 )]
+[node name="SkateTrail" parent="SkateB" instance=ExtResource( 6 )]
 z_index = -1
 
-[node name="DiveTrail" parent="SkateB" instance=ExtResource( 5 )]
+[node name="DiveTrail" parent="SkateB" instance=ExtResource( 7 )]
 
-[node name="JumpBurst" parent="SkateB" instance=ExtResource( 6 )]
+[node name="JumpBurst" parent="SkateB" instance=ExtResource( 8 )]
 
-[node name="DiveCharge" parent="." instance=ExtResource( 7 )]
+[node name="DiveCharge" parent="." instance=ExtResource( 9 )]
 position = Vector2( 0, -8 )
 z_index = -1
 
-[node name="DeathBurst" parent="." instance=ExtResource( 8 )]
+[node name="DeathBurst" parent="." instance=ExtResource( 10 )]
+
+[node name="WalkAudio" type="AudioStreamPlayer2D" parent="."]
+volume_db = -15.0
+
+[node name="JumpAudio" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 11 )
+
+[node name="LandAudio" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 12 )
+volume_db = -5.0
+
+[node name="SkateAudio" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 13 )
+volume_db = -8.0
+
+[node name="SkateBoostAudio" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 14 )
+
+[node name="SkateBrakeAudio" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 15 )
+
+[node name="SkateBrakeContinuousAudio" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 13 )
+volume_db = 4.0
+
+[node name="SkateJumpAudio" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 16 )
+
+[node name="SkateLandAudio" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 14 )
+
+[node name="DiveChargeAudio" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 17 )
+
+[node name="DiveAudio" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 18 )
+
+[node name="DeathAudio" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource( 19 )
