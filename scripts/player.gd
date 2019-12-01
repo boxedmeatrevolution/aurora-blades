@@ -11,8 +11,8 @@ const AUDIO_SKATE_BOOST_4 := preload("res://sounds/skate_boost_4.wav")
 
 # Things that need to be done:
 
+# * Add controller support.
 # * Make grading show which area you were weakest in.
-# * Symbol that pulses at the beat for tutorial.
 # * Ensure player sees dash tip.
 # * Flip player sprite around when charging a dash for backwards.
 # * Allow "late jumps".
@@ -274,7 +274,7 @@ const BALLISTIC_MAX_REDIRECT_FRACTION := 0.6
 const DIVE_CHARGE_TIME := 0.4
 const DIVE_CHARGE_FRICTION := 2000.0
 const DIVE_CHARGE_FRICTION_MIN_SPEED := 100.0
-const DIVE_CHARGE_SPEED := 80.0
+const DIVE_CHARGE_SPEED := 40.0
 const DIVE_DISTANCE := 150.0
 const DIVE_SPEED_START := 700.0
 const DIVE_SPEED_END := 200.0
@@ -329,6 +329,9 @@ var previous_position := Vector2.ZERO
 var previous_velocity := Vector2.ZERO
 var previous_skate_direction := 1
 
+var last_move_direction := Vector2.ZERO
+var last_move_direction_timer := 0.0
+
 # Stores a list of coins that have been picked up since the last checkpoint
 # that will need to be returned if the player dies.
 var score_list := []
@@ -352,6 +355,7 @@ onready var skate_land_audio := $SkateLandAudio
 onready var dive_charge_audio := $DiveChargeAudio
 onready var dive_audio := $DiveAudio
 onready var death_audio := $DeathAudio
+onready var spawn_audio := $SpawnAudio
 
 onready var skate_brake_effect_a := $SkateA/IceSpray
 onready var skate_brake_effect_b := $SkateB/IceSpray
@@ -588,6 +592,7 @@ func spawn() -> void:
 	_reset()
 	self.global_position = self.respawn_position
 	self.death_burst_effect.burst()
+	self.spawn_audio.play()
 	emit_signal("spawn", self)
 
 func death() -> void:
@@ -687,6 +692,7 @@ func _physics_process(delta : float) -> void:
 		return
 	
 	var move_direction := _read_move_direction()
+	self.last_move_direction_timer += delta
 	# Update the velocities based on the current state.
 	_state_process(delta, move_direction)
 	# Step the position forward by the timestep.
@@ -734,6 +740,11 @@ func _read_intent(move_direction : Vector2) -> Intent:
 		return Intent.new()
 	var intent := Intent.new()
 	intent.move_direction = move_direction
+	# Update the last_move_direction variable here, so we can use it to check
+	# for double taps.
+	if move_direction.length_squared() != 0.0:
+		self.last_move_direction = move_direction
+		self.last_move_direction_timer = 0.0
 	# Get input from the user. The intent structure represents the action that
 	# the player wants to do, not the input that the player actually did, so
 	# parts of it are conditional on the current state.
