@@ -1,6 +1,7 @@
 extends Node
 
 enum Difficulty {
+	VERY_EASY,
 	EASY,
 	MEDIUM,
 	HARD

@@ -2,6 +2,10 @@ extends CanvasLayer
 
 signal done
 
+func _very_easy_pressed() -> void:
+	Difficulty.difficulty = Difficulty.Difficulty.VERY_EASY
+	emit_signal("done")
+
 func _easy_pressed() -> void:
 	Difficulty.difficulty = Difficulty.Difficulty.EASY
 	emit_signal("done")

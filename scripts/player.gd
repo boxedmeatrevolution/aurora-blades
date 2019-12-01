@@ -1271,7 +1271,7 @@ func _state_transition(delta : float, intent : Intent, collision_info : Collisio
 	if self.state == State.DIVE:
 		self.has_dive = false
 	
-	if Difficulty.difficulty == Difficulty.Difficulty.EASY:
+	if Difficulty.difficulty == Difficulty.Difficulty.EASY || Difficulty.difficulty == Difficulty.Difficulty.VERY_EASY:
 		self.has_dive = true
 	if Difficulty.difficulty == Difficulty.Difficulty.HARD:
 		self.has_dive = false

@@ -4,5 +4,5 @@ onready var sprite := $Sprite
 
 func _ready():
 	if self.sprite.visible:
-		if Difficulty.difficulty == Difficulty.Difficulty.EASY:
+		if Difficulty.difficulty == Difficulty.Difficulty.VERY_EASY:
 			self.queue_free()
