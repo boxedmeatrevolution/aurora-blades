@@ -1,0 +1,113 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://scripts/difficulty_screen.gd" type="Script" id=1]
+[ext_resource path="res://styles/screen_back.tres" type="StyleBox" id=2]
+[ext_resource path="res://fonts/heading.tres" type="DynamicFont" id=3]
+[ext_resource path="res://styles/button.tres" type="StyleBox" id=4]
+[ext_resource path="res://fonts/content.tres" type="DynamicFont" id=5]
+
+[node name="DifficultyScreen" type="CanvasLayer"]
+script = ExtResource( 1 )
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+margin_right = 960.0
+margin_bottom = 540.0
+
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
+margin_left = 115.0
+margin_top = 134.0
+margin_right = 845.0
+margin_bottom = 406.0
+custom_styles/panel = ExtResource( 2 )
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer"]
+margin_left = 1.0
+margin_top = 1.0
+margin_right = 729.0
+margin_bottom = 271.0
+custom_constants/separation = 16
+
+[node name="Label" type="Label" parent="CenterContainer/PanelContainer/VBoxContainer"]
+margin_right = 728.0
+margin_bottom = 24.0
+custom_fonts/font = ExtResource( 3 )
+text = "Difficulty"
+
+[node name="GridContainer" type="GridContainer" parent="CenterContainer/PanelContainer/VBoxContainer"]
+margin_top = 40.0
+margin_right = 728.0
+margin_bottom = 270.0
+custom_constants/vseparation = 48
+custom_constants/hseparation = 32
+columns = 2
+
+[node name="EasyButton" type="Button" parent="CenterContainer/PanelContainer/VBoxContainer/GridContainer"]
+margin_top = 7.0
+margin_right = 184.0
+margin_bottom = 47.0
+size_flags_vertical = 4
+custom_styles/hover = ExtResource( 4 )
+custom_styles/pressed = ExtResource( 4 )
+custom_styles/focus = ExtResource( 4 )
+custom_styles/disabled = ExtResource( 4 )
+custom_styles/normal = ExtResource( 4 )
+custom_fonts/font = ExtResource( 5 )
+text = "Accessible"
+
+[node name="EasyLabel" type="Label" parent="CenterContainer/PanelContainer/VBoxContainer/GridContainer"]
+margin_left = 216.0
+margin_right = 728.0
+margin_bottom = 54.0
+rect_min_size = Vector2( 512, 0 )
+custom_fonts/font = ExtResource( 5 )
+text = "Many of the hazards have been removed, and you can dash as many times as you like."
+autowrap = true
+
+[node name="MediumButton" type="Button" parent="CenterContainer/PanelContainer/VBoxContainer/GridContainer"]
+margin_top = 102.0
+margin_right = 184.0
+margin_bottom = 142.0
+size_flags_vertical = 4
+custom_styles/hover = ExtResource( 4 )
+custom_styles/pressed = ExtResource( 4 )
+custom_styles/focus = ExtResource( 4 )
+custom_styles/disabled = ExtResource( 4 )
+custom_styles/normal = ExtResource( 4 )
+custom_fonts/font = ExtResource( 5 )
+text = "Challenging"
+
+[node name="MediumLabel" type="Label" parent="CenterContainer/PanelContainer/VBoxContainer/GridContainer"]
+margin_left = 216.0
+margin_top = 104.0
+margin_right = 728.0
+margin_bottom = 139.0
+rect_min_size = Vector2( 512, 0 )
+custom_fonts/font = ExtResource( 5 )
+text = "All hazards are present, and you get one dash in the air."
+autowrap = true
+
+[node name="HardButton" type="Button" parent="CenterContainer/PanelContainer/VBoxContainer/GridContainer"]
+margin_top = 190.0
+margin_right = 184.0
+margin_bottom = 230.0
+size_flags_vertical = 4
+custom_styles/hover = ExtResource( 4 )
+custom_styles/pressed = ExtResource( 4 )
+custom_styles/focus = ExtResource( 4 )
+custom_styles/disabled = ExtResource( 4 )
+custom_styles/normal = ExtResource( 4 )
+custom_fonts/font = ExtResource( 5 )
+text = "Impossible"
+
+[node name="HardLabel" type="Label" parent="CenterContainer/PanelContainer/VBoxContainer/GridContainer"]
+margin_left = 216.0
+margin_top = 192.0
+margin_right = 728.0
+margin_bottom = 227.0
+rect_min_size = Vector2( 512, 0 )
+custom_fonts/font = ExtResource( 5 )
+text = "All hazards are present, and you get no dashes."
+autowrap = true
+[connection signal="pressed" from="CenterContainer/PanelContainer/VBoxContainer/GridContainer/EasyButton" to="." method="_easy_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/VBoxContainer/GridContainer/MediumButton" to="." method="_medium_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/VBoxContainer/GridContainer/HardButton" to="." method="_hard_pressed"]

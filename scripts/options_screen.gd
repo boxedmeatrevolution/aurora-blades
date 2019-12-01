@@ -2,7 +2,6 @@ extends CanvasLayer
 
 signal done
 
-onready var box := $CenterContainer
 onready var sound_slider := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/SoundSlider
 onready var music_slider := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/MusicSlider
 onready var fullscreen_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/FullscreenButton
@@ -72,7 +71,7 @@ func _pressed_ok_button() -> void:
 
 func _input(event : InputEvent) -> void:
 	var key_event := event as InputEventKey
-	if key_event != null && key_event.pressed && !key_event.echo && self.box.visible && self.current_action != "":
+	if key_event != null && key_event.pressed && !key_event.echo && self.current_action != "":
 		get_tree().set_input_as_handled()
 		var converted_key_event = InputEventKey.new()
 		converted_key_event.scancode = key_event.scancode
