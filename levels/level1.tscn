@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://entities/ui/pixel_camera.tscn" type="PackedScene" id=1]
 [ext_resource path="res://entities/ui/ui.tscn" type="PackedScene" id=2]
@@ -13,8 +13,9 @@
 [ext_resource path="res://entities/level_end.tscn" type="PackedScene" id=11]
 [ext_resource path="res://styles/tip_back.tres" type="StyleBox" id=12]
 [ext_resource path="res://fonts/content.tres" type="DynamicFont" id=13]
-[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=14]
-[ext_resource path="res://entities/background_day.tscn" type="PackedScene" id=15]
+[ext_resource path="res://entities/heart.tscn" type="PackedScene" id=14]
+[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=15]
+[ext_resource path="res://entities/background_day.tscn" type="PackedScene" id=16]
 
 [node name="Level1" type="Node"]
 
@@ -29,7 +30,6 @@ good_deaths = 1.0
 [node name="Player" parent="." instance=ExtResource( 3 )]
 
 [node name="Blocks" type="StaticBody2D" parent="."]
-editor/display_folded = true
 collision_layer = 2
 collision_mask = 0
 
@@ -351,7 +351,6 @@ position = Vector2( 15264, 192 )
 position = Vector2( 20160, 320 )
 
 [node name="Tips" type="Node2D" parent="."]
-editor/display_folded = true
 z_index = 2
 
 [node name="Movement" type="Node2D" parent="Tips"]
@@ -411,8 +410,11 @@ margin_bottom = 108.0
 custom_styles/normal = ExtResource( 12 )
 custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
-text = "Repeatedly tap SKATE or ←/→ to go faster. Don't mash too fast though, or it will be less effective! Try to match the beat."
+text = "Repeatedly tap SKATE or ←/→ to go faster. Don't mash too fast though, or it will be a little bit less effective! Try to match the beat."
 autowrap = true
+
+[node name="Heart" parent="Tips" instance=ExtResource( 14 )]
+position = Vector2( 2976, 89 )
 
 [node name="SkateJump" type="Node2D" parent="Tips"]
 position = Vector2( 3600, -112 )
@@ -523,15 +525,14 @@ autowrap = true
 editor/display_folded = true
 z_index = 10
 
-[node name="Snow" parent="Foreground" instance=ExtResource( 14 )]
+[node name="Snow" parent="Foreground" instance=ExtResource( 15 )]
 
 [node name="Background" type="Node2D" parent="."]
-editor/display_folded = true
 z_index = -10
 
-[node name="ParallaxBackground" parent="Background" instance=ExtResource( 15 )]
+[node name="ParallaxBackground" parent="Background" instance=ExtResource( 16 )]
 
-[node name="Snow" parent="Background" instance=ExtResource( 14 )]
+[node name="Snow" parent="Background" instance=ExtResource( 15 )]
 [connection signal="death" from="Player" to="UI" method="update_deaths"]
 [connection signal="death" from="Player" to="PixelCamera" method="_on_player_death"]
 [connection signal="score" from="Player" to="UI" method="update_score"]

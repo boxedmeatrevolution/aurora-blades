@@ -14,11 +14,8 @@ const AUDIO_SKATE_BOOST_4 := preload("res://sounds/skate_boost_4.wav")
 # * Make grading show which area you were weakest in.
 # * Symbol that pulses at the beat for tutorial.
 # * Ensure player sees dash tip.
-# * Camera behind player.
 # * Flip player sprite around when charging a dash for backwards.
-# * Make respawning happen faster.
 # * Allow "late jumps".
-# * Jump particles
 # * Bug when player dashes into ground (should get only the final velocity of
 #   the dash, not the instantaneous velocity).
 # * Make wall jumps feel better when walking (some delay after letting go when
