@@ -716,7 +716,6 @@ func _physics_process(delta : float) -> void:
 	# Print the state for debugging purposes.
 	if self.previous_state != self.state || self.previous_physics_state != self.physics_state:
 		print(PHYSICS_STATE_NAME[self.physics_state], "; ", STATE_NAME[self.state])
-	print(self.velocity.length())
 	self.previous_state = self.state
 	self.previous_physics_state = self.physics_state
 	self.previous_position = self.position

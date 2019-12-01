@@ -7,7 +7,7 @@ enum State {
 
 const DAMPING := 1000.0
 const WAIT_TIME := 0.8
-const TRAVEL_TIME_MAX := 3.0
+const TRAVEL_TIME_MAX := 2.5
 const TRAVEL_TIME_MIN := 1.0
 const TRAVEL_AVERAGE_SPEED := 400.0
 
