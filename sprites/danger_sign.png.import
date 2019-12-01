@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/winter.png-fd4486b7e9d26fdaeb28e5c383defecf.stex"
+path="res://.import/danger_sign.png-03dfe9846192e5cf869c97d78b89e97a.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://tilesets/winter.png"
-dest_files=[ "res://.import/winter.png-fd4486b7e9d26fdaeb28e5c383defecf.stex" ]
+source_file="res://sprites/danger_sign.png"
+dest_files=[ "res://.import/danger_sign.png-03dfe9846192e5cf869c97d78b89e97a.stex" ]
 
 [params]
 
@@ -20,7 +20,7 @@ compress/hdr_mode=0
 compress/bptc_ldr=0
 compress/normal_map=0
 flags/repeat=0
-flags/filter=false
+flags/filter=true
 flags/mipmaps=false
 flags/anisotropic=false
 flags/srgb=2

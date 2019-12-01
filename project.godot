@@ -126,5 +126,5 @@ ui_pause={
 [rendering]
 
 quality/2d/use_pixel_snap=true
-environment/default_clear_color=Color( 0.301961, 0.301961, 0.301961, 1 )
+environment/default_clear_color=Color( 0.921569, 0.921569, 0.921569, 1 )
 environment/default_environment="res://default_env.tres"

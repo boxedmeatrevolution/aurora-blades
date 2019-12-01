@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/spikes.png-f73d4acfe57b959ab754e6ecefa9b4fc.stex"
+path="res://.import/winter_night.png-8241742e69f6cf7ff61ea8d61ad2b055.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://tilesets/spikes.png"
-dest_files=[ "res://.import/spikes.png-f73d4acfe57b959ab754e6ecefa9b4fc.stex" ]
+source_file="res://tilesets/winter_night.png"
+dest_files=[ "res://.import/winter_night.png-8241742e69f6cf7ff61ea8d61ad2b055.stex" ]
 
 [params]
 

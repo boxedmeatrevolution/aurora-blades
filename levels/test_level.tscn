@@ -2,7 +2,7 @@
 
 [ext_resource path="res://entities/ui/pixel_camera.tscn" type="PackedScene" id=1]
 [ext_resource path="res://entities/ui/ui.tscn" type="PackedScene" id=2]
-[ext_resource path="res://tilesets/winter.tres" type="TileSet" id=3]
+[ext_resource path="res://tilesets/winter_day.tres" type="TileSet" id=3]
 [ext_resource path="res://entities/player.tscn" type="PackedScene" id=4]
 [ext_resource path="res://entities/hazard_small.tscn" type="PackedScene" id=5]
 [ext_resource path="res://entities/hazard_large.tscn" type="PackedScene" id=6]
@@ -12,6 +12,7 @@
 [ext_resource path="res://entities/checkpoint.tscn" type="PackedScene" id=10]
 [ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=11]
 [ext_resource path="res://entities/background_night.tscn" type="PackedScene" id=12]
+
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 64, 64 )
