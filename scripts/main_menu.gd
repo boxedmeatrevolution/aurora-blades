@@ -9,6 +9,9 @@ const LevelSelectScreen := preload("res://scripts/level_select_screen.gd")
 var options_screen : OptionsScreen = null
 var level_select_screen : LevelSelectScreen = null
 
+func _ready() -> void:
+	Music.start_transition(Music.MUSIC_MAIN_MENU)
+
 func _start_pressed() -> void:
 	if self.options_screen == null && self.level_select_screen == null:
 		get_tree().change_scene("res://levels/level1.tscn")

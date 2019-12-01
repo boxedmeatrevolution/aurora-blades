@@ -23,6 +23,7 @@ config/icon="res://icon.png"
 
 Types="*res://scripts/autoload/types.gd"
 Scenes="*res://scripts/autoload/scenes.gd"
+Music="*res://scripts/autoload/music.gd"
 
 [display]
 

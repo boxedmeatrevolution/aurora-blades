@@ -23,6 +23,9 @@ onready var time_text := $MarginContainer/PanelContainer/GridContainer/TimeText
 var pause_screen : PauseScreen = null
 var win_screen : WinScreen = null
 
+func _ready() -> void:
+	Music.start_transition(Music.MUSIC_GAME)
+
 func _process(delta) -> void:
 	if Input.is_action_just_pressed("ui_pause"):
 		if self.pause_screen == null && self.win_screen == null:
@@ -38,6 +41,7 @@ func _pause_screen_done() -> void:
 
 func show_win_screen() -> void:
 	if self.win_screen == null && self.pause_screen == null:
+		Music.start_transition(Music.MUSIC_END)
 		self.win_screen = WinScreenScene.instance()
 		self.get_parent().add_child_below_node(self, self.win_screen)
 		self.win_screen.init(self.score, self.minutes, self.seconds, self.deaths, _calculate_grade())

@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/ambient_christmas_more.ogg-cc29e7133efb64ac1c3a514191c5a00a.oggstr"
+
+[deps]
+
+source_file="res://music/ambient_christmas_more.ogg"
+dest_files=[ "res://.import/ambient_christmas_more.ogg-cc29e7133efb64ac1c3a514191c5a00a.oggstr" ]
+
+[params]
+
+loop=true
+loop_offset=0
