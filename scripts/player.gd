@@ -1268,6 +1268,13 @@ func _state_transition(delta : float, intent : Intent, collision_info : Collisio
 		# Dive only gets restocked on the ground, not on walls.
 		if _is_ground_physics_state(self.physics_state):
 			self.has_dive = true
+	if self.state == State.DIVE:
+		self.has_dive = false
+	
+	if Difficulty.difficulty == Difficulty.Difficulty.EASY:
+		self.has_dive = true
+	if Difficulty.difficulty == Difficulty.Difficulty.HARD:
+		self.has_dive = false
 	
 	if _is_normal_state(self.state):
 		# Input transitions take priority over all else.
