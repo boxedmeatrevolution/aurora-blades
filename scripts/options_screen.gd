@@ -3,7 +3,8 @@ extends CanvasLayer
 signal done
 
 onready var box := $CenterContainer
-onready var sound_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/SoundButton
+onready var sound_slider := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/SoundSlider
+onready var music_slider := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/MusicSlider
 onready var fullscreen_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/FullscreenButton
 onready var jump_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/JumpButton
 onready var skate_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/SkateButton
@@ -13,27 +14,39 @@ onready var restart_button := $CenterContainer/PanelContainer/VBoxContainer/Grid
 var current_action := ""
 
 func _ready() -> void:
-	_update_sound_button()
+	_update_sound_slider()
+	_update_music_slider()
 	_update_fullscreen_button()
 	_update_rebind_button("jump")
 	_update_rebind_button("skate")
 	_update_rebind_button("dive")
 	_update_rebind_button("restart")
 
-func _update_sound_button() -> void:
-	var mute : bool = AudioServer.is_bus_mute(AudioServer.get_bus_index("Master"))
-	self.sound_button.text = "off" if mute else "on"
+func _update_sound_slider() -> void:
+	var mute : bool = AudioServer.is_bus_mute(AudioServer.get_bus_index("Sound"))
+	if mute:
+		self.sound_slider.value = self.sound_slider.min_value
+	else:
+		self.sound_slider.value = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Sound"))
+
+func _update_music_slider() -> void:
+	var mute : bool = AudioServer.is_bus_mute(AudioServer.get_bus_index("Music"))
+	if mute:
+		self.music_slider.value = self.music_slider.min_value
+	else:
+		self.music_slider.value = AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Music"))
 
 func _update_fullscreen_button() -> void:
 	var fullscreen := OS.window_fullscreen
 	self.fullscreen_button.text = "off" if !fullscreen else "on"
 
-func _pressed_sound_button() -> void:
-	if self.current_action == "":
-		var mute : bool = AudioServer.is_bus_mute(AudioServer.get_bus_index("Master"))
-		mute = !mute
-		AudioServer.set_bus_mute(AudioServer.get_bus_index("Master"), mute)
-		_update_sound_button()
+func _changed_sound_slider(value : float) -> void:
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Sound"), value)
+	AudioServer.set_bus_mute(AudioServer.get_bus_index("Sound"), value <= self.sound_slider.min_value)
+
+func _changed_music_slider(value : float) -> void:
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), value)
+	AudioServer.set_bus_mute(AudioServer.get_bus_index("Music"), value <= self.music_slider.min_value)
 
 func _pressed_fullscreen_button() -> void:
 	# TODO: Note: this is buggy on Wayland (I think).

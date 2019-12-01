@@ -64,3 +64,4 @@ anims/CheckpointInactive = SubResource( 3 )
 [node name="ActivateAudio" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 3 )
 volume_db = 5.0
+bus = "Sound"

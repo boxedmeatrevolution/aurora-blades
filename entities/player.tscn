@@ -1472,39 +1472,51 @@ z_index = -1
 
 [node name="WalkAudio" type="AudioStreamPlayer2D" parent="."]
 volume_db = -15.0
+bus = "Sound"
 
 [node name="JumpAudio" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 11 )
+bus = "Sound"
 
 [node name="LandAudio" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 12 )
 volume_db = -5.0
+bus = "Sound"
 
 [node name="SkateAudio" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 13 )
 volume_db = -8.0
+bus = "Sound"
 
 [node name="SkateBoostAudio" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 14 )
+bus = "Sound"
 
 [node name="SkateBrakeAudio" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 15 )
+bus = "Sound"
 
 [node name="SkateBrakeContinuousAudio" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 13 )
 volume_db = 4.0
+bus = "Sound"
 
 [node name="SkateJumpAudio" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 16 )
+bus = "Sound"
 
 [node name="SkateLandAudio" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 14 )
+bus = "Sound"
 
 [node name="DiveChargeAudio" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 17 )
+bus = "Sound"
 
 [node name="DiveAudio" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 18 )
+bus = "Sound"
 
 [node name="DeathAudio" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 19 )
+bus = "Sound"

@@ -17,6 +17,8 @@ const MUSIC_END := preload("res://music/victory_defeat.ogg")
 func _ready():
 	self.audio_player_current = AudioStreamPlayer.new()
 	self.audio_player_next = AudioStreamPlayer.new()
+	self.audio_player_current.bus = "Music"
+	self.audio_player_next.bus = "Music"
 	self.add_child(self.audio_player_current)
 	self.add_child(self.audio_player_next)
 	self.audio_player_current.volume_db = MUSIC_MAX_VOLUME

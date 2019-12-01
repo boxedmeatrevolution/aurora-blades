@@ -44,3 +44,4 @@ texture = ExtResource( 2 )
 
 [node name="PickupAudio" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 3 )
+bus = "Sound"
