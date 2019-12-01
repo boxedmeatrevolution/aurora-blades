@@ -15,7 +15,6 @@
 [ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=13]
 [ext_resource path="res://entities/background_day.tscn" type="PackedScene" id=14]
 
-
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 128, 16 )
 
