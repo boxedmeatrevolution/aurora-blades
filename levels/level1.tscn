@@ -430,7 +430,7 @@ text = "Your jumps go further when skating."
 autowrap = true
 
 [node name="SkateJumpHigh" type="Node2D" parent="Tips"]
-position = Vector2( 4912, -48 )
+position = Vector2( 4720, -44 )
 __meta__ = {
 "_edit_group_": true
 }

@@ -17,7 +17,6 @@
 [node name="Level3" type="Node"]
 
 [node name="PixelCamera" parent="." instance=ExtResource( 1 )]
-visible = false
 
 [node name="UI" parent="." instance=ExtResource( 2 )]
 next_level = "res://levels/victory.tscn"
@@ -26,7 +25,6 @@ good_time = 105.0
 good_deaths = 3.0
 
 [node name="Player" parent="." instance=ExtResource( 3 )]
-visible = false
 
 [node name="Blocks" type="StaticBody2D" parent="."]
 editor/display_folded = true
@@ -443,7 +441,6 @@ position = Vector2( 24288, -245 )
 
 [node name="Scores" type="Node2D" parent="."]
 editor/display_folded = true
-visible = false
 z_index = 1
 
 [node name="Coin" parent="Scores" instance=ExtResource( 8 )]
@@ -751,7 +748,6 @@ position = Vector2( 23680, -1104 )
 
 [node name="Checkpoints" type="Node2D" parent="."]
 editor/display_folded = true
-visible = false
 z_index = -1
 
 [node name="Checkpoint" parent="Checkpoints" instance=ExtResource( 10 )]
@@ -768,21 +764,19 @@ position = Vector2( 26160, -240 )
 
 [node name="Foreground" type="Node2D" parent="."]
 editor/display_folded = true
-visible = false
 z_index = 10
 
 [node name="Snow" parent="Foreground" instance=ExtResource( 12 )]
 
 [node name="Background" type="Node2D" parent="."]
 editor/display_folded = true
-visible = false
 z_index = -10
 
 [node name="ParallaxBackground" parent="Background" instance=ExtResource( 13 )]
 
 [node name="Snow" parent="Background" instance=ExtResource( 12 )]
-[connection signal="death" from="Player" to="PixelCamera" method="_on_player_death"]
 [connection signal="death" from="Player" to="UI" method="update_deaths"]
+[connection signal="death" from="Player" to="PixelCamera" method="_on_player_death"]
 [connection signal="score" from="Player" to="UI" method="update_score"]
 [connection signal="spawn" from="Player" to="PixelCamera" method="_on_player_spawn"]
 [connection signal="win" from="Player" to="UI" method="show_win_screen"]

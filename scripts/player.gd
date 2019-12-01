@@ -11,14 +11,10 @@ const AUDIO_SKATE_BOOST_4 := preload("res://sounds/skate_boost_4.wav")
 
 # Things that need to be done:
 
-# * More big coins to reward doing extra challenges.
 # * Make grading show which area you were weakest in.
-# * Add a proper pause menu with the option to restart the level.
-# * Add a keybinding for the player respawn.
 # * Symbol that pulses at the beat for tutorial.
 # * Ensure player sees dash tip.
 # * Camera behind player.
-# * Remake last part of level 1.
 # * Flip player sprite around when charging a dash for backwards.
 # * Make respawning happen faster.
 # * Allow "late jumps".
@@ -33,27 +29,6 @@ const AUDIO_SKATE_BOOST_4 := preload("res://sounds/skate_boost_4.wav")
 # * Fix buggy movement over slopes with player. (Not sticking to slopes)
 # * Bug: facing direction needs to be flipped around only once the
 #   jump_surface_velocity_x variable has become positive.
-# * Use the new wall_collision variable to clean up some code, such as:
-#   * Wipeout collisions
-#   * Dashing into walls
-#   * Jumping into walls and bonk head
-#   * Etc.
-# * Reach a fixed top speed, and then it takes a lot to lose that speed so long
-#   as X is tapped (there is a transition to a super fast state).
-# * Bug: In a rare case, the player can wipeout by going into a slope too hard
-#   from the air (I think??).
-# * Redirect reservoir: After every velocity redirect, there is a reservoir
-#   that slowly empties. When empty, velocity redirects are no longer as
-#   efficient. The reservoir refills with time. Purpose: to keep a super-fast
-#   player from just whipping around tight bends without consequence. (It looks
-#   weird, like the player should be slowed down signficantly).
-# * Possibility: A gradual v^2 friction force that is an obstacle to getting
-#   very large amounts of velocity.
-# * Downhill walljumps can feel unintuitive because of the huge gain in
-#   velocity after just barely turning around at the top.
-# * Sometimes just clamp at max velocity instead of doing a reverse
-#   acceleration. A reverse acceleration can make velocities go back and forth
-#   around the maximum, and can be kind of ugly. Example: wall slide.
 
 # The allowed player states.
 enum State {
