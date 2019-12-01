@@ -216,6 +216,9 @@ extents = Vector2( 128, 16 )
 
 [node name="UI" parent="." instance=ExtResource( 2 )]
 next_level = "res://levels/level3.tscn"
+good_score = 125.0
+good_time = 80.0
+good_deaths = 2.0
 
 [node name="Player" parent="." instance=ExtResource( 3 )]
 
@@ -225,6 +228,7 @@ cell_size = Vector2( 16, 16 )
 format = 1
 
 [node name="Blocks" type="StaticBody2D" parent="."]
+editor/display_folded = true
 collision_layer = 2
 collision_mask = 0
 

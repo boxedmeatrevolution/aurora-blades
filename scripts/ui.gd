@@ -15,7 +15,7 @@ export var next_level : String = ""
 export var good_score := 0.0
 export var good_time := 0.0
 export var good_deaths := 0.0
-export var power := 2.0
+export var power := 1.2
 
 onready var score_text := $MarginContainer/PanelContainer/GridContainer/ScoreText
 onready var time_text := $MarginContainer/PanelContainer/GridContainer/TimeText
@@ -60,6 +60,9 @@ func _calculate_grade() -> float:
 	var time_part := max(log((time + 1.0) / (self.good_time + 1.0)) / log(self.power), 0.0)
 	var deaths_part := max(log((self.deaths + 1.0) / (self.good_deaths + 1.0)) / log(self.power), 0.0)
 	var grade := (score_part + time_part + deaths_part) / 3.0
+	print("Score part:  ", score_part)
+	print("Time part:   ", time_part)
+	print("Deaths part: ", deaths_part)
 	return grade
 
 func update_score(score_delta : float) -> void:
@@ -76,5 +79,5 @@ func update_timer() -> void:
 		self.seconds = 59
 	self.time_text.text = "%02d:%02d" % [self.minutes, self.seconds]
 
-func update_deaths() -> void:
+func update_deaths(a, b) -> void:
 	self.deaths += 1

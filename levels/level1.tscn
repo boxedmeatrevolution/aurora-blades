@@ -218,6 +218,9 @@ extents = Vector2( 128, 16 )
 
 [node name="UI" parent="." instance=ExtResource( 2 )]
 next_level = "res://levels/level2.tscn"
+good_score = 60.0
+good_time = 65.0
+good_deaths = 1.0
 
 [node name="Player" parent="." instance=ExtResource( 3 )]
 
