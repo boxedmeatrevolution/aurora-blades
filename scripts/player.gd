@@ -182,7 +182,7 @@ const SKATE_FRICTION := 30.0
 const SKATE_MIN_SPEED := 150.0
 const SKATE_ACCELERATION := 150.0
 # Speed needed to launch the player into the skating state.
-const SKATE_START_MIN_SPEED := 40.0
+const SKATE_START_MIN_SPEED := 0.0
 # Initial speed when entering the skate state.
 const SKATE_START_SPEED := 150.0
 const SKATE_PIVOT_START_SPEED_FRACTION := 0.65
@@ -284,6 +284,9 @@ const DIVE_MIN_IMPULSE_FRACTION := 0.1
 # The distance which is checked to be collision free before starting a dive.
 const DIVE_CHECK_DISTANCE := 16.0
 
+# Time between taps for it to be a double tap.
+const DOUBLE_TAP_TIME := 0.25
+
 # Variables that are persistent between deaths.
 var checkpoint : Checkpoint = null
 var respawn_position := self.position
@@ -329,8 +332,8 @@ var previous_position := Vector2.ZERO
 var previous_velocity := Vector2.ZERO
 var previous_skate_direction := 1
 
-var last_move_direction := Vector2.ZERO
-var last_move_direction_timer := 0.0
+var double_tap_first_tap := 0
+var double_tap_timer := 0.0
 
 # Stores a list of coins that have been picked up since the last checkpoint
 # that will need to be returned if the player dies.
@@ -692,17 +695,17 @@ func _physics_process(delta : float) -> void:
 		return
 	
 	var move_direction := _read_move_direction()
-	self.last_move_direction_timer += delta
+	var double_tap := _read_double_tap(delta)
 	# Update the velocities based on the current state.
 	_state_process(delta, move_direction)
 	# Step the position forward by the timestep.
 	var collision_info := _position_process(delta)
 	# Transition between states.
-	var intent := _read_intent(move_direction)
+	var intent := _read_intent(move_direction, double_tap)
 	if _state_transition_physics(intent):
-		intent = _read_intent(move_direction)
+		intent = _read_intent(move_direction, double_tap)
 	if _state_transition(delta, intent, collision_info):
-		intent = _read_intent(move_direction)
+		intent = _read_intent(move_direction, double_tap)
 	# Update the animation based on the state.
 	_facing_direction_process(move_direction)
 	_animation_process()
@@ -735,16 +738,40 @@ func _read_move_direction() -> Vector2:
 		move_direction.y += 1
 	return move_direction
 
-func _read_intent(move_direction : Vector2) -> Intent:
+func _read_double_tap(delta : float) -> int:
+	if self.double_tap_first_tap != 0:
+		self.double_tap_timer += delta
+		if self.double_tap_timer >= DOUBLE_TAP_TIME:
+			self.double_tap_first_tap = 0
+			return 0
+		else:
+			if Input.is_action_just_pressed("move_left"):
+				if self.double_tap_first_tap == -1:
+					return -1
+				else:
+					self.double_tap_first_tap = 0
+					return 0
+			elif Input.is_action_just_pressed("move_right"):
+				if self.double_tap_first_tap == 1:
+					return 1
+				else:
+					self.double_tap_first_tap = 0
+					return 0
+	else:
+		if Input.is_action_just_pressed("move_left"):
+			self.double_tap_first_tap = -1
+			self.double_tap_timer = 0.0
+		elif Input.is_action_just_pressed("move_right"):
+			self.double_tap_first_tap = 1
+			self.double_tap_timer = 0.0
+		return 0
+	return 0
+
+func _read_intent(move_direction : Vector2, double_tap : int) -> Intent:
 	if self.in_dialogue || self.win:
 		return Intent.new()
 	var intent := Intent.new()
 	intent.move_direction = move_direction
-	# Update the last_move_direction variable here, so we can use it to check
-	# for double taps.
-	if move_direction.length_squared() != 0.0:
-		self.last_move_direction = move_direction
-		self.last_move_direction_timer = 0.0
 	# Get input from the user. The intent structure represents the action that
 	# the player wants to do, not the input that the player actually did, so
 	# parts of it are conditional on the current state.
@@ -764,8 +791,10 @@ func _read_intent(move_direction : Vector2) -> Intent:
 			if self.state == State.PIVOT:
 				if sign(move_direction.x) == -sign(self.pivot_stored_velocity) && Input.is_action_just_pressed("skate"):
 					intent.skate_start = true
+				elif sign(double_tap) == -sign(self.pivot_stored_velocity) && double_tap != 0:
+					intent.skate_start = true
 			else:
-				if Input.is_action_just_pressed("skate"):
+				if Input.is_action_just_pressed("skate") || double_tap != 0:
 					intent.skate_start = true
 		if _is_skate_state(self.state):
 			if self.state != State.SKATE_BRAKE:

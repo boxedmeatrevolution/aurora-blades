@@ -1524,3 +1524,4 @@ bus = "Sound"
 
 [node name="SpawnAudio" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource( 20 )
+bus = "Sound"
