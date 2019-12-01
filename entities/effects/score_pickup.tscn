@@ -2,7 +2,7 @@
 
 [ext_resource path="res://scripts/score_pickup.gd" type="Script" id=1]
 [ext_resource path="res://sprites/shapes/diamond_8.png" type="Texture" id=2]
-[ext_resource path="res://sounds/coin.ogg" type="AudioStream" id=3]
+[ext_resource path="res://sounds/coin.wav" type="AudioStream" id=3]
 
 [sub_resource type="Curve" id=1]
 _data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 1, 0.155867 ), 0.0, 0.0, 0, 0 ]

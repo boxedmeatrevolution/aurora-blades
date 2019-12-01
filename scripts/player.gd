@@ -4,10 +4,10 @@ const Checkpoint := preload("res://scripts/checkpoint.gd")
 const Hazard := preload("res://scripts/hazard.gd")
 const Score := preload("res://scripts/score.gd")
 
-const AUDIO_SKATE_BOOST_1 := preload("res://sounds/skate_boost_1.ogg")
-const AUDIO_SKATE_BOOST_2 := preload("res://sounds/skate_boost_2.ogg")
-const AUDIO_SKATE_BOOST_3 := preload("res://sounds/skate_boost_3.ogg")
-const AUDIO_SKATE_BOOST_4 := preload("res://sounds/skate_boost_4.ogg")
+const AUDIO_SKATE_BOOST_1 := preload("res://sounds/skate_boost_1.wav")
+const AUDIO_SKATE_BOOST_2 := preload("res://sounds/skate_boost_2.wav")
+const AUDIO_SKATE_BOOST_3 := preload("res://sounds/skate_boost_3.wav")
+const AUDIO_SKATE_BOOST_4 := preload("res://sounds/skate_boost_4.wav")
 
 # Things that need to be done:
 
@@ -605,6 +605,9 @@ func _reset() -> void:
 	self.dive_charge_effect.set_emitting(false)
 	self.dive_trail_effect_a.set_emitting(false)
 	self.dive_trail_effect_b.set_emitting(false)
+	
+	self.skate_audio.stop()
+	self.skate_brake_continuous_audio.stop()
 	
 	_animation_process()
 	_effects_process()

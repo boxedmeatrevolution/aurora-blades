@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/dive.wav-a122c7ec2576b9ff1b5a9c51d9f9f6a5.sample"
+
+[deps]
+
+source_file="res://sounds/dive.wav"
+dest_files=[ "res://.import/dive.wav-a122c7ec2576b9ff1b5a9c51d9f9f6a5.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=true
+edit/normalize=true
+edit/loop=false
+compress/mode=0

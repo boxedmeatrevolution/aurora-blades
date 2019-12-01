@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/skate_brake.wav-aa09f953d11978fdc556bf71f8d93e9d.sample"
+
+[deps]
+
+source_file="res://sounds/skate_brake.wav"
+dest_files=[ "res://.import/skate_brake.wav-aa09f953d11978fdc556bf71f8d93e9d.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=true
+edit/normalize=true
+edit/loop=false
+compress/mode=0

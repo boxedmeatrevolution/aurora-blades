@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/skate_boost_1.wav-4a622a07714cc5c53c2b08819e9d06c1.sample"
+
+[deps]
+
+source_file="res://sounds/skate_boost_1.wav"
+dest_files=[ "res://.import/skate_boost_1.wav-4a622a07714cc5c53c2b08819e9d06c1.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=true
+edit/normalize=true
+edit/loop=false
+compress/mode=0

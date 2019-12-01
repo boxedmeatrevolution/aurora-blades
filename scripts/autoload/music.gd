@@ -7,7 +7,7 @@ var transition_timer := 0.0
 
 const TRANSITION_TIME := 1.0
 
-const MUSIC_MAX_VOLUME := -10.0
+const MUSIC_MAX_VOLUME := 0.0
 const MUSIC_MIN_VOLUME := -30.0
 
 const MUSIC_MAIN_MENU := preload("res://music/title.ogg")
