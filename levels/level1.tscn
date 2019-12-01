@@ -10,13 +10,11 @@
 [ext_resource path="res://entities/coin.tscn" type="PackedScene" id=8]
 [ext_resource path="res://entities/coin_large.tscn" type="PackedScene" id=9]
 [ext_resource path="res://entities/checkpoint.tscn" type="PackedScene" id=10]
-[ext_resource path="res://styles/tip_back.tres" type="StyleBox" id=11]
-[ext_resource path="res://fonts/content.tres" type="DynamicFont" id=12]
-[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=13]
-[ext_resource path="res://entities/background_day.tscn" type="PackedScene" id=14]
-
-[sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 128, 16 )
+[ext_resource path="res://entities/level_end.tscn" type="PackedScene" id=11]
+[ext_resource path="res://styles/tip_back.tres" type="StyleBox" id=12]
+[ext_resource path="res://fonts/content.tres" type="DynamicFont" id=13]
+[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=14]
+[ext_resource path="res://entities/background_day.tscn" type="PackedScene" id=15]
 
 [node name="Level1" type="Node"]
 
@@ -349,17 +347,8 @@ position = Vector2( 12832, 48 )
 [node name="Checkpoint7" parent="Checkpoints" instance=ExtResource( 10 )]
 position = Vector2( 15264, 192 )
 
-[node name="Win" type="Area2D" parent="."]
-editor/display_folded = true
-position = Vector2( 20144, 304 )
-collision_layer = 32
-collision_mask = 0
-__meta__ = {
-"_edit_group_": true
-}
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Win"]
-shape = SubResource( 1 )
+[node name="LevelEnd" parent="." instance=ExtResource( 11 )]
+position = Vector2( 20160, 320 )
 
 [node name="Tips" type="Node2D" parent="."]
 editor/display_folded = true
@@ -374,8 +363,8 @@ __meta__ = {
 [node name="Label" type="Label" parent="Tips/Movement"]
 margin_right = 320.0
 margin_bottom = 89.0
-custom_styles/normal = ExtResource( 11 )
-custom_fonts/font = ExtResource( 12 )
+custom_styles/normal = ExtResource( 12 )
+custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 text = "Use the arrow keys to move and press JUMP (default Z) to jump."
 autowrap = true
@@ -389,8 +378,8 @@ __meta__ = {
 [node name="Label" type="Label" parent="Tips/WallJump"]
 margin_right = 336.0
 margin_bottom = 89.0
-custom_styles/normal = ExtResource( 11 )
-custom_fonts/font = ExtResource( 12 )
+custom_styles/normal = ExtResource( 12 )
+custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 text = "Jump into a wall to slide down it, and press JUMP again to wall jump."
 autowrap = true
@@ -404,8 +393,8 @@ __meta__ = {
 [node name="Label" type="Label" parent="Tips/SkateStart"]
 margin_right = 352.0
 margin_bottom = 89.0
-custom_styles/normal = ExtResource( 11 )
-custom_fonts/font = ExtResource( 12 )
+custom_styles/normal = ExtResource( 12 )
+custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 text = "While walking, press SKATE (default X) or double tap ←/→ to start skating."
 autowrap = true
@@ -419,8 +408,8 @@ __meta__ = {
 [node name="Label" type="Label" parent="Tips/SkateBoost"]
 margin_right = 448.0
 margin_bottom = 108.0
-custom_styles/normal = ExtResource( 11 )
-custom_fonts/font = ExtResource( 12 )
+custom_styles/normal = ExtResource( 12 )
+custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 text = "Repeatedly tap SKATE or ←/→ to go faster. Don't mash too fast though, or it will be less effective! Try to match the beat."
 autowrap = true
@@ -434,8 +423,8 @@ __meta__ = {
 [node name="Label" type="Label" parent="Tips/SkateJump"]
 margin_right = 448.0
 margin_bottom = 51.0
-custom_styles/normal = ExtResource( 11 )
-custom_fonts/font = ExtResource( 12 )
+custom_styles/normal = ExtResource( 12 )
+custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 text = "Your jumps go further when skating."
 autowrap = true
@@ -449,8 +438,8 @@ __meta__ = {
 [node name="Label" type="Label" parent="Tips/SkateJumpHigh"]
 margin_right = 336.0
 margin_bottom = 51.0
-custom_styles/normal = ExtResource( 11 )
-custom_fonts/font = ExtResource( 12 )
+custom_styles/normal = ExtResource( 12 )
+custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 text = "Hold ↑ and tap JUMP to do a high jump."
 autowrap = true
@@ -464,8 +453,8 @@ __meta__ = {
 [node name="Label" type="Label" parent="Tips/Dive"]
 margin_right = 512.0
 margin_bottom = 108.0
-custom_styles/normal = ExtResource( 11 )
-custom_fonts/font = ExtResource( 12 )
+custom_styles/normal = ExtResource( 12 )
+custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 text = "Press DASH (default C) to do a short dash in any direction. If you need an easy speed boost, try doing a diagonal dash into the ground."
 autowrap = true
@@ -479,8 +468,8 @@ __meta__ = {
 [node name="Label" type="Label" parent="Tips/RampJump"]
 margin_right = 432.0
 margin_bottom = 89.0
-custom_styles/normal = ExtResource( 11 )
-custom_fonts/font = ExtResource( 12 )
+custom_styles/normal = ExtResource( 12 )
+custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 text = "Jump right before going off of a ramp to go much further, and high jump to go much higher."
 autowrap = true
@@ -494,8 +483,8 @@ __meta__ = {
 [node name="Label" type="Label" parent="Tips/RampLand"]
 margin_right = 432.0
 margin_bottom = 89.0
-custom_styles/normal = ExtResource( 11 )
-custom_fonts/font = ExtResource( 12 )
+custom_styles/normal = ExtResource( 12 )
+custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 text = "Try to land on a downward slope to preserve your speed. Landing on a flat surface slows you down!"
 autowrap = true
@@ -509,8 +498,8 @@ __meta__ = {
 [node name="Label" type="Label" parent="Tips/Challenge"]
 margin_right = 432.0
 margin_bottom = 51.0
-custom_styles/normal = ExtResource( 11 )
-custom_fonts/font = ExtResource( 12 )
+custom_styles/normal = ExtResource( 12 )
+custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 text = "Can you make these jumps without any dashing?"
 autowrap = true
@@ -524,8 +513,8 @@ __meta__ = {
 [node name="Label" type="Label" parent="Tips/Respawn"]
 margin_right = 480.0
 margin_bottom = 70.0
-custom_styles/normal = ExtResource( 11 )
-custom_fonts/font = ExtResource( 12 )
+custom_styles/normal = ExtResource( 12 )
+custom_fonts/font = ExtResource( 13 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 text = "If you get stuck, press RESPAWN (default R) to go back to the last checkpoint."
 autowrap = true
@@ -534,17 +523,17 @@ autowrap = true
 editor/display_folded = true
 z_index = 10
 
-[node name="Snow" parent="Foreground" instance=ExtResource( 13 )]
+[node name="Snow" parent="Foreground" instance=ExtResource( 14 )]
 
 [node name="Background" type="Node2D" parent="."]
 editor/display_folded = true
 z_index = -10
 
-[node name="ParallaxBackground" parent="Background" instance=ExtResource( 14 )]
+[node name="ParallaxBackground" parent="Background" instance=ExtResource( 15 )]
 
-[node name="Snow" parent="Background" instance=ExtResource( 13 )]
-[connection signal="death" from="Player" to="PixelCamera" method="_on_player_death"]
+[node name="Snow" parent="Background" instance=ExtResource( 14 )]
 [connection signal="death" from="Player" to="UI" method="update_deaths"]
+[connection signal="death" from="Player" to="PixelCamera" method="_on_player_death"]
 [connection signal="score" from="Player" to="UI" method="update_score"]
 [connection signal="spawn" from="Player" to="PixelCamera" method="_on_player_spawn"]
 [connection signal="win" from="Player" to="UI" method="show_win_screen"]

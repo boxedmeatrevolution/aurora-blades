@@ -10,11 +10,9 @@
 [ext_resource path="res://entities/coin.tscn" type="PackedScene" id=8]
 [ext_resource path="res://entities/coin_large.tscn" type="PackedScene" id=9]
 [ext_resource path="res://entities/checkpoint.tscn" type="PackedScene" id=10]
-[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=11]
-[ext_resource path="res://entities/background_night.tscn" type="PackedScene" id=12]
-
-[sub_resource type="RectangleShape2D" id=2]
-extents = Vector2( 128, 16 )
+[ext_resource path="res://entities/level_end.tscn" type="PackedScene" id=11]
+[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=12]
+[ext_resource path="res://entities/background_night.tscn" type="PackedScene" id=13]
 
 [node name="Level2" type="Node"]
 
@@ -606,30 +604,22 @@ position = Vector2( 11216, 160 )
 [node name="Checkpoint3" parent="Checkpoints" instance=ExtResource( 10 )]
 position = Vector2( 18432, -208 )
 
-[node name="Win" type="Area2D" parent="."]
-position = Vector2( 24192, 80 )
-collision_layer = 32
-collision_mask = 0
-__meta__ = {
-"_edit_group_": true
-}
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Win"]
-shape = SubResource( 2 )
+[node name="LevelEnd" parent="." instance=ExtResource( 11 )]
+position = Vector2( 24176, 96 )
 
 [node name="Foreground" type="Node2D" parent="."]
 editor/display_folded = true
 z_index = 10
 
-[node name="Snow" parent="Foreground" instance=ExtResource( 11 )]
+[node name="Snow" parent="Foreground" instance=ExtResource( 12 )]
 
 [node name="Background" type="Node2D" parent="."]
 editor/display_folded = true
 z_index = -10
 
-[node name="ParallaxBackground" parent="Background" instance=ExtResource( 12 )]
+[node name="ParallaxBackground" parent="Background" instance=ExtResource( 13 )]
 
-[node name="Snow" parent="Background" instance=ExtResource( 11 )]
+[node name="Snow" parent="Background" instance=ExtResource( 12 )]
 [connection signal="death" from="Player" to="UI" method="update_deaths"]
 [connection signal="death" from="Player" to="PixelCamera" method="_on_player_death"]
 [connection signal="score" from="Player" to="UI" method="update_score"]

@@ -10,11 +10,9 @@
 [ext_resource path="res://entities/coin.tscn" type="PackedScene" id=8]
 [ext_resource path="res://entities/coin_large.tscn" type="PackedScene" id=9]
 [ext_resource path="res://entities/checkpoint.tscn" type="PackedScene" id=10]
-[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=11]
-[ext_resource path="res://entities/background_day.tscn" type="PackedScene" id=12]
-
-[sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 128, 16 )
+[ext_resource path="res://entities/level_end.tscn" type="PackedScene" id=11]
+[ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=12]
+[ext_resource path="res://entities/background_day.tscn" type="PackedScene" id=13]
 
 [node name="Level3" type="Node"]
 
@@ -765,33 +763,26 @@ position = Vector2( 12048, -544 )
 [node name="Checkpoint3" parent="Checkpoints" instance=ExtResource( 10 )]
 position = Vector2( 18288, -416 )
 
-[node name="Win" type="Area2D" parent="."]
-editor/display_folded = true
-visible = false
-collision_layer = 32
-collision_mask = 0
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Win"]
-position = Vector2( 26192, -256 )
-shape = SubResource( 1 )
+[node name="LevelEnd" parent="." instance=ExtResource( 11 )]
+position = Vector2( 26160, -240 )
 
 [node name="Foreground" type="Node2D" parent="."]
 editor/display_folded = true
 visible = false
 z_index = 10
 
-[node name="Snow" parent="Foreground" instance=ExtResource( 11 )]
+[node name="Snow" parent="Foreground" instance=ExtResource( 12 )]
 
 [node name="Background" type="Node2D" parent="."]
 editor/display_folded = true
 visible = false
 z_index = -10
 
-[node name="ParallaxBackground" parent="Background" instance=ExtResource( 12 )]
+[node name="ParallaxBackground" parent="Background" instance=ExtResource( 13 )]
 
-[node name="Snow" parent="Background" instance=ExtResource( 11 )]
-[connection signal="death" from="Player" to="UI" method="update_deaths"]
+[node name="Snow" parent="Background" instance=ExtResource( 12 )]
 [connection signal="death" from="Player" to="PixelCamera" method="_on_player_death"]
+[connection signal="death" from="Player" to="UI" method="update_deaths"]
 [connection signal="score" from="Player" to="UI" method="update_score"]
 [connection signal="spawn" from="Player" to="PixelCamera" method="_on_player_spawn"]
 [connection signal="win" from="Player" to="UI" method="show_win_screen"]

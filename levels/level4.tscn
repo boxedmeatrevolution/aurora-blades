@@ -9,7 +9,6 @@
 [ext_resource path="res://entities/checkpoint.tscn" type="PackedScene" id=7]
 [ext_resource path="res://entities/effects/snow.tscn" type="PackedScene" id=8]
 
-
 [sub_resource type="TileSet" id=1]
 0/name = "winter.png 0"
 0/texture = ExtResource( 2 )

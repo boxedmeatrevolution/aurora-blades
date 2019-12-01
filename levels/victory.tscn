@@ -23,6 +23,7 @@ custom_constants/separation = 16
 margin_right = 600.0
 margin_bottom = 24.0
 custom_fonts/font = ExtResource( 2 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
 text = "Success!"
 
 [node name="Label2" type="Label" parent="CenterContainer/VBoxContainer"]
@@ -31,6 +32,7 @@ margin_right = 600.0
 margin_bottom = 170.0
 rect_min_size = Vector2( 600, 0 )
 custom_fonts/font = ExtResource( 3 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
 text = "You collected a lot of seeds. Maybe when the Earth isn't so cold, you'll be able to plant some of them.
 
 We hope you enjoyed our game.
