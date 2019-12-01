@@ -21,9 +21,7 @@ const AUDIO_SKATE_BOOST_4 := preload("res://sounds/skate_boost_4.wav")
 # * Make wall jumps feel better when walking (some delay after letting go when
 #   tapping arrows?)
 # * Faster dash with less levitation.
-# * Double tap arrows to enter skate, tap arrows to boost.
 # * Fix snow falling particles.
-# * Fix buggy movement over slopes with player. (Not sticking to slopes)
 # * Bug: facing direction needs to be flipped around only once the
 #   jump_surface_velocity_x variable has become positive.
 
@@ -274,7 +272,7 @@ const BALLISTIC_MAX_REDIRECT_FRACTION := 0.6
 const DIVE_CHARGE_TIME := 0.4
 const DIVE_CHARGE_FRICTION := 2000.0
 const DIVE_CHARGE_FRICTION_MIN_SPEED := 100.0
-const DIVE_CHARGE_SPEED := 40.0
+const DIVE_CHARGE_SPEED := 80.0
 const DIVE_DISTANCE := 150.0
 const DIVE_SPEED_START := 700.0
 const DIVE_SPEED_END := 200.0
@@ -718,6 +716,7 @@ func _physics_process(delta : float) -> void:
 	# Print the state for debugging purposes.
 	if self.previous_state != self.state || self.previous_physics_state != self.physics_state:
 		print(PHYSICS_STATE_NAME[self.physics_state], "; ", STATE_NAME[self.state])
+	print(self.velocity.length())
 	self.previous_state = self.state
 	self.previous_physics_state = self.physics_state
 	self.previous_position = self.position
@@ -840,8 +839,8 @@ func _facing_direction_process(move_direction : Vector2) -> void:
 func _state_process(delta : float, move_direction : Vector2) -> void:
 	# Dive is special-cased like this because there isn't a better spot to put
 	# this code.
-	if self.previous_state == State.DIVE && self.state != State.DIVE:
-		self.velocity = self.velocity.clamped(DIVE_SPEED_END)
+#	if self.previous_state == State.DIVE && self.state != State.DIVE:
+#		self.velocity = self.velocity.clamped(DIVE_SPEED_END)
 	var surface_tangent := Vector2(-self.surface_normal.y, self.surface_normal.x)
 	if self.state == State.STAND:
 		# When the player is standing, they should slow down to a stop. We use
@@ -1171,6 +1170,8 @@ func _handle_collision_physics_state_transition(new_surface_normal : Vector2) ->
 # Handle transitions into and away from different states.
 func _handle_state_transition(old_state : int) -> bool:
 	if old_state != self.state:
+		if old_state == State.DIVE:
+			self.velocity = self.velocity.clamped(0.5 * (DIVE_SPEED_START + DIVE_SPEED_END))
 		# Handle transitions between skate states and non-skate states.
 		if !_is_skate_state(self.state) && _is_skate_state(old_state):
 			pass
