@@ -1,13 +1,17 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://scripts/options_screen.gd" type="Script" id=1]
 [ext_resource path="res://styles/screen_back.tres" type="StyleBox" id=2]
 [ext_resource path="res://fonts/heading.tres" type="DynamicFont" id=3]
 [ext_resource path="res://fonts/content.tres" type="DynamicFont" id=4]
 [ext_resource path="res://sprites/shapes/tick.png" type="Texture" id=5]
-[ext_resource path="res://styles/slider.tres" type="StyleBox" id=6]
-[ext_resource path="res://styles/key_button.tres" type="StyleBox" id=7]
-[ext_resource path="res://styles/button.tres" type="StyleBox" id=8]
+[ext_resource path="res://sprites/shapes/tick_focus.png" type="Texture" id=6]
+[ext_resource path="res://styles/slider.tres" type="StyleBox" id=7]
+[ext_resource path="res://styles/key_button.tres" type="StyleBox" id=8]
+[ext_resource path="res://styles/button_focus.tres" type="StyleBox" id=9]
+[ext_resource path="res://styles/button_hover.tres" type="StyleBox" id=10]
+[ext_resource path="res://styles/button_press.tres" type="StyleBox" id=11]
+[ext_resource path="res://styles/button.tres" type="StyleBox" id=12]
 
 [node name="OptionsScreen" type="CanvasLayer"]
 pause_mode = 2
@@ -55,14 +59,16 @@ text = "Sound"
 margin_left = 176.0
 margin_right = 336.0
 margin_bottom = 16.0
+focus_neighbour_bottom = NodePath("../MusicSlider")
+focus_next = NodePath("../MusicSlider")
+focus_previous = NodePath("../../Button")
 custom_icons/grabber_disabled = ExtResource( 5 )
-custom_icons/grabber_highlight = ExtResource( 5 )
+custom_icons/grabber_highlight = ExtResource( 6 )
 custom_icons/grabber = ExtResource( 5 )
-custom_styles/slider = ExtResource( 6 )
-custom_styles/grabber_disabled = ExtResource( 6 )
-custom_styles/grabber_highlight = ExtResource( 6 )
-custom_styles/grabber_area = ExtResource( 6 )
-custom_styles/focus = ExtResource( 6 )
+custom_styles/slider = ExtResource( 7 )
+custom_styles/grabber_disabled = ExtResource( 7 )
+custom_styles/grabber_highlight = ExtResource( 7 )
+custom_styles/grabber_area = ExtResource( 7 )
 min_value = -30.0
 max_value = 0.0
 step = 3.0
@@ -80,14 +86,17 @@ margin_left = 176.0
 margin_top = 32.0
 margin_right = 336.0
 margin_bottom = 48.0
+focus_neighbour_top = NodePath("../SoundSlider")
+focus_neighbour_bottom = NodePath("../FullscreenButton")
+focus_next = NodePath("../FullscreenButton")
+focus_previous = NodePath("../SoundSlider")
 custom_icons/grabber_disabled = ExtResource( 5 )
-custom_icons/grabber_highlight = ExtResource( 5 )
+custom_icons/grabber_highlight = ExtResource( 6 )
 custom_icons/grabber = ExtResource( 5 )
-custom_styles/slider = ExtResource( 6 )
-custom_styles/grabber_disabled = ExtResource( 6 )
-custom_styles/grabber_highlight = ExtResource( 6 )
-custom_styles/grabber_area = ExtResource( 6 )
-custom_styles/focus = ExtResource( 6 )
+custom_styles/slider = ExtResource( 7 )
+custom_styles/grabber_disabled = ExtResource( 7 )
+custom_styles/grabber_highlight = ExtResource( 7 )
+custom_styles/grabber_area = ExtResource( 7 )
 min_value = -30.0
 max_value = 0.0
 step = 3.0
@@ -105,12 +114,16 @@ margin_left = 176.0
 margin_top = 64.0
 margin_right = 336.0
 margin_bottom = 92.0
+focus_neighbour_top = NodePath("../MusicSlider")
+focus_neighbour_bottom = NodePath("../JumpButton")
+focus_next = NodePath("../JumpButton")
+focus_previous = NodePath("../MusicSlider")
 size_flags_horizontal = 3
-custom_styles/hover = ExtResource( 7 )
-custom_styles/pressed = ExtResource( 7 )
-custom_styles/focus = ExtResource( 7 )
-custom_styles/disabled = ExtResource( 7 )
-custom_styles/normal = ExtResource( 7 )
+custom_styles/hover = ExtResource( 8 )
+custom_styles/pressed = ExtResource( 8 )
+custom_styles/focus = ExtResource( 9 )
+custom_styles/disabled = ExtResource( 8 )
+custom_styles/normal = ExtResource( 8 )
 custom_fonts/font = ExtResource( 4 )
 text = "off"
 
@@ -127,12 +140,16 @@ margin_top = 108.0
 margin_right = 336.0
 margin_bottom = 136.0
 rect_min_size = Vector2( 160, 0 )
+focus_neighbour_top = NodePath("../FullscreenButton")
+focus_neighbour_bottom = NodePath("../SkateButton")
+focus_next = NodePath("../SkateButton")
+focus_previous = NodePath("../FullscreenButton")
 size_flags_horizontal = 3
-custom_styles/hover = ExtResource( 7 )
-custom_styles/pressed = ExtResource( 7 )
-custom_styles/focus = ExtResource( 7 )
-custom_styles/disabled = ExtResource( 7 )
-custom_styles/normal = ExtResource( 7 )
+custom_styles/hover = ExtResource( 8 )
+custom_styles/pressed = ExtResource( 8 )
+custom_styles/focus = ExtResource( 9 )
+custom_styles/disabled = ExtResource( 8 )
+custom_styles/normal = ExtResource( 8 )
 custom_fonts/font = ExtResource( 4 )
 text = "Z"
 
@@ -148,11 +165,15 @@ margin_left = 176.0
 margin_top = 152.0
 margin_right = 336.0
 margin_bottom = 180.0
-custom_styles/hover = ExtResource( 7 )
-custom_styles/pressed = ExtResource( 7 )
-custom_styles/focus = ExtResource( 7 )
-custom_styles/disabled = ExtResource( 7 )
-custom_styles/normal = ExtResource( 7 )
+focus_neighbour_top = NodePath("../JumpButton")
+focus_neighbour_bottom = NodePath("../DiveButton")
+focus_next = NodePath("../DiveButton")
+focus_previous = NodePath("../JumpButton")
+custom_styles/hover = ExtResource( 8 )
+custom_styles/pressed = ExtResource( 8 )
+custom_styles/focus = ExtResource( 9 )
+custom_styles/disabled = ExtResource( 8 )
+custom_styles/normal = ExtResource( 8 )
 custom_fonts/font = ExtResource( 4 )
 text = "X"
 
@@ -168,11 +189,15 @@ margin_left = 176.0
 margin_top = 196.0
 margin_right = 336.0
 margin_bottom = 224.0
-custom_styles/hover = ExtResource( 7 )
-custom_styles/pressed = ExtResource( 7 )
-custom_styles/focus = ExtResource( 7 )
-custom_styles/disabled = ExtResource( 7 )
-custom_styles/normal = ExtResource( 7 )
+focus_neighbour_top = NodePath("../SkateButton")
+focus_neighbour_bottom = NodePath("../RestartButton")
+focus_next = NodePath("../RestartButton")
+focus_previous = NodePath("../SkateButton")
+custom_styles/hover = ExtResource( 8 )
+custom_styles/pressed = ExtResource( 8 )
+custom_styles/focus = ExtResource( 9 )
+custom_styles/disabled = ExtResource( 8 )
+custom_styles/normal = ExtResource( 8 )
 custom_fonts/font = ExtResource( 4 )
 text = "C"
 
@@ -188,11 +213,15 @@ margin_left = 176.0
 margin_top = 240.0
 margin_right = 336.0
 margin_bottom = 268.0
-custom_styles/hover = ExtResource( 7 )
-custom_styles/pressed = ExtResource( 7 )
-custom_styles/focus = ExtResource( 7 )
-custom_styles/disabled = ExtResource( 7 )
-custom_styles/normal = ExtResource( 7 )
+focus_neighbour_top = NodePath("../DiveButton")
+focus_neighbour_bottom = NodePath("../../Button")
+focus_next = NodePath("../../Button")
+focus_previous = NodePath("../DiveButton")
+custom_styles/hover = ExtResource( 8 )
+custom_styles/pressed = ExtResource( 8 )
+custom_styles/focus = ExtResource( 9 )
+custom_styles/disabled = ExtResource( 8 )
+custom_styles/normal = ExtResource( 8 )
 custom_fonts/font = ExtResource( 4 )
 text = "R"
 
@@ -200,11 +229,14 @@ text = "R"
 margin_top = 324.0
 margin_right = 336.0
 margin_bottom = 364.0
-custom_styles/hover = ExtResource( 8 )
-custom_styles/pressed = ExtResource( 8 )
-custom_styles/focus = ExtResource( 8 )
-custom_styles/disabled = ExtResource( 8 )
-custom_styles/normal = ExtResource( 8 )
+focus_neighbour_top = NodePath("../GridContainer/RestartButton")
+focus_next = NodePath("../GridContainer/SoundSlider")
+focus_previous = NodePath("../GridContainer/RestartButton")
+custom_styles/hover = ExtResource( 10 )
+custom_styles/pressed = ExtResource( 11 )
+custom_styles/focus = ExtResource( 9 )
+custom_styles/disabled = ExtResource( 12 )
+custom_styles/normal = ExtResource( 12 )
 custom_fonts/font = ExtResource( 4 )
 text = "Back"
 [connection signal="value_changed" from="CenterContainer/PanelContainer/VBoxContainer/GridContainer/SoundSlider" to="." method="_changed_sound_slider"]

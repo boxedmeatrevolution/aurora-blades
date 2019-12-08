@@ -1,9 +1,12 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://scripts/main_menu.gd" type="Script" id=1]
 [ext_resource path="res://backgrounds/title_card.png" type="Texture" id=2]
-[ext_resource path="res://styles/button.tres" type="StyleBox" id=3]
-[ext_resource path="res://fonts/content.tres" type="DynamicFont" id=4]
+[ext_resource path="res://styles/button_hover.tres" type="StyleBox" id=3]
+[ext_resource path="res://styles/button_press.tres" type="StyleBox" id=4]
+[ext_resource path="res://styles/button_focus.tres" type="StyleBox" id=5]
+[ext_resource path="res://styles/button.tres" type="StyleBox" id=6]
+[ext_resource path="res://fonts/content.tres" type="DynamicFont" id=7]
 
 [node name="MainMenu" type="CanvasLayer"]
 script = ExtResource( 1 )
@@ -24,56 +27,87 @@ custom_constants/margin_bottom = 32
 margin_left = 32.0
 margin_top = 32.0
 margin_right = 232.0
-margin_bottom = 240.0
+margin_bottom = 296.0
 custom_constants/separation = 16
 
 [node name="StartButton" type="Button" parent="MarginContainer/VBoxContainer"]
 margin_right = 200.0
 margin_bottom = 40.0
+focus_neighbour_bottom = NodePath("../LevelSelectButton")
+focus_next = NodePath("../LevelSelectButton")
+focus_previous = NodePath("../ExitButton")
 custom_styles/hover = ExtResource( 3 )
-custom_styles/pressed = ExtResource( 3 )
-custom_styles/focus = ExtResource( 3 )
-custom_styles/disabled = ExtResource( 3 )
-custom_styles/normal = ExtResource( 3 )
-custom_fonts/font = ExtResource( 4 )
+custom_styles/pressed = ExtResource( 4 )
+custom_styles/focus = ExtResource( 5 )
+custom_styles/disabled = ExtResource( 6 )
+custom_styles/normal = ExtResource( 6 )
+custom_fonts/font = ExtResource( 7 )
 text = "Start"
 
 [node name="LevelSelectButton" type="Button" parent="MarginContainer/VBoxContainer"]
 margin_top = 56.0
 margin_right = 200.0
 margin_bottom = 96.0
+focus_neighbour_top = NodePath("../StartButton")
+focus_neighbour_bottom = NodePath("../OptionsButton")
+focus_next = NodePath("../OptionsButton")
+focus_previous = NodePath("../StartButton")
 custom_styles/hover = ExtResource( 3 )
-custom_styles/pressed = ExtResource( 3 )
-custom_styles/focus = ExtResource( 3 )
-custom_styles/disabled = ExtResource( 3 )
-custom_styles/normal = ExtResource( 3 )
-custom_fonts/font = ExtResource( 4 )
+custom_styles/pressed = ExtResource( 4 )
+custom_styles/focus = ExtResource( 5 )
+custom_styles/disabled = ExtResource( 6 )
+custom_styles/normal = ExtResource( 6 )
+custom_fonts/font = ExtResource( 7 )
 text = "Level select"
 
 [node name="OptionsButton" type="Button" parent="MarginContainer/VBoxContainer"]
 margin_top = 112.0
 margin_right = 200.0
 margin_bottom = 152.0
+focus_neighbour_top = NodePath("../LevelSelectButton")
+focus_neighbour_bottom = NodePath("../CreditsButton")
+focus_next = NodePath("../CreditsButton")
+focus_previous = NodePath("../LevelSelectButton")
 custom_styles/hover = ExtResource( 3 )
-custom_styles/pressed = ExtResource( 3 )
-custom_styles/focus = ExtResource( 3 )
-custom_styles/disabled = ExtResource( 3 )
-custom_styles/normal = ExtResource( 3 )
-custom_fonts/font = ExtResource( 4 )
+custom_styles/pressed = ExtResource( 4 )
+custom_styles/focus = ExtResource( 5 )
+custom_styles/disabled = ExtResource( 6 )
+custom_styles/normal = ExtResource( 6 )
+custom_fonts/font = ExtResource( 7 )
 text = "Options"
 
-[node name="ExitButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="CreditsButton" type="Button" parent="MarginContainer/VBoxContainer"]
 margin_top = 168.0
 margin_right = 200.0
 margin_bottom = 208.0
+focus_neighbour_top = NodePath("../OptionsButton")
+focus_neighbour_bottom = NodePath("../ExitButton")
+focus_next = NodePath("../ExitButton")
+focus_previous = NodePath("../OptionsButton")
 custom_styles/hover = ExtResource( 3 )
-custom_styles/pressed = ExtResource( 3 )
-custom_styles/focus = ExtResource( 3 )
-custom_styles/disabled = ExtResource( 3 )
-custom_styles/normal = ExtResource( 3 )
-custom_fonts/font = ExtResource( 4 )
+custom_styles/pressed = ExtResource( 4 )
+custom_styles/focus = ExtResource( 5 )
+custom_styles/disabled = ExtResource( 6 )
+custom_styles/normal = ExtResource( 6 )
+custom_fonts/font = ExtResource( 7 )
+text = "Credits"
+
+[node name="ExitButton" type="Button" parent="MarginContainer/VBoxContainer"]
+margin_top = 224.0
+margin_right = 200.0
+margin_bottom = 264.0
+focus_neighbour_top = NodePath("../CreditsButton")
+focus_next = NodePath("../StartButton")
+focus_previous = NodePath("../CreditsButton")
+custom_styles/hover = ExtResource( 3 )
+custom_styles/pressed = ExtResource( 4 )
+custom_styles/focus = ExtResource( 5 )
+custom_styles/disabled = ExtResource( 6 )
+custom_styles/normal = ExtResource( 6 )
+custom_fonts/font = ExtResource( 7 )
 text = "Exit"
 [connection signal="pressed" from="MarginContainer/VBoxContainer/StartButton" to="." method="_start_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/LevelSelectButton" to="." method="_level_select_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/OptionsButton" to="." method="_options_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/CreditsButton" to="." method="_credits_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/ExitButton" to="." method="_exit_pressed"]

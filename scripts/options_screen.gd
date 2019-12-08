@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-signal done
+signal done(success)
 
 onready var sound_slider := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/SoundSlider
 onready var music_slider := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/MusicSlider
@@ -9,6 +9,8 @@ onready var jump_button := $CenterContainer/PanelContainer/VBoxContainer/GridCon
 onready var skate_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/SkateButton
 onready var dive_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/DiveButton
 onready var restart_button := $CenterContainer/PanelContainer/VBoxContainer/GridContainer/RestartButton
+
+onready var back_button := $CenterContainer/PanelContainer/VBoxContainer/Button
 
 var current_action := ""
 
@@ -20,6 +22,11 @@ func _ready() -> void:
 	_update_rebind_button("skate")
 	_update_rebind_button("dive")
 	_update_rebind_button("restart")
+	self.back_button.grab_focus()
+
+func _process(delta) -> void:
+	if Input.is_action_just_pressed("ui_cancel"):
+		_pressed_ok_button()
 
 func _update_sound_slider() -> void:
 	var mute : bool = AudioServer.is_bus_mute(AudioServer.get_bus_index("Sound"))
@@ -67,24 +74,25 @@ func _pressed_rebind_button(action : String) -> void:
 			button.text = "..."
 
 func _pressed_ok_button() -> void:
-	emit_signal("done")
+	emit_signal("done", true)
 
 func _input(event : InputEvent) -> void:
 	var key_event := event as InputEventKey
 	if key_event != null && key_event.pressed && !key_event.echo && self.current_action != "":
-		get_tree().set_input_as_handled()
-		var converted_key_event = InputEventKey.new()
-		converted_key_event.scancode = key_event.scancode
-		converted_key_event.unicode = key_event.unicode
-		converted_key_event.pressed = true
-		for old_event in InputMap.get_action_list(self.current_action):
-			var old_key_event := old_event as InputEventKey
-			if old_key_event != null:
-				old_key_event.unicode = key_event.unicode
-				old_key_event.scancode = key_event.scancode
-				break
-		_update_rebind_button(self.current_action)
-		self.current_action = ""
+		if key_event.scancode != KEY_ESCAPE:
+			get_tree().set_input_as_handled()
+			var converted_key_event = InputEventKey.new()
+			converted_key_event.scancode = key_event.scancode
+			converted_key_event.unicode = key_event.unicode
+			converted_key_event.pressed = true
+			for old_event in InputMap.get_action_list(self.current_action):
+				var old_key_event := old_event as InputEventKey
+				if old_key_event != null:
+					old_key_event.unicode = key_event.unicode
+					old_key_event.scancode = key_event.scancode
+					break
+			_update_rebind_button(self.current_action)
+			self.current_action = ""
 
 func _get_button(action : String) -> Button:
 	match action:

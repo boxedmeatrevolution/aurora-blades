@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://scripts/win_screen.gd" type="Script" id=1]
 [ext_resource path="res://styles/screen_back.tres" type="StyleBox" id=2]
@@ -7,7 +7,10 @@
 [ext_resource path="res://fonts/content.tres" type="DynamicFont" id=5]
 [ext_resource path="res://sprites/ui/time.png" type="Texture" id=6]
 [ext_resource path="res://sprites/ui/death.png" type="Texture" id=7]
-[ext_resource path="res://styles/button.tres" type="StyleBox" id=8]
+[ext_resource path="res://styles/button_hover.tres" type="StyleBox" id=8]
+[ext_resource path="res://styles/button_press.tres" type="StyleBox" id=9]
+[ext_resource path="res://styles/button_focus.tres" type="StyleBox" id=10]
+[ext_resource path="res://styles/button.tres" type="StyleBox" id=11]
 
 [node name="WinScreen" type="CanvasLayer"]
 pause_mode = 2
@@ -44,6 +47,7 @@ margin_right = 384.0
 margin_bottom = 168.0
 
 [node name="GridContainer" type="GridContainer" parent="CenterContainer/PanelContainer/VBoxContainer/CenterContainer"]
+editor/display_folded = true
 margin_left = 128.0
 margin_right = 256.0
 margin_bottom = 128.0
@@ -105,10 +109,10 @@ margin_top = 216.0
 margin_right = 384.0
 margin_bottom = 256.0
 custom_styles/hover = ExtResource( 8 )
-custom_styles/pressed = ExtResource( 8 )
-custom_styles/focus = ExtResource( 8 )
-custom_styles/disabled = ExtResource( 8 )
-custom_styles/normal = ExtResource( 8 )
+custom_styles/pressed = ExtResource( 9 )
+custom_styles/focus = ExtResource( 10 )
+custom_styles/disabled = ExtResource( 11 )
+custom_styles/normal = ExtResource( 11 )
 custom_fonts/font = ExtResource( 5 )
 text = "Continue"
 [connection signal="pressed" from="CenterContainer/PanelContainer/VBoxContainer/Button" to="." method="_continue_pressed"]

@@ -1,10 +1,13 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://scripts/level_select_screen.gd" type="Script" id=1]
 [ext_resource path="res://styles/screen_back.tres" type="StyleBox" id=2]
 [ext_resource path="res://fonts/heading.tres" type="DynamicFont" id=3]
-[ext_resource path="res://styles/button.tres" type="StyleBox" id=4]
-[ext_resource path="res://fonts/content.tres" type="DynamicFont" id=5]
+[ext_resource path="res://styles/button_hover.tres" type="StyleBox" id=4]
+[ext_resource path="res://styles/button_press.tres" type="StyleBox" id=5]
+[ext_resource path="res://styles/button_focus.tres" type="StyleBox" id=6]
+[ext_resource path="res://styles/button.tres" type="StyleBox" id=7]
+[ext_resource path="res://fonts/content.tres" type="DynamicFont" id=8]
 
 [node name="LevelSelectScreen" type="CanvasLayer"]
 script = ExtResource( 1 )
@@ -44,39 +47,52 @@ columns = 2
 [node name="Level1" type="Button" parent="CenterContainer/PanelContainer/VBoxContainer/GridContainer"]
 margin_right = 140.0
 margin_bottom = 40.0
+focus_neighbour_right = NodePath("../Level2")
+focus_neighbour_bottom = NodePath("../Level3")
+focus_next = NodePath("../Level2")
+focus_previous = NodePath("../../Button")
 size_flags_horizontal = 3
 custom_styles/hover = ExtResource( 4 )
-custom_styles/pressed = ExtResource( 4 )
-custom_styles/focus = ExtResource( 4 )
-custom_styles/disabled = ExtResource( 4 )
-custom_styles/normal = ExtResource( 4 )
-custom_fonts/font = ExtResource( 5 )
+custom_styles/pressed = ExtResource( 5 )
+custom_styles/focus = ExtResource( 6 )
+custom_styles/disabled = ExtResource( 7 )
+custom_styles/normal = ExtResource( 7 )
+custom_fonts/font = ExtResource( 8 )
 text = "1"
 
 [node name="Level2" type="Button" parent="CenterContainer/PanelContainer/VBoxContainer/GridContainer"]
 margin_left = 148.0
 margin_right = 288.0
 margin_bottom = 40.0
+focus_neighbour_left = NodePath("../Level1")
+focus_neighbour_bottom = NodePath("../Level4")
+focus_next = NodePath("../Level3")
+focus_previous = NodePath("../Level1")
 size_flags_horizontal = 3
 custom_styles/hover = ExtResource( 4 )
-custom_styles/pressed = ExtResource( 4 )
-custom_styles/focus = ExtResource( 4 )
-custom_styles/disabled = ExtResource( 4 )
-custom_styles/normal = ExtResource( 4 )
-custom_fonts/font = ExtResource( 5 )
+custom_styles/pressed = ExtResource( 5 )
+custom_styles/focus = ExtResource( 6 )
+custom_styles/disabled = ExtResource( 7 )
+custom_styles/normal = ExtResource( 7 )
+custom_fonts/font = ExtResource( 8 )
 text = "2"
 
 [node name="Level3" type="Button" parent="CenterContainer/PanelContainer/VBoxContainer/GridContainer"]
 margin_top = 48.0
 margin_right = 140.0
 margin_bottom = 88.0
+focus_neighbour_top = NodePath("../Level1")
+focus_neighbour_right = NodePath("../Level4")
+focus_neighbour_bottom = NodePath("../../Button")
+focus_next = NodePath("../Level4")
+focus_previous = NodePath("../Level2")
 size_flags_horizontal = 3
 custom_styles/hover = ExtResource( 4 )
-custom_styles/pressed = ExtResource( 4 )
-custom_styles/focus = ExtResource( 4 )
-custom_styles/disabled = ExtResource( 4 )
-custom_styles/normal = ExtResource( 4 )
-custom_fonts/font = ExtResource( 5 )
+custom_styles/pressed = ExtResource( 5 )
+custom_styles/focus = ExtResource( 6 )
+custom_styles/disabled = ExtResource( 7 )
+custom_styles/normal = ExtResource( 7 )
+custom_fonts/font = ExtResource( 8 )
 text = "3"
 
 [node name="Level4" type="Button" parent="CenterContainer/PanelContainer/VBoxContainer/GridContainer"]
@@ -84,25 +100,33 @@ margin_left = 148.0
 margin_top = 48.0
 margin_right = 288.0
 margin_bottom = 88.0
+focus_neighbour_left = NodePath("../Level3")
+focus_neighbour_top = NodePath("../Level2")
+focus_neighbour_bottom = NodePath("../../Button")
+focus_next = NodePath("../../Button")
+focus_previous = NodePath("../Level3")
 size_flags_horizontal = 3
 custom_styles/hover = ExtResource( 4 )
-custom_styles/pressed = ExtResource( 4 )
-custom_styles/focus = ExtResource( 4 )
-custom_styles/disabled = ExtResource( 4 )
-custom_styles/normal = ExtResource( 4 )
-custom_fonts/font = ExtResource( 5 )
+custom_styles/pressed = ExtResource( 5 )
+custom_styles/focus = ExtResource( 6 )
+custom_styles/disabled = ExtResource( 7 )
+custom_styles/normal = ExtResource( 7 )
+custom_fonts/font = ExtResource( 8 )
 text = "4"
 
 [node name="Button" type="Button" parent="CenterContainer/PanelContainer/VBoxContainer"]
 margin_top = 144.0
 margin_right = 288.0
 margin_bottom = 184.0
+focus_neighbour_top = NodePath("../GridContainer/Level3")
+focus_next = NodePath("../GridContainer/Level1")
+focus_previous = NodePath("../GridContainer/Level4")
 custom_styles/hover = ExtResource( 4 )
-custom_styles/pressed = ExtResource( 4 )
-custom_styles/focus = ExtResource( 4 )
-custom_styles/disabled = ExtResource( 4 )
-custom_styles/normal = ExtResource( 4 )
-custom_fonts/font = ExtResource( 5 )
+custom_styles/pressed = ExtResource( 5 )
+custom_styles/focus = ExtResource( 6 )
+custom_styles/disabled = ExtResource( 7 )
+custom_styles/normal = ExtResource( 7 )
+custom_fonts/font = ExtResource( 8 )
 text = "Back"
 [connection signal="pressed" from="CenterContainer/PanelContainer/VBoxContainer/GridContainer/Level1" to="." method="_goto_level" binds= [ 1 ]]
 [connection signal="pressed" from="CenterContainer/PanelContainer/VBoxContainer/GridContainer/Level2" to="." method="_goto_level" binds= [ 2 ]]

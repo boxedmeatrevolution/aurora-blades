@@ -2,14 +2,14 @@ extends CanvasLayer
 
 signal done
 
-onready var box := $CenterContainer
+onready var button := $CenterContainer/PanelContainer/VBoxContainer/Button
 onready var score_text := $CenterContainer/PanelContainer/VBoxContainer/CenterContainer/GridContainer/ScoreText
 onready var time_text := $CenterContainer/PanelContainer/VBoxContainer/CenterContainer/GridContainer/TimeText
 onready var death_text := $CenterContainer/PanelContainer/VBoxContainer/CenterContainer/GridContainer/DeathText
 onready var grade_text := $CenterContainer/PanelContainer/VBoxContainer/GradeText
 
 func _ready() -> void:
-	self.box.visible = false
+	self.button.grab_focus()
 
 func _continue_pressed() -> void:
 	emit_signal("done")
@@ -19,7 +19,6 @@ func init(score : int, time_minutes : int, time_seconds : int, deaths : int, gra
 	self.time_text.text = "%02d:%02d" % [time_minutes, time_seconds]
 	self.death_text.text = str(deaths)
 	self.grade_text.text = "Grade: %s" % _format_grade(grade)
-	self.box.visible = true
 
 func _format_grade(grade : float) -> String:
 	var grade_whole := floor(grade)

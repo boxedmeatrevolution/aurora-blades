@@ -1,10 +1,13 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://scripts/pause_screen.gd" type="Script" id=1]
 [ext_resource path="res://styles/screen_back.tres" type="StyleBox" id=2]
 [ext_resource path="res://fonts/heading.tres" type="DynamicFont" id=3]
-[ext_resource path="res://styles/button.tres" type="StyleBox" id=4]
-[ext_resource path="res://fonts/content.tres" type="DynamicFont" id=5]
+[ext_resource path="res://styles/button_hover.tres" type="StyleBox" id=4]
+[ext_resource path="res://styles/button_press.tres" type="StyleBox" id=5]
+[ext_resource path="res://styles/button_focus.tres" type="StyleBox" id=6]
+[ext_resource path="res://styles/button.tres" type="StyleBox" id=7]
+[ext_resource path="res://fonts/content.tres" type="DynamicFont" id=8]
 
 [node name="PauseScreen" type="CanvasLayer"]
 pause_mode = 2
@@ -38,48 +41,62 @@ text = "Paused"
 margin_top = 40.0
 margin_right = 216.0
 margin_bottom = 80.0
+focus_neighbour_bottom = NodePath("../RestartButton")
+focus_next = NodePath("../RestartButton")
+focus_previous = NodePath("../MainMenuButton")
 custom_styles/hover = ExtResource( 4 )
-custom_styles/pressed = ExtResource( 4 )
-custom_styles/focus = ExtResource( 4 )
-custom_styles/disabled = ExtResource( 4 )
-custom_styles/normal = ExtResource( 4 )
-custom_fonts/font = ExtResource( 5 )
+custom_styles/pressed = ExtResource( 5 )
+custom_styles/focus = ExtResource( 6 )
+custom_styles/disabled = ExtResource( 7 )
+custom_styles/normal = ExtResource( 7 )
+custom_fonts/font = ExtResource( 8 )
 text = "Resume"
 
 [node name="RestartButton" type="Button" parent="CenterContainer/PanelContainer/VBoxContainer"]
 margin_top = 96.0
 margin_right = 216.0
 margin_bottom = 136.0
+focus_neighbour_top = NodePath("../ResumeButton")
+focus_neighbour_bottom = NodePath("../OptionsButton")
+focus_next = NodePath("../OptionsButton")
+focus_previous = NodePath("../ResumeButton")
 custom_styles/hover = ExtResource( 4 )
-custom_styles/pressed = ExtResource( 4 )
-custom_styles/focus = ExtResource( 4 )
-custom_styles/disabled = ExtResource( 4 )
-custom_styles/normal = ExtResource( 4 )
-custom_fonts/font = ExtResource( 5 )
+custom_styles/pressed = ExtResource( 5 )
+custom_styles/focus = ExtResource( 6 )
+custom_styles/disabled = ExtResource( 7 )
+custom_styles/normal = ExtResource( 7 )
+custom_fonts/font = ExtResource( 8 )
 text = "Restart level"
 
 [node name="OptionsButton" type="Button" parent="CenterContainer/PanelContainer/VBoxContainer"]
 margin_top = 152.0
 margin_right = 216.0
 margin_bottom = 192.0
+focus_neighbour_top = NodePath("../RestartButton")
+focus_neighbour_bottom = NodePath("../MainMenuButton")
+focus_next = NodePath("../MainMenuButton")
+focus_previous = NodePath("../RestartButton")
 custom_styles/hover = ExtResource( 4 )
-custom_styles/pressed = ExtResource( 4 )
-custom_styles/focus = ExtResource( 4 )
-custom_styles/disabled = ExtResource( 4 )
-custom_styles/normal = ExtResource( 4 )
-custom_fonts/font = ExtResource( 5 )
+custom_styles/pressed = ExtResource( 5 )
+custom_styles/focus = ExtResource( 6 )
+custom_styles/disabled = ExtResource( 7 )
+custom_styles/normal = ExtResource( 7 )
+custom_fonts/font = ExtResource( 8 )
 text = "Options"
 
 [node name="MainMenuButton" type="Button" parent="CenterContainer/PanelContainer/VBoxContainer"]
 margin_top = 208.0
 margin_right = 216.0
 margin_bottom = 248.0
+focus_neighbour_top = NodePath("../OptionsButton")
+focus_next = NodePath("../ResumeButton")
+focus_previous = NodePath("../OptionsButton")
 custom_styles/hover = ExtResource( 4 )
-custom_styles/pressed = ExtResource( 4 )
-custom_styles/focus = ExtResource( 4 )
-custom_styles/disabled = ExtResource( 4 )
-custom_styles/normal = ExtResource( 4 )
-custom_fonts/font = ExtResource( 5 )
+custom_styles/pressed = ExtResource( 5 )
+custom_styles/focus = ExtResource( 6 )
+custom_styles/disabled = ExtResource( 7 )
+custom_styles/normal = ExtResource( 7 )
+custom_fonts/font = ExtResource( 8 )
 text = "Main menu"
 [connection signal="pressed" from="CenterContainer/PanelContainer/VBoxContainer/ResumeButton" to="." method="_resume_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/VBoxContainer/RestartButton" to="." method="_restart_pressed"]
