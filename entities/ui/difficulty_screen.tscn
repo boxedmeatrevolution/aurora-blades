@@ -120,7 +120,7 @@ custom_styles/focus = ExtResource( 4 )
 custom_styles/disabled = ExtResource( 4 )
 custom_styles/normal = ExtResource( 4 )
 custom_fonts/font = ExtResource( 5 )
-text = "Impossible"
+text = "Mastery"
 
 [node name="HardLabel" type="Label" parent="CenterContainer/PanelContainer/VBoxContainer/GridContainer"]
 margin_left = 216.0

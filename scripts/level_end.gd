@@ -8,14 +8,15 @@ onready var collision_shape := $CollisionShape2D
 var active := false
 
 func _ready() -> void:
-	self.collision_shape.set_disabled(true)
+	#self.collision_shape.set_disabled(true)
+	pass
 
 func _process(delta) -> void:
 	if $Sprite.frame == 3:
 		self.collision_shape.set_disabled(false)
 	if self.on_screen:
 		self.screen_timer += delta
-		if self.screen_timer >= 0.5:
+		if self.screen_timer >= 0.2:
 			if !self.active:
 				self.active = true
 				self.animation_player.play("LevelEndActive")

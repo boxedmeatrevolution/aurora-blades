@@ -34,7 +34,7 @@ func _format_grade(grade : float) -> String:
 			letter = "C"
 		_:
 			letter = "D"
-	if grade_fractional < 1.0 / 3.0:
+	if grade_fractional < 1.0 / 3.0 && grade_whole <= 3:
 		letter += "+"
 	if grade_fractional > 2.0 / 3.0 || grade_whole > 3:
 		letter += "-"

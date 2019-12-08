@@ -3,7 +3,7 @@
 [ext_resource path="res://scripts/level_end.gd" type="Script" id=1]
 [ext_resource path="res://sprites/level_end.png" type="Texture" id=2]
 
-[sub_resource type="Animation" id=3]
+[sub_resource type="Animation" id=1]
 resource_name = "LevelEndActive"
 length = 1.2
 tracks/0/type = "value"
@@ -35,7 +35,7 @@ tracks/0/keys = {
 "values": [ 0 ]
 }
 
-[sub_resource type="RectangleShape2D" id=1]
+[sub_resource type="RectangleShape2D" id=3]
 extents = Vector2( 32, 64 )
 
 [node name="LevelEnd" type="Area2D"]
@@ -54,13 +54,13 @@ hframes = 4
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Sprite"]
 autoplay = "LevelEndInactive"
-anims/LevelEndActive = SubResource( 3 )
+anims/LevelEndActive = SubResource( 1 )
 anims/LevelEndInactive = SubResource( 2 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
 position = Vector2( 0, -64 )
-shape = SubResource( 1 )
+shape = SubResource( 3 )
 
 [node name="VisibilityNotifier2D" type="VisibilityNotifier2D" parent="."]
 position = Vector2( -2.86102e-06, -64 )
